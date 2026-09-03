@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Lector PDF Minimalista</title>
+  <style>
+    body, html { 
+      height: 100%; margin: 0; display: flex; 
+      flex-direction: column; font-family: sans-serif; 
+    }
+    #toolbar { 
+      padding: 15px; background: #333; color: white; 
+    }
+    #viewer { 
+      flex-grow: 1; border: none; width: 100%; background: #525659;
+    }
+    input[type="file"] { color: white; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="toolbar">
+    <label for="file-input" style="margin-right: 10px;">Abrir archivo:</label>
+    <input type="file" id="file-input" accept="application/pdf">
+  </div>
+  
+  <iframe id="viewer"></iframe>
+
+  <script>
+    const fileInput = document.getElementById('file-input');
+    const viewer = document.getElementById('viewer');
+
+    fileInput.addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        viewer.src = file.path; 
+      }
+    });
+  </script>
+</body>
+</html>
