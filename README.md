@@ -1,0 +1,2 @@
+# LectorPDFMinimalista
+Lector PDF Minimalista
