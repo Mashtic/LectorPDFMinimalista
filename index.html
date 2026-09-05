@@ -14,6 +14,9 @@
     #viewer { 
       flex-grow: 1; border: none; width: 100%; background: #525659;
     }
+    #presentation { 
+      flex-grow: 1; border: none; width: 100%; background: #525659;
+    }
     input[type="file"] { color: white; cursor: pointer; }
   </style>
 </head>
@@ -23,7 +26,8 @@
     <input type="file" id="file-input" accept="application/pdf">
   </div>
   
-  <iframe id="viewer"></iframe>
+  <!-- <iframe id="viewer"></iframe> -->
+        <div id="presentation"></div>
 
   <script>
     const fileInput = document.getElementById('file-input');
@@ -32,9 +36,12 @@
     fileInput.addEventListener('change', (event) => {
       const file = event.target.files[0];
       if (file) {
-        viewer.src = file.path; 
+        viewer.src = file.path;
       }
     });
   </script>
+
+        <!-- This should be handled by a global renderer -->
+        <script type="module" src="./src/renderer.js"></script>
 </body>
 </html>

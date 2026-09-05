@@ -4,7 +4,7 @@
   "description": "Lector PDF Minimalista",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "nodemon --ext js,css,html --exec electron ."
   },
   "repository": {
     "type": "git",
@@ -19,6 +19,10 @@
   },
   "homepage": "https://github.com/Mashtic/LectorPDFMinimalista#readme",
   "devDependencies": {
-    "electron": "^44.1.1"
+    "electron": "^44.1.1",
+    "nodemon": "^3.1.14"
+  },
+  "dependencies": {
+    "pdfjs-dist": "^6.3.289"
   }
 }
