@@ -13,12 +13,29 @@ function createWindow() {
 
     win.loadFile('index.html');
 
-    ipcMain.on('toggle-fullscreen', () => {
-        win.setFullScreen(!win.isFullScreen());
-    });
+    // ipcMain.on('toggle-fullscreen', () => {
+    //     win.setFullScreen(!win.isFullScreen());
+    // });
 }
 
-app.whenReady().then(createWindow);
+function createPresentationWindow() {
+    const win = new BrowserWindow({
+        fullscreen: true,
+        frame: false,
+        webPreferences: {
+            plugins: true,
+            nodeIntegration: true,
+            contextIsolation: false
+        }
+    })
+
+    win.loadFile('./src/pdf/presentation/PdfPresentationScreen.html')
+}
+
+app.whenReady().then(() => {
+    createWindow()
+    createPresentationWindow()
+});
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
