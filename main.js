@@ -1,4 +1,6 @@
 const { app, BrowserWindow } = require('electron');
+const path = require('path');
+require('./src/OpenFile.js');
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -8,6 +10,7 @@ function createWindow() {
       plugins: true,
       nodeIntegration: true,
       contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js'),
     },
   });
 

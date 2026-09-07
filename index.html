@@ -25,6 +25,8 @@
   
   <iframe id="viewer"></iframe>
 
+  <button id="OpenFileBtn" type="button"> Abrir Archivo</button>
+  
   <script>
     const fileInput = document.getElementById('file-input');
     const viewer = document.getElementById('viewer');
@@ -35,6 +37,8 @@
         viewer.src = file.path; 
       }
     });
+  </script>
+  <script src="./renderer.js">
   </script>
 </body>
 </html>
