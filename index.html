@@ -15,10 +15,21 @@
       flex-grow: 1; border: none; width: 100%; background: #525659;
     }
     input[type="file"] { color: white; cursor: pointer; }
+    #floating-toggle {
+      margin-right: 10px;
+      padding: 6px 10px;
+      border: 1px solid #777;
+      border-radius: 4px;
+      background: #666;
+      color: white;
+      cursor: pointer;
+    }
+    #floating-toggle.active { background: #2e8b57; border-color: #3ca66b; }
   </style>
 </head>
 <body>
   <div id="toolbar">
+    <button id="floating-toggle" type="button" aria-pressed="false">Normal</button>
     <label for="file-input" style="margin-right: 10px;">Abrir archivo:</label>
     <input type="file" id="file-input" accept="application/pdf">
   </div>
@@ -28,6 +39,18 @@
   <script>
     const fileInput = document.getElementById('file-input');
     const viewer = document.getElementById('viewer');
+    const floatingToggle = document.getElementById('floating-toggle');
+    const { ipcRenderer } = require('electron');
+
+    let isFloating = false;
+
+    floatingToggle.addEventListener('click', () => {
+      isFloating = !isFloating;
+      floatingToggle.textContent = isFloating ? 'Flotante' : 'Normal';
+      floatingToggle.classList.toggle('active', isFloating);
+      floatingToggle.setAttribute('aria-pressed', String(isFloating));
+      ipcRenderer.send('set-floating-mode', isFloating);
+    });
 
     fileInput.addEventListener('change', (event) => {
       const file = event.target.files[0];
