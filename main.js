@@ -1,6 +1,6 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-require('./src/OpenFile.js');
+require('./src/pdf/OpenFile.js');
 
 function createWindow() {
     const win = new BrowserWindow({
