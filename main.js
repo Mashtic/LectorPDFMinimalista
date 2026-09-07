@@ -16,6 +16,13 @@ function createWindow() {
     // ipcMain.on('toggle-fullscreen', () => {
     //     win.setFullScreen(!win.isFullScreen());
     // });
+
+    ipcMain.on('set-floating-mode', (event, isFloating) => {
+        const window = BrowserWindow.fromWebContents(event.sender);
+        if (window) {
+            window.setAlwaysOnTop(isFloating);
+        }
+    });
 }
 
 function createPresentationWindow() {
