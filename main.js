@@ -1,14 +1,14 @@
 const { app, BrowserWindow } = require('electron');
 
-function createWindow () {
+function createWindow() {
   const win = new BrowserWindow({
     width: 1000,
     height: 800,
     webPreferences: {
-      plugins: true, 
+      plugins: true,
       nodeIntegration: true,
-      contextIsolation: false
-    }
+      contextIsolation: true,
+    },
   });
 
   win.loadFile('index.html');
