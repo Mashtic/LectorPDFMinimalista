@@ -1,0 +1,28 @@
+#pdf-viewer-list > * {
+    margin-top: 15px;
+}
+
+#pdf-viewer-list > *:first-child {
+    margin-top: 7px;
+}
+
+.pdf-page {
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    box-shadow: 0 0 15px -3px;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+html, body {
+  width:  100%;
+  height: 100%;
+  margin: 0;
+}
