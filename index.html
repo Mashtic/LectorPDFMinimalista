@@ -40,6 +40,8 @@
   <!-- <iframe id="viewer"></iframe> -->
         <div id="presentation"></div>
 
+  <button id="OpenFileBtn" type="button"> Abrir Archivo</button>
+  
   <script>
     const fileInput = document.getElementById('file-input');
     const viewer = document.getElementById('viewer');
@@ -63,8 +65,7 @@
       }
     });
   </script>
-
         <!-- This should be handled by a global renderer -->
-        <script type="module" src="./src/renderer.js"></script>
+        <script type="module" src="./renderer.js"></script>
 </body>
 </html>
