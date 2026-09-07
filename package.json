@@ -20,5 +20,8 @@
   "homepage": "https://github.com/Mashtic/LectorPDFMinimalista#readme",
   "devDependencies": {
     "electron": "^44.1.1"
+  },
+  "dependencies": {
+    "pdfjs-dist": "^6.3.289"
   }
 }
