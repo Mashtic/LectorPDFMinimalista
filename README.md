@@ -2,6 +2,12 @@
 
 Un visor de documentos PDF de escritorio construido con Electron. Este proyecto aprovecha el motor nativo de Chromium mediante la configuración de `webPreferences`, permitiendo renderizar y leer archivos sin necesidad de instalar librerías externas complejas.
 
+<!-- INICIO MODIFICACIÓN DE VICTOR: explica cómo leer dos PDF en la misma ventana. -->
+## Lectura simultánea
+
+Al abrir el primer archivo, se muestra en un único visor. Al seleccionar un segundo PDF, la aplicación permite elegir entre **Abrir uno nuevo** (reemplaza el documento actual) y **Abrir en simultáneo**. Esta última opción divide la misma ventana en dos visores independientes, cada uno con sus propios controles y panel de páginas. Puedes cerrar un panel con el botón `×`; si ya hay dos abiertos, el siguiente archivo reemplaza el panel que hayas seleccionado.
+<!-- FIN MODIFICACIÓN DE VICTOR -->
+
 ## Requisitos Previos
 
 Para ejecutar este proyecto, necesitas tener instalado en tu computadora:
