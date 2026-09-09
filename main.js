@@ -44,7 +44,7 @@ function createPresentationWindow() {
 
 app.whenReady().then(() => {
     createWindow()
-    createPresentationWindow()
+    // createPresentationWindow()
 });
 
 app.on('window-all-closed', () => {
