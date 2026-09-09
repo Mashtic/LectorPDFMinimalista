@@ -8,6 +8,6 @@ ipcMain.handle('dialog:openFile', async () => {
   })
   if (canceled || filePaths.length === 0) return null
 
-  const content = await fs.readFile(filePaths[0], 'utf-8')
+  const content = await fs.readFile(filePaths[0])
   return { path: filePaths[0], content }
 })
