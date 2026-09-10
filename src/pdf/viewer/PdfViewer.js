@@ -4,8 +4,9 @@ import { GlobalWorkerOptions, getDocument } from '../../../node_modules/pdfjs-di
 GlobalWorkerOptions.workerSrc = './pdf.worker.mjs';
 
 export class PdfViewer {
-    constructor(url, currentPage = 1) {
-        this.url = url
+    constructor(pdfData, currentPage = 1) {
+        this.url = null
+        this.pdfData = pdfData
         this.pdfDoc = null
         this.currentPage = currentPage
         this.scale = 1
@@ -13,7 +14,7 @@ export class PdfViewer {
     }
 
     async load() {
-        this.pdfDoc = await getDocument({ url: this.url }).promise
+        this.pdfDoc = await getDocument({ data: this.pdfData }).promise
         await this.renderPages()
         this.setupObservers()
     }

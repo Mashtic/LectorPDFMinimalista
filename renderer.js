@@ -1,9 +1,7 @@
 document.getElementById('OpenFileBtn').addEventListener('click', async () => {
     const result = await window.electronAPI.openFile()
     if (result) {
-        console.log('Path:', result.path)
-        console.log('Content:', result.content)
-
+        sessionStorage.setItem("currentPDF", JSON.stringify(Array.from(result.content)))
         window.location.href = './src/pdf/viewer/PdfViewerScreen.html'
     }
 })
