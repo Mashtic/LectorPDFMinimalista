@@ -48,8 +48,8 @@ function createPresentationWindow() {
 }
 
 app.whenReady().then(() => {
-  createWindow();
-  createPresentationWindow()
+    createWindow()
+    // createPresentationWindow()
 });
 
 app.on('window-all-closed', () => {
