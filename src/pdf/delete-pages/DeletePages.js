@@ -11,4 +11,3 @@ async function deletePages(pdfBytes, pages) {
   return pdfBytesModified;
 }
 
-

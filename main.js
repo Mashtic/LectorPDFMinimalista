@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 require('./src/pdf/OpenFile.js');
-const deletePages = require('./src/pdf/DeletePages.js');
+const deletePages = require('./src/pdf/delete-pages/DeletePages.js');
 
 function createWindow() {
   const win = new BrowserWindow({
