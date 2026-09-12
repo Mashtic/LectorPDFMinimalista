@@ -1,4 +1,4 @@
-import { GlobalWorkerOptions, getDocument } from '../../../node_modules/pdfjs-dist/build/pdf.mjs';
+import { GlobalWorkerOptions, getDocument, TextLayer } from '../../../node_modules/pdfjs-dist/build/pdf.mjs';
 
 // This should maybe be handled somewhere else
 GlobalWorkerOptions.workerSrc = './pdf.worker.mjs';
@@ -32,6 +32,9 @@ export class PdfViewer {
             canvas.width = viewport.width
             canvas.height = viewport.height
 
+            canvas.style.width = `${viewport.width}px`
+            canvas.style.height = `${viewport.height}px`
+
             const renderCtx = {
                 canvasContext: canvasCtx,
                 viewport
@@ -43,7 +46,27 @@ export class PdfViewer {
 
             this.pages.set(num, entry)
 
-            entry.renderTask.promise
+            entry.renderTask.promise.then(() => {
+                return page.getTextContent()
+            }).then(textContent => {
+                const textId = `text-layer-${num}`
+                const textLayer = document.getElementById(textId)
+
+                textLayer.innerHTML = ''
+                textLayer.style.setProperty('--scale-factor', viewport.scale)
+                textLayer.style.width = `${viewport.width}px`
+                textLayer.style.height = `${viewport.height}px`
+
+                const layer = new TextLayer({
+                    textContentSource: textContent,
+                    viewport: viewport,
+                    container: textLayer
+                })
+
+                entry.textLayer = textLayer
+
+                return layer.render()
+            })
         })
     }
 
@@ -61,6 +84,12 @@ export class PdfViewer {
         canvas.width = 0
         canvas.height = 0
 
+        const textLayer = document.getElementById(`text-layer-${num}`)
+
+        if (textLayer) {
+            textLayer.innerHTML = ''
+        }
+
         if (entry.page) {
             entry.page.cleanup()
         }
@@ -71,7 +100,6 @@ export class PdfViewer {
 
     setupObservers() {
         const wrappers = document.querySelectorAll('#pdf-viewer-list .pdf-page')
-        console.log(wrappers)
 
         const loadObserver = new IntersectionObserver(entries => {
             entries.forEach(entry => {
@@ -139,10 +167,29 @@ export class PdfViewer {
             const canvas = document.createElement('canvas')
             canvas.dataset.pageNumber = num
 
+            canvas.style.position = 'absolute'
+            canvas.style.left = '0'
+            canvas.style.top = '0'
+            canvas.style.width = `${viewport.width}px`
+            canvas.style.height = `${viewport.height}px`
+            canvas.style.zIndex = '1'
+
+            const textLayer = document.createElement('div')
+            textLayer.className = 'textLayer'
+            textLayer.id = `text-layer-${num}`
+
+            textLayer.style.position = 'absolute'
+            textLayer.style.left = '0'
+            textLayer.style.top = '0'
+            textLayer.style.width = `${viewport.width}px`
+            textLayer.style.height = `${viewport.height}px`
+            textLayer.style.zIndex = '2'
+
             wrapper.appendChild(canvas)
+            wrapper.appendChild(textLayer)
             canvasDiv.appendChild(wrapper)
 
-            this.pages.set({
+            this.pages.set(num, {
                 wrapper,
                 canvas,
                 page,
@@ -152,41 +199,4 @@ export class PdfViewer {
             })
         }
     }
-
-    // This does not lazy load pages and instead waits for all pages to load
-    // in other words, this is BAD
-
-    // async renderPages() {
-    //     const canvasDiv = document.querySelector('#pdf-viewer-list')
-    //
-    //     const renderPromises = []
-    //
-    //     for (let i = 1; i <= this.pdfDoc.numPages; i++) {
-    //         var canvas = document.createElement('canvas')
-    //         canvasDiv.appendChild(canvas)
-    //
-    //         renderPromises.push(
-    //             this.pdfDoc.getPage(i).then(page => {
-    //                 const canvasCtx = canvas.getContext('2d')
-    //
-    //                 const viewport = page.getViewport({
-    //                     scale: this.scale
-    //                 })
-    //
-    //                 canvas.height = viewport.height
-    //                 canvas.width = viewport.width
-    //
-    //
-    //                 const renderCtx = {
-    //                     canvasContext: canvasCtx,
-    //                     viewport
-    //                 }
-    //
-    //                 return page.render(renderCtx).promise
-    //             })
-    //         )
-    //     }
-    //
-    //     await Promise.all(renderPromises)
-    // }
 }
