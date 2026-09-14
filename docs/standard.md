@@ -6,7 +6,7 @@
 
 ## 0) Alcance
 
-Aplica a **backend (Node, Electron)**, **frontend (HTML, CSS, JS)**.
+Aplica a **backend (Node, Electron)**, **frontend (HTML, CSS, JS)**. Así como a aspectos del reposirio como **branches** y **commits**.
 
 ---
 
