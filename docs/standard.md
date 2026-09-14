@@ -39,8 +39,8 @@ Aplica a **backend (Node, Electron)**, **frontend (HTML, CSS, JS)**.
 ## 3) Formato de Código
 
 - **Indentación:** 2 espacios (no tabs).
-- **Brackets:** Los brackets de apertura deben ir en línea con la definición del método. Ver ejemplo 5.1.
-- **Espaciado entre métodos:** Dejar 1 línea vacía entre declaraciones de métodos. Ver ejemplo 5.2.
+- **Brackets:** Los brackets de apertura deben ir en línea con la definición del método. Ver ejemplo 6.1.
+- **Espaciado entre métodos:** Dejar 1 línea vacía entre declaraciones de métodos. Ver ejemplo 6.2.
 
 **Nota:** Usar archivo de configuración.
 
@@ -81,14 +81,52 @@ LectorPDFMinimalista/
 ```
 
 - **HTML único:** Solo debe haber un archivo html por ventana. Para la ventana principal este será `index.html`. Si se deben crear ventanas adicionales, estas deberán tener su propio archivo html único.
-	- Para los archivos compartidos, añadir comentarios antes de cada sección específica de código para distinguir a que feature corresponde el bloque de código. Escritos en mayúsculas.
+	- Para los archivos compartidos, añadir comentarios antes de cada sección específica de código para distinguir a que feature corresponde el bloque de código. Escritos en mayúsculas. Ver ejemplo 6.3.
 - **Separacion de elementos:** Todos los scripts y estilos de CSS que se necesiten usar dentro `index.html` deben ir en sus respectivos archivos para no saturar el index.
+
+### 4.1 `renderer/`
+
+Contiene el código que se ejecuta en el proceso renderer y que está relacionado con la interfaz de usuario. Los directorios internos deben organizar el código por feature cuando sea necesario.
+
+El código del renderer debe utilizar las APIs expuestas mediante preload.js para comunicarse con el proceso principal.
+
+### 4.2 `ipc/`
+
+Contiene la capa de comunicación entre el proceso renderer y el proceso principal. No debe contener implementaciones extensas de lógica de negocio.
+
+### 4.3 `services/`
+
+Contiene la lógica de negocio y las operaciones que realizan el procesamiento principal de la aplicación. Los servicios no deben depender de elementos específicos de la interfaz del renderer.
+
+### 4.4 `windows/`
+
+Contiene la configuración y creación de las ventanas de Electron. Cada módulo debe encargarse de construir y configurar una ventana concreta. La lógica de las features debe permanecer fuera de este directorio.
+
+### 4.5 `docs/`
+
+Contiene la documentación del proyecto.
 
 ---
 
-## 5) Ejemplos
+## 5) Nombres para Branches
 
-- ### 5.1:
+Branches locales que no vayan a estar en el repositorio no tienen un formato específico.
+
+Branches que vayan a estar en el repositorio deben seguir el siguiente formato. Ver ejemplo 6.4:
+```
+<tipo>/<código?>/<nombre>
+```
+- **Tipo:** Puede ser `feat`, `fix`, `chore`, `refac`, `doc`. Si se necesita otro, preguntar.
+- **Código:** Opcional. El código de historia de usuario, task o fix. En minúscula.
+- **Nombre:** En `kebab-case`. De una a 3 palabras que describan la funcionalidad.
+- **Excepciones:** Las únicas excepciones a esto son las ramas `main` y `develop`.
+
+---
+
+## 6) Ejemplos
+
+- ### 6.1:
+
 > **Correcto:**
 ```
 function name() {
@@ -102,7 +140,8 @@ function name()
 }
 ```
 
-- ### 5.2:
+- ### 6.2:
+
 > **Correcto:**
 ```
 function name1() {}
@@ -115,6 +154,24 @@ function name1() {}
 function name1() {}
 function name1() {}
 ```
+
+- ### 6.3
+
+> **Correcto:**
+```
+// VIEW PDF
+/* Lógica de VIEW PDF */
+```
+
+- ### 6.4
+
+> **Correcto:**
+```
+feat/us-018/scroll-pdf
+refac/apply-code-standard
+fix/fx-002/combine-viewer-zoom
+```
+
 ---
 
-**Estado del documento**: v1.2 (base).
+**Estado del documento**: v1.3.
