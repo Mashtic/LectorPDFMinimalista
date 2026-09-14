@@ -36,8 +36,8 @@ Aplica a **backend (Node, Electron)**, **frontend (HTML, CSS, JS)**.
 ## 3) Formato de Código
 
 - **Indentación:** 2 espacios (no tabs).
-- **Brackets:** Los brackets de apertura deben ir en línea con la definición del método. Ver ejemplo X.1.
-- **Espaciado entre métodos:** Dejar 2 líneas vacías entre declaraciones de métodos. Ver ejemplos X.2.
+- **Brackets:** Los brackets de apertura deben ir en línea con la definición del método. Ver ejemplo 5.1.
+- **Espaciado entre métodos:** Dejar 2 líneas vacías entre declaraciones de métodos. Ver ejemplos 5.2.
 
 **Nota:** Usar archivo de configuración.
 
@@ -102,4 +102,4 @@ function name1() {}
 ```
 ---
 
-**Estado del documento**: v1.0 (base).
+**Estado del documento**: v1.1 (base).
