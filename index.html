@@ -138,6 +138,8 @@
     @media (max-width: 700px) { #toolbar { min-height: 72px; flex-wrap: wrap; } #empty-state { inset: 72px 0 0; } #readers.split { flex-direction: column; overflow: auto; } #readers.split .reader-pane { min-height: 50%; } }
     /* FIN MODIFICACIÓN DE VICTOR */
   </style>
+ 
+  <link rel="stylesheet" type="text/css" href="./src/pdf/delete-pages/Delete-Pages.css">
 </head>
 <body>
     <div id="title-bar"></div>
@@ -206,6 +208,9 @@
   <!-- INICIO BLOQUE: carga e inicialización de módulos independientes. -->
   <script src="pdf-reader-ui.js"></script>
   <script src="pdf-merge-ui.js"></script>
+<button id="DeletePagesBtn" type="button"> Borrar Paginas</button> 
+<script type="module" src="./src/pdf/delete-pages/DeletePages-renderer.js">
+</script>
   <script>
     initializePdfReader();
     initializePdfMerge();

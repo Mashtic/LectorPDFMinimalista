@@ -6,11 +6,16 @@
         <title>Presentation Mode</title>
         <!-- <link rel="stylesheet" type="text/css" href="../../../node_modules/pdfjs-dist/web/pdf_viewer.css"> -->
         <link rel="stylesheet" type="text/css" href="./PdfViewerStyle.css">
+        <link rel="stylesheet" type="text/css" href="../delete-pages/Delete-Pages.css">
     </head>
     <body>
+        <button id="DeletePagesBtn" type="button"> Borrar Paginas</button>
+
         <div id="pdf-viewer-list"></div>
 
         <!-- This should be handled by a global renderer -->
         <script type="module" src="./PdfViewerRenderer.js"></script>
+        <script type="module" src="../delete-pages/DeletePages-renderer.js">
+        </script>
     </body>
 </html>
