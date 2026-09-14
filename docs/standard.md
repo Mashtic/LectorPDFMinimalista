@@ -39,8 +39,8 @@ Aplica a **backend (Node, Electron)**, **frontend (HTML, CSS, JS)**.
 ## 3) Formato de Código
 
 - **Indentación:** 2 espacios (no tabs).
-- **Brackets:** Los brackets de apertura deben ir en línea con la definición del método. Ver ejemplo 6.1.
-- **Espaciado entre métodos:** Dejar 1 línea vacía entre declaraciones de métodos. Ver ejemplo 6.2.
+- **Brackets:** Los brackets de apertura deben ir en línea con la definición del método. Ver ejemplo 7.1.
+- **Espaciado entre métodos:** Dejar 1 línea vacía entre declaraciones de métodos. Ver ejemplo 7.2.
 
 **Nota:** Usar archivo de configuración.
 
@@ -112,7 +112,7 @@ Contiene la documentación del proyecto.
 
 Branches locales que no vayan a estar en el repositorio no tienen un formato específico.
 
-Branches que vayan a estar en el repositorio deben seguir el siguiente formato. Ver ejemplo 6.4:
+Branches que vayan a estar en el repositorio deben seguir el siguiente formato. Ver ejemplo 74:
 ```
 <tipo>/<código?>/<nombre>
 ```
@@ -123,9 +123,15 @@ Branches que vayan a estar en el repositorio deben seguir el siguiente formato. 
 
 ---
 
-## 6) Ejemplos
+## 6) Nombres para Commits
 
-- ### 6.1:
+Los commits deberán tener el formato definido por https://www.conventionalcommits.org/en/v1.0.0/
+
+---
+
+## 7) Ejemplos
+
+- ### 7.1:
 
 > **Correcto:**
 ```
@@ -140,7 +146,7 @@ function name()
 }
 ```
 
-- ### 6.2:
+- ### 7.2:
 
 > **Correcto:**
 ```
@@ -155,7 +161,7 @@ function name1() {}
 function name1() {}
 ```
 
-- ### 6.3
+- ### 7.3
 
 > **Correcto:**
 ```
@@ -163,7 +169,7 @@ function name1() {}
 /* Lógica de VIEW PDF */
 ```
 
-- ### 6.4
+- ### 7.4
 
 > **Correcto:**
 ```
@@ -174,4 +180,4 @@ fix/fx-002/combine-viewer-zoom
 
 ---
 
-**Estado del documento**: v1.3.
+**Estado del documento**: v1.4.
