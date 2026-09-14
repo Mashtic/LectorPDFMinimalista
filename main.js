@@ -1,4 +1,5 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain } = require('electron');
+const { cleanupPreviews, registerPdfMergeHandler } = require('./pdf-merge-service');
 const path = require('path');
 require('./src/pdf/OpenFile.js');
 
@@ -47,8 +48,14 @@ app.whenReady().then(() => {
     // createPresentationWindow()
 });
 
+// INICIO BLOQUE: registro de la función aislada de combinación de PDFs.
+registerPdfMergeHandler({ ipcMain, dialog, BrowserWindow, app });
+// FIN BLOQUE: registro de la función aislada de combinación de PDFs.
+
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();
     }
 });
+
+app.on('before-quit', () => { cleanupPreviews(); });

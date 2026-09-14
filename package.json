@@ -23,6 +23,7 @@
     "nodemon": "^3.1.14"
   },
   "dependencies": {
-    "pdfjs-dist": "^6.3.289"
+    "pdfjs-dist": "^6.3.289",
+    "pdf-lib": "^1.17.1"
   }
 }
