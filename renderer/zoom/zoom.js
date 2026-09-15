@@ -1,9 +1,13 @@
+const DEFAULT_MIN_ZOOM = 0.5;
+const DEFAULT_MAX_ZOOM = 3;
+const DEFAULT_STEP = 0.15;
+
 export function createZoomState(overrides = {}) {
   return {
-    scale: 1.5,
-    minZoom: 0.5,
-    maxZoom: 5.0,
-    step: 0.1,
+    scale: 1,
+    minZoom: DEFAULT_MIN_ZOOM,
+    maxZoom: DEFAULT_MAX_ZOOM,
+    step: DEFAULT_STEP,
     ...overrides,
   };
 }
@@ -13,13 +17,11 @@ function clamp(state, value) {
 }
 
 export function zoomIn(state) {
-  state.scale = clamp(state, state.scale + state.step);
-  return state.scale;
+  return setZoom(state, state.scale + state.step);
 }
 
 export function zoomOut(state) {
-  state.scale = clamp(state, state.scale - state.step);
-  return state.scale;
+  return setZoom(state, state.scale - state.step);
 }
 
 export function setZoom(state, newScale) {

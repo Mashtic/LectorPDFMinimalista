@@ -13,6 +13,20 @@ if (currentPDF) {
 
   viewer = new PdfViewer(currentPDF);
   viewer.load();
+
+  document.addEventListener("keydown", (event) => {
+    if (!(event.ctrlKey)) {
+      return;
+    }
+
+    if (event.code === "Equal" || event.code === "NumpadAdd") {
+      event.preventDefault();
+      viewer.zoomInPages();
+    } else if (event.code === "Minus" || event.code === "NumpadSubtract") {
+      event.preventDefault();
+      viewer.zoomOutPages();
+    }
+  });
 }
 
 document.addEventListener("keydown", (event) => {

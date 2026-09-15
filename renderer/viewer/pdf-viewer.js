@@ -3,6 +3,8 @@ import {
   getDocument,
   TextLayer,
 } from "../../node_modules/pdfjs-dist/build/pdf.mjs";
+import {createZoomState, zoomIn, zoomOut} from "../zoom/zoom.js";
+
 
 // This should maybe be handled somewhere else
 GlobalWorkerOptions.workerSrc = "./pdf.worker.mjs";
@@ -13,9 +15,15 @@ export class PdfViewer {
     this.dataPDF = pdfData;
     this.documentPDF = null;
     this.currentPage = currentPage;
-    this.scale = 1;
+    //this.scale = 1;
+    this.zoomState = createZoomState({ scale: 1 });
     this.pages = new Map();
   }
+
+  get scale() {
+    return this.zoomState.scale;
+  }
+
 
   async load() {
     this.documentPDF = await getDocument({ data: this.dataPDF }).promise;
@@ -40,9 +48,38 @@ export class PdfViewer {
     counter.innerHTML = `${this.currentPage} / ${this.documentPDF.numPages}`;
   }
 
+  zoomInPages() {
+    zoomIn(this.zoomState);
+    this.rerenderVisiblePages();
+  }
+
+  zoomOutPages() {
+    zoomOut(this.zoomState);
+    this.rerenderVisiblePages();
+  }
+
+  rerenderVisiblePages() {
+    for (const [pageNumber, entry] of this.pages) {
+      if (entry.rendered) {
+        this.renderPage(pageNumber, entry.canvas);
+      }
+    }
+  }
+
   renderPage(pageNumber, canvas) {
+    const entry = this.pages.get(pageNumber) || {};
+
+    if (entry.isRendering) {
+      entry.renderPending = true;
+      return;
+    }
+
+    entry.isRendering = true;
+    entry.renderPending = false;
+    this.pages.set(pageNumber, entry);
+
+
     this.documentPDF.getPage(pageNumber).then((page) => {
-      const entry = this.pages.get(pageNumber) || {};
       entry.page = page;
       const canvasContext = canvas.getContext("2d");
 
@@ -55,6 +92,11 @@ export class PdfViewer {
 
       canvas.style.width = `${viewport.width}px`;
       canvas.style.height = `${viewport.height}px`;
+
+      if (entry.wrapper) {
+        entry.wrapper.style.width = `${viewport.width}px`;
+        entry.wrapper.style.height = `${viewport.height}px`;
+      }
 
       const renderContext = {
         canvasContext: canvasContext,
@@ -89,6 +131,18 @@ export class PdfViewer {
           entry.textLayer = textLayer;
 
           return layer.render();
+        })
+        .catch(() => {
+
+        })
+        .finally(() => {
+          entry.isRendering = false;
+          this.pages.set(pageNumber, entry);
+
+          if (entry.renderPending) {
+            entry.renderPending = false;
+            this.renderPage(pageNumber, canvas);
+          }
         });
     });
   }
