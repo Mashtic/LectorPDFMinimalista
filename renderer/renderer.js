@@ -8,3 +8,9 @@ document.getElementById("OpenFileBtn").addEventListener("click", async () => {
     window.location.reload();
   }
 });
+
+//debug
+// console.log(await window.electronAPI.getGlobalVar("currentPDF"))
+// window.electronAPI.setGlobalVar("currentPDF", "hola")
+// console.log(await window.electronAPI.getGlobalVar("currentPDF"))
+
