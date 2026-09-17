@@ -1,7 +1,4 @@
-document.getElementById('DeletePagesBtn').addEventListener('click', openModal);
 
-//AI-generated dialog to test the feature
-//TODO: remove when integrated with final UI
 const modalMarkup = `
       <div class="overlay is-open" id="overlay">
         <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
@@ -17,7 +14,7 @@ const modalMarkup = `
       </div>
     `;
 
-function openModal() {
+export function openDeletePagesModal() {
   // Insert the modal's HTML into the page on demand
   document.body.insertAdjacentHTML('beforeend', modalMarkup);
 
@@ -51,34 +48,15 @@ async function acceptModal() {
   if (!input) {
     return;
   }
-  console.log('Accepted value:', input.value);
-
-  let page_arr = input.value.split(',');
-  page_arr = page_arr.map(Number);
-  console.log(page_arr);
-
-  const pdf_json = sessionStorage.getItem('currentPDF');
-  if (!pdf_json) {
-    return;
-  }
-
-  const currentPDF = pdf_json ? new Uint8Array(JSON.parse(pdf_json)) : null;
-  if (!currentPDF) {
-    return;
-  }
-
-  const result = await window.electronAPI.deletePages(currentPDF, page_arr);
-  if (!result) {
-    return;
-  }
-  console.log(result);
-
-  sessionStorage.setItem(
-    'currentPDF',
-    JSON.stringify(Array.from(result)),
-  );
-
   closeModal();
+
+  let pageList = input.value.split(',');
+  pageList = pageList.map(Number);
+
+  if (!(await window.electronAPI.deletePages(pageList))) {
+    return;
+  }
+
   location.reload();
 }
 

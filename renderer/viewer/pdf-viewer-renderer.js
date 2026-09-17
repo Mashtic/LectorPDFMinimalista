@@ -9,7 +9,6 @@ if (currentPDF) {
   viewContainer.style.display = 'block';
 
   const viewer = new PdfViewer(currentPDF);
-  console.log(currentPDF)
   viewer.load();
 }
 

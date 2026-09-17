@@ -21,10 +21,11 @@
   <body>
     <!-- WINDOW -->
     <div id="title-bar"></div>
-
+    
     <button id="floating-toggle" type="button" aria-pressed="false">
       Normal
     </button>
+
 
     <div id="welcome-screen">
       <button id="OpenFileBtn" type="button">
@@ -49,13 +50,14 @@
       </button>
     </div>
 
+
     <!-- VIEWER -->
     <main id="pdf-viewer-container">
       <div id="pdf-viewer-list"></div>
-
-      <!-- DELETE PAGES -->
-      <button id="DeletePagesBtn" type="button">Delete Pages</button>
     </main>
+
+    <!-- DELETE PAGES -->
+    <button id="DeletePagesBtn" type="button">Delete Pages</button>
 
     <!-- INICIO MODIFICACIÓN DE VICTOR  -->
     <!--   <header id="toolbar"> -->
@@ -127,7 +129,6 @@
 
     <!-- TODO: Import scripts once they are placed properly -->
     <script src="./index.js" type="module"></script>
-    <script src="./delete-pages/delete-pages-renderer.js"></script>
     <script type="module" src="./viewer/pdf-viewer-renderer.js"></script>
   </body>
 </html>

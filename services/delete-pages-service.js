@@ -1,7 +1,8 @@
 const { PDFDocument } = require('pdf-lib');
+const {setGlobalVar, getGlobalVar} = require('./global-var-service.js')
 
-async function deletePages(pdfBytes, pages) {
-  const pdfDoc = await PDFDocument.load(pdfBytes);
+async function deletePages(pages) {
+  const pdfDoc = await PDFDocument.load(getGlobalVar("currentPDF"));
   pages.sort((a, b) => a - b); 
 
   let offset = 0;
@@ -14,7 +15,8 @@ async function deletePages(pdfBytes, pages) {
   }
 
   const pdfBytesModified = await pdfDoc.save();
-  return pdfBytesModified;
+  setGlobalVar("currentPDF", pdfBytesModified)
+  return true;
 }
 
 module.exports = deletePages;
