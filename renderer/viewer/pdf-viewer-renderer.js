@@ -1,23 +1,20 @@
-import { PdfViewer } from "./pdf-viewer.js";
+import { PdfViewer } from './pdf-viewer.js';
 
-const welcomeScreen = document.getElementById("welcome-screen");
-const viewContainer = document.getElementById("pdf-viewer-container");
-const pdf_json = sessionStorage.getItem("currentPDF");
+const welcomeScreen = document.getElementById('welcome-screen');
+const viewContainer = document.getElementById('pdf-viewer-container');
+const currentPDF = await window.electronAPI.getGlobalVar('currentPDF');
 
-if (pdf_json) {
-  welcomeScreen.style.display = "none";
-  viewContainer.style.display = "block";
+if (currentPDF) {
+  welcomeScreen.style.display = 'none';
+  viewContainer.style.display = 'block';
 
-  const currentPDF = pdf_json ? new Uint8Array(JSON.parse(pdf_json)) : null;
-
-  if (currentPDF) {
-    const viewer = new PdfViewer(currentPDF);
-    viewer.load();
-  }
+  const viewer = new PdfViewer(currentPDF);
+  console.log(currentPDF)
+  viewer.load();
 }
 
-document.addEventListener("keydown", (event) => {
-  if (event.key.toLowerCase() === "c") {
+document.addEventListener('keydown', (event) => {
+  if (event.key.toLowerCase() === 'c') {
     const selection = window.getSelection();
     const text = selection?.toString();
 

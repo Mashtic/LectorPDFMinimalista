@@ -1,5 +1,6 @@
 
 const globalVars = {
+  pdfPath: null,
   currentPDF: null,
 }
 

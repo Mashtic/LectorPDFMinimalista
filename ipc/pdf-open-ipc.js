@@ -1,27 +1,8 @@
-const { ipcMain, dialog } = require("electron");
-
+const { ipcMain} = require("electron");
 const { readPdfFile } = require("../services/pdf-open-service");
 
 function registerPDFOpenIpc() {
-  ipcMain.handle("dialog:openFile", async (event) => {
-    const { canceled, filePaths } = await dialog.showOpenDialog({
-      properties: ["openFile"],
-      filters: [
-        {
-          name: "PDF Files",
-          extensions: ["pdf"],
-        },
-      ],
-    });
-
-    if (canceled || filePaths.length === 0) {
-      return null;
-    }
-
-    return readPdfFile(filePaths[0]);
-  });
+  ipcMain.handle("dialog:openFile", readPdfFile);
 }
 
-module.exports = {
-  registerPDFOpenIpc,
-};
+module.exports = {registerPDFOpenIpc};
