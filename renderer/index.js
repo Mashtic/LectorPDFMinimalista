@@ -1,6 +1,15 @@
 import { openFile } from "./open-file/open-file.js";
 import { openDeletePagesModal } from "./delete-pages/delete-pages-renderer.js";
+import { saveFile } from "./save-file/save-file.js";
+
+if(await window.electronAPI.getGlobalVar("currentPDF")){
+  document.getElementById('SaveFileBtn').style = "display: block;";
+}
 
 document.getElementById("OpenFileBtn").addEventListener("click", openFile)
 
 document.getElementById('DeletePagesBtn').addEventListener('click', openDeletePagesModal);
+
+document.getElementById('SaveFileBtn').addEventListener('click', saveFile);
+
+
