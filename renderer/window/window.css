@@ -46,7 +46,7 @@ html {
 #floating-toggle {
   position: fixed;
   top: 15px;
-  right: 15px;
+  right: 45px;
   z-index: 10000;
   -webkit-app-region: no-drag;
   padding: 4px 10px;
