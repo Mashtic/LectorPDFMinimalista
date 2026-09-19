@@ -58,9 +58,50 @@ export class PdfViewer {
     this.rerenderVisiblePages();
   }
 
+  zoomAtPoint(clientX, clientY, direction) {
+    const wrapper = document.elementFromPoint(clientX, clientY)?.closest(".pdf-page");
+    if (!wrapper) {
+      if (direction === "in") this.zoomInPages();
+      else this.zoomOutPages();
+      return;
+    }
+
+    const rectBefore = wrapper.getBoundingClientRect();
+    const fracX = (clientX - rectBefore.left) / rectBefore.width;
+    const fracY = (clientY - rectBefore.top) / rectBefore.height;
+
+    if (direction === "in") {
+      this.zoomInPages();
+    } else {
+      this.zoomOutPages();
+    }
+
+    const container = document.getElementById("pdf-viewer-container");
+    const rectAfter = wrapper.getBoundingClientRect();
+    const targetClientX = rectAfter.left + fracX * rectAfter.width;
+    const targetClientY = rectAfter.top + fracY * rectAfter.height;
+
+    container.scrollLeft += targetClientX - clientX;
+    container.scrollTop += targetClientY - clientY;
+  }
+
+  resizePageLayout(pageNumber, entry) {
+      if (!entry.page) {
+        return;
+      }
+  
+      const viewport = entry.page.getViewport({ scale: this.scale });
+  
+      if (entry.wrapper) {
+        entry.wrapper.style.width = `${viewport.width}px`;
+        entry.wrapper.style.height = `${viewport.height}px`;
+      }
+    }
+
   rerenderVisiblePages() {
     for (const [pageNumber, entry] of this.pages) {
       if (entry.rendered) {
+        this.resizePageLayout(pageNumber, entry);
         this.renderPage(pageNumber, entry.canvas);
       }
     }

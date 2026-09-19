@@ -27,6 +27,16 @@ if (currentPDF) {
       viewer.zoomOutPages();
     }
   });
+
+  viewContainer.addEventListener(
+    "wheel",
+    (event) => {
+      if (!(event.ctrlKey)) return;
+      event.preventDefault();
+      viewer.zoomAtPoint(event.clientX, event.clientY, event.deltaY < 0 ? "in" : "out");
+    },
+    { passive: false },
+  );
 }
 
 document.addEventListener("keydown", (event) => {
