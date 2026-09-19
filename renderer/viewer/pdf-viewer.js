@@ -21,6 +21,23 @@ export class PdfViewer {
     this.documentPDF = await getDocument({ data: this.dataPDF }).promise;
     await this.renderPages();
     this.setupObservers();
+    this.updateCurrentPage();
+  }
+
+  updateCurrentPage() {
+    const elements = document.elementsFromPoint(
+      document.body.offsetWidth / 2,
+      document.body.offsetHeight / 2,
+    );
+
+    const canvas = elements.find((element) => element.tagName === "CANVAS");
+
+    if (!canvas) return;
+
+    this.currentPage = Number(canvas.dataset.pageNumber);
+
+    const counter = document.getElementById("pdf-page-counter");
+    counter.innerHTML = `${this.currentPage} / ${this.documentPDF.numPages}`;
   }
 
   renderPage(pageNumber, canvas) {
@@ -126,7 +143,7 @@ export class PdfViewer {
       },
       {
         root: null,
-        rootMargin: "500px 0px",
+        rootMargin: "750px 0px",
         threshold: 0,
       },
     );
