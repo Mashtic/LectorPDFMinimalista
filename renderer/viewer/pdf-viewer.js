@@ -28,7 +28,6 @@ export class PdfViewer {
     await this.renderPages();
     this.setupObservers();
     this.updateCurrentPage();
-    this.jumpToPage(5);
   }
 
   updateCurrentPage() {
