@@ -3,8 +3,7 @@ import {
   getDocument,
   TextLayer,
 } from "../../node_modules/pdfjs-dist/build/pdf.mjs";
-import {createZoomState, zoomIn, zoomOut} from "../zoom/zoom.js";
-
+import { createZoomState, zoomIn, zoomOut } from "../zoom/zoom.js";
 
 // This should maybe be handled somewhere else
 GlobalWorkerOptions.workerSrc = "./pdf.worker.mjs";
@@ -24,12 +23,12 @@ export class PdfViewer {
     return this.zoomState.scale;
   }
 
-
   async load() {
     this.documentPDF = await getDocument({ data: this.dataPDF }).promise;
     await this.renderPages();
     this.setupObservers();
     this.updateCurrentPage();
+    this.jumpToPage(5);
   }
 
   updateCurrentPage() {
@@ -44,8 +43,22 @@ export class PdfViewer {
 
     this.currentPage = Number(canvas.dataset.pageNumber);
 
-    const counter = document.getElementById("pdf-page-counter");
-    counter.innerHTML = `${this.currentPage} / ${this.documentPDF.numPages}`;
+    const counter = document.getElementById("pdf-page-count");
+    counter.value = `${this.currentPage}`;
+
+    const totalPages = document.getElementById("pdf-total-pages");
+    totalPages.innerHTML = ` / ${this.documentPDF.numPages}`;
+  }
+
+  jumpToPage(pageNumber) {
+    if (pageNumber <= 0 || pageNumber > this.documentPDF.numPages) return;
+
+    const targetDiv = this.pages.get(pageNumber).wrapper;
+    if (!targetDiv) return;
+
+    targetDiv.scrollIntoView();
+
+    this.updateCurrentPage();
   }
 
   zoomInPages() {
@@ -59,7 +72,9 @@ export class PdfViewer {
   }
 
   zoomAtPoint(clientX, clientY, direction) {
-    const wrapper = document.elementFromPoint(clientX, clientY)?.closest(".pdf-page");
+    const wrapper = document
+      .elementFromPoint(clientX, clientY)
+      ?.closest(".pdf-page");
     if (!wrapper) {
       if (direction === "in") this.zoomInPages();
       else this.zoomOutPages();
@@ -86,17 +101,17 @@ export class PdfViewer {
   }
 
   resizePageLayout(pageNumber, entry) {
-      if (!entry.page) {
-        return;
-      }
-  
-      const viewport = entry.page.getViewport({ scale: this.scale });
-  
-      if (entry.wrapper) {
-        entry.wrapper.style.width = `${viewport.width}px`;
-        entry.wrapper.style.height = `${viewport.height}px`;
-      }
+    if (!entry.page) {
+      return;
     }
+
+    const viewport = entry.page.getViewport({ scale: this.scale });
+
+    if (entry.wrapper) {
+      entry.wrapper.style.width = `${viewport.width}px`;
+      entry.wrapper.style.height = `${viewport.height}px`;
+    }
+  }
 
   rerenderVisiblePages() {
     for (const [pageNumber, entry] of this.pages) {
@@ -118,7 +133,6 @@ export class PdfViewer {
     entry.isRendering = true;
     entry.renderPending = false;
     this.pages.set(pageNumber, entry);
-
 
     this.documentPDF.getPage(pageNumber).then((page) => {
       entry.page = page;
@@ -173,9 +187,7 @@ export class PdfViewer {
 
           return layer.render();
         })
-        .catch(() => {
-
-        })
+        .catch(() => {})
         .finally(() => {
           entry.isRendering = false;
           this.pages.set(pageNumber, entry);

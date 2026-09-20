@@ -7,6 +7,8 @@ const currentPDF = await window.electronAPI.getGlobalVar("currentPDF");
 let viewer;
 let ticking = false;
 
+const pageInput = document.getElementById("pdf-page-count");
+
 if (currentPDF) {
   welcomeScreen.style.display = "none";
   viewContainer.style.display = "block";
@@ -15,7 +17,7 @@ if (currentPDF) {
   viewer.load();
 
   document.addEventListener("keydown", (event) => {
-    if (!(event.ctrlKey)) {
+    if (!event.ctrlKey) {
       return;
     }
 
@@ -31,9 +33,13 @@ if (currentPDF) {
   viewContainer.addEventListener(
     "wheel",
     (event) => {
-      if (!(event.ctrlKey)) return;
+      if (!event.ctrlKey) return;
       event.preventDefault();
-      viewer.zoomAtPoint(event.clientX, event.clientY, event.deltaY < 0 ? "in" : "out");
+      viewer.zoomAtPoint(
+        event.clientX,
+        event.clientY,
+        event.deltaY < 0 ? "in" : "out",
+      );
     },
     { passive: false },
   );
@@ -60,4 +66,18 @@ viewContainer.addEventListener("scroll", () => {
     viewer.updateCurrentPage();
     ticking = false;
   });
+});
+
+pageInput.addEventListener("click", () => {
+  pageInput.select();
+});
+
+pageInput.addEventListener("keydown", (event) => {
+  if (!viewer) return;
+
+  if (event.key.toLowerCase() === "enter") {
+    const pageNumber = parseInt(pageInput.value, 10);
+
+    viewer.jumpToPage(pageNumber);
+  }
 });
