@@ -1,35 +1,46 @@
-const { PdfPresentationViewer } = require("./pdf-presentation-viewer.js");
+import { PdfPresentationViewer } from "./pdf-presentation-viewer.js";
 
-const viewer = new PdfPresentationViewer("../../src/pdf/test/pdf2.pdf");
+const currentPDF = await window.electronAPI.getGlobalVar("currentPDF");
+const currentPage = await window.electronAPI.getGlobalVar("currentPage");
 
 var mouseTimeout;
 var isMouseHidden = false;
 
-viewer.load();
+let viewer;
 
-document.addEventListener("keydown", (event) => {
-  if (event.key.toLowerCase() === "arrowleft") {
-    event.preventDefault();
-    viewer.prevPage();
-  }
+if (currentPDF) {
+  viewer = new PdfPresentationViewer(currentPDF, currentPage);
 
-  if (event.key.toLowerCase() === "arrowright") {
-    event.preventDefault();
-    viewer.nextPage();
-  }
-});
+  viewer.load();
 
-document.addEventListener("wheel", (event) => {
-  if (event.deltaY < 0) {
-    event.preventDefault();
-    viewer.prevPage();
-  }
+  document.addEventListener("keydown", (event) => {
+    if (event.key.toLowerCase() === "arrowleft") {
+      event.preventDefault();
+      viewer.prevPage();
+    }
 
-  if (event.deltaY > 0) {
-    event.preventDefault();
-    viewer.nextPage();
-  }
-});
+    if (event.key.toLowerCase() === "arrowright") {
+      event.preventDefault();
+      viewer.nextPage();
+    }
+
+    if (event.key === "Escape") {
+      window.top.close();
+    }
+  });
+
+  document.addEventListener("wheel", (event) => {
+    if (event.deltaY < 0) {
+      event.preventDefault();
+      viewer.prevPage();
+    }
+
+    if (event.deltaY > 0) {
+      event.preventDefault();
+      viewer.nextPage();
+    }
+  });
+}
 
 document.addEventListener("mousemove", handleMouseMove);
 

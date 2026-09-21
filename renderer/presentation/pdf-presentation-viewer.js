@@ -1,16 +1,14 @@
-const {
+import {
   GlobalWorkerOptions,
   getDocument,
-} = require("../../node_modules/pdfjs-dist/build/pdf.mjs");
+} from "../../node_modules/pdfjs-dist/build/pdf.mjs";
 
-// This should maybe be handled somewhere else
 GlobalWorkerOptions.workerSrc = "./pdf.worker.mjs";
 
-class PdfPresentationViewer {
-  // Take PDFDoc as parameter instead of URL once PDF opening
-  // functionality is implemented
-  constructor(URL, currentPage = 1) {
-    this.URL = URL;
+export class PdfPresentationViewer {
+  constructor(pdfData, currentPage = 1) {
+    this.URL = null;
+    this.pdfData = pdfData;
     this.documentPDF = null;
     this.currentPage = currentPage;
     this.pageIsRendering = false;
@@ -26,12 +24,9 @@ class PdfPresentationViewer {
     });
   }
 
-  // Remove once PDFDoc is taken as a parameter
   async load() {
-    getDocument({ url: this.URL }).promise.then((documentPDF) => {
-      this.documentPDF = documentPDF;
-      this.renderPage(this.currentPage);
-    });
+    this.documentPDF = await getDocument({ data: this.pdfData }).promise;
+    this.renderPage(this.currentPage);
   }
 
   nextPage() {
@@ -96,5 +91,3 @@ class PdfPresentationViewer {
     }
   }
 }
-
-module.exports = { PdfPresentationViewer };

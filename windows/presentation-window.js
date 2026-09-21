@@ -8,12 +8,16 @@ function createPresentationWindow() {
     webPreferences: {
       plugins: true,
       nodeIntegration: true,
-      contextIsolation: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, "../preload.js"),
     },
   });
 
   win.loadFile(
-    path.join(__dirname, "../renderer/presentation/PdfPresentationScreen.html"),
+    path.join(
+      __dirname,
+      "../renderer/presentation/pdf-presentation-screen.html",
+    ),
   );
 
   return win;

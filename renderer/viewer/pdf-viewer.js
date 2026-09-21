@@ -5,7 +5,6 @@ import {
 } from "../../node_modules/pdfjs-dist/build/pdf.mjs";
 import { createZoomState, zoomIn, zoomOut } from "../zoom/zoom.js";
 
-// This should maybe be handled somewhere else
 GlobalWorkerOptions.workerSrc = "./pdf.worker.mjs";
 
 export class PdfViewer {
@@ -14,6 +13,7 @@ export class PdfViewer {
     this.dataPDF = pdfData;
     this.documentPDF = null;
     this.currentPage = currentPage;
+    this.previousPage = 0;
     //this.scale = 1;
     this.zoomState = createZoomState({ scale: 1 });
     this.pages = new Map();
@@ -45,11 +45,16 @@ export class PdfViewer {
 
     this.currentPage = Number(canvas.dataset.pageNumber);
 
+    if (this.currentPage == this.previousPage) return;
+
     const counter = document.getElementById("pdf-page-count");
     counter.value = `${this.currentPage}`;
 
     const totalPages = document.getElementById("pdf-total-pages");
     totalPages.innerHTML = ` / ${this.documentPDF.numPages}`;
+
+    this.previousPage = this.currentPage;
+    window.electronAPI.setGlobalVar("currentPage", this.currentPage);
   }
 
   jumpToPage(pageNumber) {
