@@ -17,6 +17,9 @@ export class PdfViewer {
     //this.scale = 1;
     this.zoomState = createZoomState({ scale: 1 });
     this.pages = new Map();
+    this.onTextLayerRendered = null;
+    this.onTextLayerUnloaded = null;
+
   }
 
   get scale() {
@@ -183,8 +186,11 @@ export class PdfViewer {
           });
 
           entry.textLayer = textLayer;
+          entry.textDivs = layer.textDivs;
 
-          return layer.render();
+          return layer.render().then(() => {
+            this.onTextLayerRendered?.(pageNumber);
+          });
         })
         .catch(() => {})
         .finally(() => {
@@ -218,6 +224,9 @@ export class PdfViewer {
     if (textLayer) {
       textLayer.innerHTML = "";
     }
+
+    entry.textDivs = null;
+    this.onTextLayerUnloaded?.(pageNumber);
 
     if (entry.page) {
       entry.page.cleanup();

@@ -1,4 +1,6 @@
 import { PdfViewer } from "./pdf-viewer.js";
+import { PdfSearchController } from "../search/pdf-search.js";
+import { initializeSearchBar } from "../search/search-bar.js";
 
 const welcomeScreen = document.getElementById("welcome-screen");
 const viewContainer = document.getElementById("pdf-viewer-container");
@@ -14,7 +16,12 @@ if (currentPDF) {
   viewContainer.style.display = "block";
 
   viewer = new PdfViewer(currentPDF);
+  const searchController = new PdfSearchController(viewer);
+  viewer.onTextLayerRendered = (pageNumber) => searchController.onPageRendered(pageNumber);
+  viewer.onTextLayerUnloaded = (pageNumber) => searchController.onPageUnloaded(pageNumber);
+
   viewer.load();
+  initializeSearchBar(searchController);
 
   document.addEventListener("keydown", (event) => {
     if (!event.ctrlKey) {
