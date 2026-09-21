@@ -1,20 +1,19 @@
-
 const globalVars = {
   pdfPath: null,
   currentPDF: null,
+  currentPage: 1,
+};
+
+function getGlobalVar(key) {
+  return globalVars[key];
 }
 
-function getGlobalVar(key){
-  return globalVars[key]
-}
-
-
-function setGlobalVar(key, value){
-  if(globalVars[key] === undefined){
-    throw `Error: Setting non-existing global variable:${key}`
+function setGlobalVar(key, value) {
+  if (globalVars[key] === undefined) {
+    throw `Error: Setting non-existing global variable:${key}`;
   }
 
-  globalVars[key] = value
+  globalVars[key] = value;
 }
 
-module.exports = {getGlobalVar, setGlobalVar}
+module.exports = { getGlobalVar, setGlobalVar };

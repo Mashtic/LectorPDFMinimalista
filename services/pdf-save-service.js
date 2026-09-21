@@ -1,14 +1,14 @@
-const { dialog } = require('electron');
-const { writeFile } = require('node:fs/promises');
-const {getGlobalVar} = require('./global-var-service.js')
+const { dialog } = require("electron");
+const { writeFile } = require("node:fs/promises");
+const { getGlobalVar } = require("./global-var-service.js");
 
 async function writePdfFile() {
   const { canceled, filePath } = await dialog.showSaveDialog({
     defaultPath: getGlobalVar("pdfPath"),
     filters: [
       {
-        name: 'PDF Files',
-        extensions: ['pdf'],
+        name: "PDF Files",
+        extensions: ["pdf"],
       },
     ],
   });
@@ -21,4 +21,4 @@ async function writePdfFile() {
   return true;
 }
 
-module.exports = { writePdfFile};
+module.exports = { writePdfFile };

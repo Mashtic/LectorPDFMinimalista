@@ -1,5 +1,6 @@
 const { BrowserWindow } = require("electron");
 const path = require("path");
+const { showContextMenu } = require("./context-menu.js");
 
 function createMainWindow() {
   const win = new BrowserWindow({
@@ -14,6 +15,10 @@ function createMainWindow() {
   });
 
   win.loadFile(path.join(__dirname, "../renderer/index.html"));
+
+  win.webContents.on("context-menu", () => {
+    showContextMenu(win);
+  });
 
   return win;
 }
