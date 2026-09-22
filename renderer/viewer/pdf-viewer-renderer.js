@@ -2,6 +2,7 @@ import { PdfViewer } from "./pdf-viewer.js";
 
 const welcomeScreen = document.getElementById("welcome-screen");
 const viewContainer = document.getElementById("pdf-viewer-container");
+const viewerActions = document.getElementById("viewer-actions");
 const currentPDF = await window.electronAPI.getGlobalVar("currentPDF");
 
 let viewer;
@@ -12,6 +13,7 @@ const pageInput = document.getElementById("pdf-page-count");
 if (currentPDF) {
   welcomeScreen.style.display = "none";
   viewContainer.style.display = "block";
+  viewerActions.hidden = false;
 
   viewer = new PdfViewer(currentPDF);
   viewer.load();

@@ -2,6 +2,8 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
   openFile: () => ipcRenderer.invoke('dialog:openFile'),
+  appendPdf: () => ipcRenderer.invoke('dialog:appendPdf'),
+  appendPdfContent: (content) => ipcRenderer.invoke('pdf:append-content', content),
   saveFile: () => ipcRenderer.invoke('dialog:saveFile'),
   deletePages: (pages) => ipcRenderer.invoke('pdfMod:deletePages', pages),
   setGlobalVar: (key, value) =>

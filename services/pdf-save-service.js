@@ -3,8 +3,9 @@ const { writeFile } = require('node:fs/promises');
 const {getGlobalVar} = require('./global-var-service.js')
 
 async function writePdfFile() {
+  const sourcePath = getGlobalVar("pdfPath");
   const { canceled, filePath } = await dialog.showSaveDialog({
-    defaultPath: getGlobalVar("pdfPath"),
+    defaultPath: sourcePath || 'documento-combinado.pdf',
     filters: [
       {
         name: 'PDF Files',
