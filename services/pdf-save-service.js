@@ -21,4 +21,14 @@ async function writePdfFile() {
   return true;
 }
 
-module.exports = { writePdfFile };
+async function saveCurrentPdf() {
+  const pdfPath = getGlobalVar("pdfPath");
+  const currentPDF = getGlobalVar("currentPDF");
+  if (!pdfPath || !currentPDF) {
+    return false;
+  }
+  await writeFile(pdfPath, currentPDF);
+  return true;
+}
+
+module.exports = {saveCurrentPdf, writePdfFile};

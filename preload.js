@@ -6,8 +6,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on("dialog:openPdfDialog", callback);
   },
   saveFile: () => ipcRenderer.invoke("dialog:saveFile"),
+  saveCurrentPdf: () => ipcRenderer.invoke("pdf:saveCurrent"),
   openSaveFileDialog: (callback) => {
     ipcRenderer.on("dialog:openSaveFileDialog", callback);
+  },
+  openSaveCurrentPdfDialog: (callback) => {
+    ipcRenderer.on("dialog:openSaveCurrentPdfDialog", callback);
   },
   setFloatingMode: (isFloating, documentSize) =>
     ipcRenderer.send("set-floating-mode", isFloating, documentSize),

@@ -22,9 +22,15 @@ function showContextMenu(window) {
   if (getGlobalVar("currentPDF")) {
     template.push(
       {
-        label: "Save File",
+        label: "Save As",
         click: () => {
           window.webContents.send("dialog:openSaveFileDialog");
+        },
+      },
+      {
+        label: "Save",
+        click: () => {
+          window.webContents.send("dialog:openSaveCurrentPdfDialog");
         },
       },
       {

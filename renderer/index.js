@@ -1,6 +1,6 @@
 import { openFile } from "./open-file/open-file.js";
 import { openDeletePagesModal } from "./delete-pages/delete-pages-renderer.js";
-import { saveFile } from "./save-file/save-file.js";
+import { saveCurrentPdf, saveFile } from "./save-file/save-file.js";
 import "./window/window.js";
 
 // if (await window.electronAPI.getGlobalVar("currentPDF")) {
@@ -25,4 +25,8 @@ window.electronAPI.openPdfDialog(() => {
 
 window.electronAPI.openSaveFileDialog(() => {
   saveFile();
+});
+
+window.electronAPI.openSaveCurrentPdfDialog(() => {
+  saveCurrentPdf();
 });

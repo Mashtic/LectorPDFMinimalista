@@ -1,8 +1,12 @@
 const { ipcMain} = require("electron");
-const { writePdfFile } = require("../services/pdf-save-service.js");
+const {
+  saveCurrentPdf,
+  writePdfFile,
+} = require("../services/pdf-save-service.js");
 
 function registerPDFSaveIpc() {
   ipcMain.handle("dialog:saveFile", writePdfFile);
+  ipcMain.handle("pdf:saveCurrent", saveCurrentPdf);
 }
 
 module.exports = {registerPDFSaveIpc};

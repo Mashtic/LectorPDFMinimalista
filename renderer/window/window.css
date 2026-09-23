@@ -107,3 +107,25 @@ html {
 #OpenFileBtn:hover svg {
   transform: translateY(-2px);
 }
+
+#save-status {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 10000;
+  padding: 9px 14px;
+  border: 1px solid #3ca66b;
+  border-radius: 4px;
+  background: #2e8b57;
+  color: #ffffff;
+  font-size: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#save-status.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
