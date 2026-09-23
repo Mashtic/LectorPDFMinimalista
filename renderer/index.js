@@ -1,6 +1,7 @@
 import { openFile } from "./open-file/open-file.js";
 import { openDeletePagesModal } from "./delete-pages/delete-pages-renderer.js";
 import { saveFile } from "./save-file/save-file.js";
+import "./window/window.js";
 
 // if (await window.electronAPI.getGlobalVar("currentPDF")) {
 //   document.getElementById("SaveFileBtn").style = "display: block;";

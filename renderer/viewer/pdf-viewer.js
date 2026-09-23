@@ -3,7 +3,7 @@ import {
   getDocument,
   TextLayer,
 } from "../../node_modules/pdfjs-dist/build/pdf.mjs";
-import { createZoomState, zoomIn, zoomOut } from "../zoom/zoom.js";
+import { createZoomState, setZoom, zoomIn, zoomOut } from "../zoom/zoom.js";
 
 GlobalWorkerOptions.workerSrc = "./pdf.worker.mjs";
 
@@ -75,6 +75,16 @@ export class PdfViewer {
 
   zoomOutPages() {
     zoomOut(this.zoomState);
+    this.rerenderVisiblePages();
+  }
+
+  fitWidth(maxWidth) {
+    const firstPage = this.pages.get(1);
+    if (!firstPage || firstPage.wrapper.offsetWidth <= maxWidth) {
+      return;
+    }
+    const scale = (this.scale * maxWidth) / firstPage.wrapper.offsetWidth;
+    setZoom(this.zoomState, scale);
     this.rerenderVisiblePages();
   }
 

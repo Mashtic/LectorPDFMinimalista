@@ -20,7 +20,23 @@ if (currentPDF) {
   viewer.onTextLayerRendered = (pageNumber) => searchController.onPageRendered(pageNumber);
   viewer.onTextLayerUnloaded = (pageNumber) => searchController.onPageUnloaded(pageNumber);
 
-  viewer.load();
+  await viewer.load();
+  const firstPage = document.querySelector(".pdf-page");
+
+  if (firstPage) {
+    document.dispatchEvent(
+      new CustomEvent("pdf-document-loaded", {
+        detail: {
+          width: firstPage.offsetWidth,
+          height: firstPage.offsetHeight,
+        },
+      }),
+    );
+  }
+  document.addEventListener("floating-window-resized", () => {
+    viewer.fitWidth(viewContainer.clientWidth);
+  });
+
   initializeSearchBar(searchController);
 
   document.addEventListener("keydown", (event) => {
