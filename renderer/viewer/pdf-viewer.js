@@ -173,28 +173,38 @@ export class PdfViewer {
 
       entry.renderTask.promise
         .then(() => {
-          return page.getTextContent();
-        })
-        .then((textContent) => {
-          const textId = `text-layer-${pageNumber}`;
-          const textLayer = document.getElementById(textId);
-
-          textLayer.innerHTML = "";
-          textLayer.style.setProperty("--scale-factor", viewport.scale);
-          textLayer.style.width = `${viewport.width}px`;
-          textLayer.style.height = `${viewport.height}px`;
-
-          const layer = new TextLayer({
-            textContentSource: textContent,
-            viewport: viewport,
-            container: textLayer,
-          });
-
-          entry.textLayer = textLayer;
-          entry.textDivs = layer.textDivs;
-
-          return layer.render().then(() => {
+          if (entry.textLayerInstance) {
+            entry.textLayer.style.setProperty("--scale-factor", viewport.scale);
+            entry.textLayer.style.width = `${viewport.width}px`;
+            entry.textLayer.style.height = `${viewport.height}px`;
+  
+            entry.textLayerInstance.update({ viewport });
             this.onTextLayerRendered?.(pageNumber);
+            return;
+          }
+
+          return page.getTextContent().then((textContent) => {
+            const textId = `text-layer-${pageNumber}`;
+            const textLayer = document.getElementById(textId);
+    
+            textLayer.innerHTML = "";
+            textLayer.style.setProperty("--scale-factor", viewport.scale);
+            textLayer.style.width = `${viewport.width}px`;
+            textLayer.style.height = `${viewport.height}px`;
+
+            const layer = new TextLayer({
+              textContentSource: textContent,
+              viewport: viewport,
+              container: textLayer,
+            });
+
+            entry.textLayer = textLayer;
+            entry.textDivs = layer.textDivs;
+            entry.textLayerInstance = layer;
+
+            return layer.render().then(() => {
+              this.onTextLayerRendered?.(pageNumber);
+            });
           });
         })
         .catch(() => {})
@@ -231,6 +241,7 @@ export class PdfViewer {
     }
 
     entry.textDivs = null;
+    entry.textLayerInstance = null;
     this.onTextLayerUnloaded?.(pageNumber);
 
     if (entry.page) {
