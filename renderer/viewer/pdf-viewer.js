@@ -78,6 +78,11 @@ export class PdfViewer {
     this.rerenderVisiblePages();
   }
 
+  resetZoom() {
+    setZoom(this.zoomState, 1);
+    this.rerenderVisiblePages();
+  }
+
   fitWidth(maxWidth) {
     const firstPage = this.pages.get(1);
     if (!firstPage || firstPage.wrapper.offsetWidth <= maxWidth) {

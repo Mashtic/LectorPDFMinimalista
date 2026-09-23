@@ -33,8 +33,12 @@ if (currentPDF) {
       }),
     );
   }
-  document.addEventListener("floating-window-resized", () => {
+  window.electronAPI.onFloatingWindowSized(() => {
     viewer.fitWidth(viewContainer.clientWidth);
+  });
+
+  document.addEventListener("floating-mode-entered", () => {
+    viewer.resetZoom();
   });
 
   initializeSearchBar(searchController);

@@ -56,6 +56,7 @@ function registerWindowIpc() {
     if (isFloating && isValidDocumentSize(documentSize)) {
       win.setSize(...getFloatingWindowSize(win, documentSize));
       win.setPosition(...getWorkAreaPosition(win));
+      event.sender.send("floating-window-sized");
     } else if (!isFloating && win.normalWindowSize) {
       win.setSize(...win.normalWindowSize);
       win.setPosition(...win.normalWindowPosition);

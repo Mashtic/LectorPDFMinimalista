@@ -22,14 +22,13 @@ document.addEventListener("pdf-document-loaded", (event) => {
   }
 });
 
-window.addEventListener("resize", () => {
-  if (isFloating) {
-    document.dispatchEvent(new CustomEvent("floating-window-resized"));
-  }
-});
-
 floatingToggle.addEventListener("click", () => {
   isFloating = !isFloating;
+
+  if (isFloating) {
+    document.dispatchEvent(new CustomEvent("floating-mode-entered"));
+  }
+
   documentSize = getDocumentSize() || documentSize;
   floatingToggle.textContent = isFloating ? "Floating" : "Normal";
   floatingToggle.classList.toggle("active", isFloating);

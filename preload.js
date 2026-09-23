@@ -11,6 +11,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
   setFloatingMode: (isFloating, documentSize) =>
     ipcRenderer.send("set-floating-mode", isFloating, documentSize),
+  onFloatingWindowSized: (callback) => {
+    ipcRenderer.on("floating-window-sized", callback);
+  },
   deletePages: (pages) => ipcRenderer.invoke("pdfMod:deletePages", pages),
   openDeletePagesModal: (callback) => {
     ipcRenderer.on("pdfMod:openDeletePagesModal", callback);
