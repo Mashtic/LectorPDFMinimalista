@@ -7,6 +7,9 @@ import { createZoomState, setZoom, zoomIn, zoomOut } from "../zoom/zoom.js";
 
 GlobalWorkerOptions.workerSrc = "./pdf.worker.mjs";
 
+// Space kept above an outline target so it is not hidden by the page counter
+const JUMP_TOP_MARGIN = 56;
+
 export class PdfViewer {
   constructor(pdfData, currentPage = 1) {
     this.URL = null;
@@ -19,7 +22,7 @@ export class PdfViewer {
     this.pages = new Map();
     this.onTextLayerRendered = null;
     this.onTextLayerUnloaded = null;
-
+    this.onCurrentPageChanged = null;
   }
 
   get scale() {
@@ -55,6 +58,7 @@ export class PdfViewer {
 
     this.previousPage = this.currentPage;
     window.electronAPI.setGlobalVar("currentPage", this.currentPage);
+    this.onCurrentPageChanged?.(this.currentPage);
   }
 
   jumpToPage(pageNumber) {
@@ -64,6 +68,27 @@ export class PdfViewer {
     if (!targetDiv) return;
 
     targetDiv.scrollIntoView();
+
+    this.updateCurrentPage();
+  }
+
+  jumpToPagePosition(pageNumber, pdfTop) {
+    const entry = this.pages.get(pageNumber);
+
+    if (pdfTop === null || pdfTop === undefined || !entry?.page) {
+      this.jumpToPage(pageNumber);
+      return;
+    }
+
+    const viewport = entry.page.getViewport({ scale: this.scale });
+    const [, offsetInPage] = viewport.convertToViewportPoint(0, pdfTop);
+
+    const container = document.getElementById("pdf-viewer-container");
+    const pageOffset =
+      entry.wrapper.getBoundingClientRect().top -
+      container.getBoundingClientRect().top;
+
+    container.scrollTop += pageOffset + offsetInPage - JUMP_TOP_MARGIN;
 
     this.updateCurrentPage();
   }
