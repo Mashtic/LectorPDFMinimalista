@@ -45,29 +45,45 @@ html {
 /* Floating Window Button */
 #floating-toggle {
   position: fixed;
-  top: 15px;
-  right: 45px;
-  z-index: 10000;
+  top: 12px;
+  right: 12px;
+  z-index: 10001;
   -webkit-app-region: no-drag;
-  padding: 4px 10px;
-  font-size: 11px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+
+  border: none;
+  border-radius: 6px;
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
-  transition: all 0.2s;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+#floating-toggle[hidden] {
+  display: none;
 }
 
 #floating-toggle:hover {
   color: var(--text-hover);
-  border-color: #999;
+  background: rgba(0, 0, 0, 0.05);
 }
 
 #floating-toggle.active {
-  background: #2e8b57;
-  color: white;
-  border-color: #3ca66b;
+  color: #2e8b57;
+  background: rgba(46, 139, 87, 0.12);
+}
+
+#floating-toggle:focus-visible {
+  outline: 2px solid #8a8a8a;
+  outline-offset: 2px;
 }
 
 /* Welcome Screen */

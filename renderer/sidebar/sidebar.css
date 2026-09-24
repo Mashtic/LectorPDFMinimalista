@@ -94,7 +94,6 @@ body.sidebar-open #pdf-page-counter {
 
 /* Tabs */
 #sidebar-tabs {
-  -webkit-app-region: drag;
   display: flex;
   gap: 16px;
   height: 56px;
@@ -104,7 +103,6 @@ body.sidebar-open #pdf-page-counter {
 }
 
 .sidebar-tab {
-  -webkit-app-region: no-drag;
   padding: 4px 0;
   border: none;
   border-bottom: 1px solid transparent;

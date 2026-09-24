@@ -17,6 +17,7 @@ function getDocumentSize() {
 
 document.addEventListener("pdf-document-loaded", (event) => {
   documentSize = event.detail;
+  floatingToggle.hidden = false;
   if (isFloating) {
     window.electronAPI.setFloatingMode(true, documentSize);
   }
@@ -29,9 +30,12 @@ floatingToggle.addEventListener("click", () => {
     document.dispatchEvent(new CustomEvent("floating-mode-entered"));
   }
 
+  const label = isFloating ? "Window kept on top" : "Keep window on top";
+
   documentSize = getDocumentSize() || documentSize;
-  floatingToggle.textContent = isFloating ? "Floating" : "Normal";
   floatingToggle.classList.toggle("active", isFloating);
   floatingToggle.setAttribute("aria-pressed", String(isFloating));
+  floatingToggle.setAttribute("aria-label", label);
+  floatingToggle.title = label;
   window.electronAPI.setFloatingMode(isFloating, documentSize);
 });
