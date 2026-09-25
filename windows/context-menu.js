@@ -40,8 +40,10 @@ function showContextMenu(window) {
         },
       },
       {
-        label: "Concatenate Files",
-        click: notImplementedYet,
+        label: "Append File",
+        click: () => {
+          window.webContents.send("dialog:openAppendDialog");
+        },
       },
       {
         label: "Merge Files",

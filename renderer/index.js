@@ -8,9 +8,9 @@ import "./window/window.js";
 // }
 
 document.getElementById("OpenFileBtn").addEventListener("click", openFile);
-document
-  .getElementById("OpenAnotherFileBtn")
-  .addEventListener("click", appendPdf);
+// document
+//   .getElementById("OpenAnotherFileBtn")
+//   .addEventListener("click", appendPdf);
 
 // document
 //   .getElementById("DeletePagesBtn")
@@ -32,6 +32,10 @@ window.electronAPI.openSaveFileDialog(() => {
 
 window.electronAPI.openSaveCurrentPdfDialog(() => {
   saveCurrentPdf();
+});
+
+window.electronAPI.openAppendDialog(() => {
+  appendPdf();
 });
 
 document.addEventListener("dragover", (event) => {
