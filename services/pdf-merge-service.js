@@ -12,10 +12,17 @@ function suggestedName(firstFile, secondFile) {
 }
 
 async function combinePdfFiles(firstFile, secondFile) {
+  return combinePdfBytes(
+    await fs.readFile(firstFile),
+    await fs.readFile(secondFile),
+  );
+}
+
+async function combinePdfBytes(firstPdf, secondPdf) {
   const combined = await PDFDocument.create();
 
-  for (const filePath of [firstFile, secondFile]) {
-    const source = await PDFDocument.load(await fs.readFile(filePath));
+  for (const pdfBytes of [firstPdf, secondPdf]) {
+    const source = await PDFDocument.load(pdfBytes);
 
     const pages = await combined.copyPages(source, source.getPageIndices());
 
@@ -65,6 +72,7 @@ async function cleanupPreviews() {
 
 module.exports = {
   combinePdfFiles,
+  combinePdfBytes,
   createPreview,
   removePreview,
   getPreview,

@@ -138,10 +138,55 @@ html {
   opacity: 0;
   pointer-events: none;
   transform: translateY(8px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 #save-status.is-visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+#viewer-actions {
+  position: fixed;
+  top: 42px;
+  left: 16px;
+  z-index: 1001;
+  -webkit-app-region: no-drag;
+}
+
+#viewer-actions[hidden] {
+  display: none;
+}
+
+#OpenAnotherFileBtn {
+  padding: 8px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #333333;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
+}
+
+#OpenAnotherFileBtn:hover {
+  background: #f4f4f4;
+}
+
+body.is-dropping-pdf::after {
+  content: "Suelta el PDF para abrirlo";
+  position: fixed;
+  inset: 0;
+  z-index: 20000;
+  display: grid;
+  place-items: center;
+  border: 3px dashed #4a90e2;
+  background: rgb(255 255 255 / 82%);
+  color: #1f5f9e;
+  font-size: 18px;
+  font-weight: 600;
+  pointer-events: none;
 }

@@ -22,6 +22,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   openDeletePagesModal: (callback) => {
     ipcRenderer.on("pdfMod:openDeletePagesModal", callback);
   },
+  appendPdf: () => ipcRenderer.invoke("dialog:appendPdf"),
+  appendPdfContent: (content) =>
+    ipcRenderer.invoke("pdf:append-content", content),
   setGlobalVar: (key, value) =>
     ipcRenderer.invoke("global-var:set", key, value),
   getGlobalVar: (key) => ipcRenderer.invoke("global-var:get", key),
