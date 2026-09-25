@@ -1,0 +1,63 @@
+\chapter{Especificación de funcionalidad}
+\section{Descripción del producto}
+Describa en prosa la funcionalidad del producto. Añada detalles sobre la codificación de las historias de usuario, como prefijos utilizados.
+
+\subsection{Historias de usuario}
+
+% La pila del producto debe actualizarla cada iteración del proyecto. Divida las historias en épicas o MVPs, de forma que sea más fácil identificar cuáles historias corresponden a cada fase.
+% Añada a cada historia criterios de calidad, para esto pregúntese ¿cómo verifica el usuario que la funcionalidad está completa? ¿qué espera el usuario de 
+
+%% PILA DE PRODUCTO %%
+\begin{longtable}{|l||p{7cm}|p{4.5cm}|}
+
+\multicolumn{3}{c}{Título de la épica}\\
+\hline\hline
+\textbf{Código} & \textbf{Descripción} & \textbf{Criterios de Calidad}\\
+\hline
+\endfirsthead
+\textbf{Código} & \textbf{Descripción} & \textbf{Criterios de Calidad}\\
+\hline\hline
+\endhead
+
+% Omita las historias eliminadas
+% En esta tabla no coloree las historias, mantenga la última versión de la pila general del producto
+\textbf{RFXXX} & 
+\textbf{Título de la historia:} Descripción de la funcionalidad que representa la historia, lo más detallado posible y con énfasis en la implementación de funcionalidad. & Descripción de cómo el usuario puede verifica que la funcionalidad está completa de forma satisfactoria.\\
+\hline
+\textbf{US-001} & \textbf{App minimalista}: Ocultar la información en la interfaz de usuario para dar un estilo minimalista a la aplicación. Esto se hace mediante la implementación de estilos de css que modifican la interfaz.& La interfaz está limpia y solo contiene un visualizador de pdf por defecto, las demás funcionalidades están colocadas de forma oculta en menús de hamburguesa o menús de contexto (accesibles haciendo click derecho).\\
+\hline
+\textbf{US-002} & \textbf{Compaginar archivos pdf}: Compaginar 2 archivos pdf abiertos para obtener un archivo pdf resultante que es la unión del final del primer pdf con el inicio del segundo pdf. Esto se hace utilizando la biblioteca pdf-lib.  & Es posible compaginar 2 pdfs abiertos y el resultado se muestra en el visualizador.\\
+\hline
+\textbf{US-003} & \textbf{Mezclar archivos pdf}: Mezclar las páginas de 2 archivos pdf abiertos. Las páginas se pueden reordenan de cualquier manera. El resultado se muestra en el visualizador. Internamente se utiliza pdf-lib para manejar los archivos. & Es posible unir 2 archivos pdf abiertos y reordenar sus páginas. El resultado final se observa en el visualizador.\\
+\hline
+\textbf{US-004} & \textbf{Abrir varios archivos pdf}: Se puede abrir un segundo archivo pdf siemprpe y cuando ya exista uno cargado en memoria. El segundo pdf también se carga en memoria. Esto se hace usando la biblioteca estándar de nodejs para leer archivos junto con las funciones para mostrar dialogs de electron.  & Es posible abrir un segundo pdf tras haber abierto uno antes.\\
+\hline
+\textbf{US-005} & \textbf{Visualización ajustada al PDF}: Las dimensiones de la ventana se ajustan al visualizador del documento pdf. Esto se logra usando funciones de electron para modificar la ventana, y scripts en el renderer que comunican el tamaño del visualizador. & La ventana de la aplicación cambia de tamaño para ajustarse perfectamente al tamaño del pdf\\
+\hline
+\textbf{US-006} & \textbf{Presentar PDF}:  Un pdf abierto puede mostrarse en modo presentación. Para esto se abre una nueva ventana de electron en modo pantalla completa. Esta ventana carga un visualizador diferente en el renderer que implementa las funcionalidades del modo presentación. El visualizador utiliza la biblioteca PDF.js & Es posible ver el pdf en modo presentación, osea que las páginas se pasan con un click y el pdf se e en pantalla completa.\\
+\hline
+\textbf{US-007} & \textbf{Eliminar páginas de un PDF}:  Eliminar páginas de un documento pdf cargado en memoria. Se elige una lista con cualquiera de las páginas del documento para ser eliminadas. Internamente se utiliza la biblioteca pdf-lib para modificar el archivo. & Es posible eliminar páginas específicas de un pdf y visualizar el resultado.\\
+\hline
+\hline
+\textbf{US-008} & \textbf{Guardar un PDF}:  Un pdf abierto, cargado en memoria, y modificado se puede guardar en el disco en la misma ruta que estaba el archivo original (sobreescribiendo el archivo). Esto se hace usando las funciones de la biblioteca estándar de nodejs para escribir archivos.& Es posible guardar un pdf abierto que fue modificado para conservar los cambios en el archivo.\\
+\hline
+\hline
+\textbf{RFXXX} & \textbf{titulo}:   desc & Calidad\\
+\hline
+\hline
+\textbf{RFXXX} & \textbf{titulo}:   desc & Calidad\\
+\hline
+\hline
+\textbf{RFXXX} & \textbf{titulo}:   desc & Calidad\\
+\hline
+\hline
+\textbf{RFXXX} & \textbf{titulo}:   desc & Calidad\\
+\hline
+\hline
+\textbf{RFXXX} & \textbf{titulo}:   desc & Calidad\\
+\hline
+\hline
+\textbf{RFXXX} & \textbf{titulo}:   desc & Calidad\\
+\hline
+\end{longtable}
+
