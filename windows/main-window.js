@@ -1,4 +1,4 @@
-const { BrowserWindow } = require("electron");
+const { BrowserWindow, globalShortcut } = require("electron");
 const path = require("path");
 const { showContextMenu } = require("./context-menu.js");
 
@@ -19,6 +19,12 @@ function createMainWindow() {
 
   win.webContents.on("context-menu", () => {
     showContextMenu(win);
+  });
+
+  win.webContents.on("before-input-event", (event, input) => {
+    if (input.type === "keyDown" && input.key === "m") {
+      showContextMenu(win);
+    }
   });
 
   return win;

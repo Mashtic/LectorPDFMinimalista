@@ -61,6 +61,20 @@ export class PdfViewer {
     this.onCurrentPageChanged?.(this.currentPage);
   }
 
+  skipUp() {
+    if (this.currentPage <= 1) return;
+
+    this.currentPage--;
+    this.jumpToPage(this.currentPage);
+  }
+
+  skipDown() {
+    if (this.currentPage >= this.documentPDF.numPages) return;
+
+    this.currentPage++;
+    this.jumpToPage(this.currentPage);
+  }
+
   jumpToPage(pageNumber) {
     if (pageNumber <= 0 || pageNumber > this.documentPDF.numPages) return;
 
@@ -217,7 +231,7 @@ export class PdfViewer {
             entry.textLayer.style.setProperty("--scale-factor", viewport.scale);
             entry.textLayer.style.width = `${viewport.width}px`;
             entry.textLayer.style.height = `${viewport.height}px`;
-  
+
             entry.textLayerInstance.update({ viewport });
             this.onTextLayerRendered?.(pageNumber);
             return;
@@ -226,7 +240,7 @@ export class PdfViewer {
           return page.getTextContent().then((textContent) => {
             const textId = `text-layer-${pageNumber}`;
             const textLayer = document.getElementById(textId);
-    
+
             textLayer.innerHTML = "";
             textLayer.style.setProperty("--scale-factor", viewport.scale);
             textLayer.style.width = `${viewport.width}px`;

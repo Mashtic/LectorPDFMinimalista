@@ -5,7 +5,8 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "live": "nodemon --ext js,css,html --exec electron ."
+    "live": "nodemon --ext js,css,html --exec electron .",
+    "build": "electron-builder --linux --win"
   },
   "repository": {
     "type": "git",
@@ -21,10 +22,29 @@
   "homepage": "https://github.com/Mashtic/LectorPDFMinimalista#readme",
   "devDependencies": {
     "electron": "^44.1.1",
+    "electron-builder": "^26.15.3",
     "nodemon": "^3.1.14"
   },
   "dependencies": {
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^6.3.289"
+  },
+  "allowScripts": {
+    "electron-winstaller@5.4.0": true
+  },
+  "build": {
+    "appId": "com.disin.folio",
+    "productName": "Folio",
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Utility"
+    },
+    "win": {
+      "target": [
+        "portable"
+      ]
+    }
   }
 }

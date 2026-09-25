@@ -20,8 +20,10 @@ if (currentPDF) {
 
   viewer = new PdfViewer(currentPDF);
   const searchController = new PdfSearchController(viewer);
-  viewer.onTextLayerRendered = (pageNumber) => searchController.onPageRendered(pageNumber);
-  viewer.onTextLayerUnloaded = (pageNumber) => searchController.onPageUnloaded(pageNumber);
+  viewer.onTextLayerRendered = (pageNumber) =>
+    searchController.onPageRendered(pageNumber);
+  viewer.onTextLayerUnloaded = (pageNumber) =>
+    searchController.onPageUnloaded(pageNumber);
 
   await viewer.load();
   const firstPage = document.querySelector(".pdf-page");
@@ -46,6 +48,14 @@ if (currentPDF) {
 
   initializeSearchBar(searchController);
   initializeSidebar(viewer);
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key.toLowerCase() === "j") {
+      viewer.skipDown();
+    } else if (event.key.toLowerCase() === "k") {
+      viewer.skipUp();
+    }
+  });
 
   document.addEventListener("keydown", (event) => {
     if (!event.ctrlKey) {
