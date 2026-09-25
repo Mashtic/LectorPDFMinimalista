@@ -1,4 +1,4 @@
-const { app } = require("electron");
+const { app, Menu } = require("electron");
 const { createMainWindow } = require("./windows/main-window.js");
 const { registerWindowIpc } = require("./ipc/window-ipc.js");
 const { registerDeletePageIpc } = require("./ipc/delete-pages-ipc.js");
@@ -20,6 +20,7 @@ app.whenReady().then(() => {
   registerGlobalVarIpc();
   registerPDFSaveIpc();
 
+  Menu.setApplicationMenu(null);
   createMainWindow();
   // createPresentationWindow();
 });
