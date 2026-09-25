@@ -9,6 +9,10 @@
   --overlay: rgba(15, 17, 21, 0.55);
 }
 
+.delete-input {
+    background: var(--bg-color);
+}
+
 .open-trigger {
   padding: 0.65rem 1.1rem;
   border-radius: 8px;
@@ -48,6 +52,7 @@
   margin: 0 0 0.4rem;
   font-size: 1.15rem;
   font-weight: 600;
+  color: var(--ink)
 }
 
 .modal p {

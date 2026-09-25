@@ -2,13 +2,12 @@
 const modalMarkup = `
       <div class="overlay is-open" id="overlay">
         <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-          <h2 id="modal-title">Rename file</h2>
-          <p>Lista de páginas para borrar</p>
-          <label for="filename">Lista de Páginas</label>
-          <input type="text" id="deleted-pages" value="">
+          <h2 class="" id="modal-title">Delete Pages</h2>
+          <label for="filename">List of pages:</label>
+          <input type="text" id="deleted-pages" value="" class="delete-input">
           <div class="modal-actions">
             <button id="modal-cancel-btn" class="btn btn-cancel">Cancel</button>
-            <button id="modal-accept-btn" class="btn btn-accept">Aceptar</button>
+            <button id="modal-accept-btn" class="btn btn-accept">Accept</button>
           </div>
         </div>
       </div>
