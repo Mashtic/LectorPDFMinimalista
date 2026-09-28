@@ -3,33 +3,46 @@
 \section{Entorno de Desarrollo}
 
 \subsection{Dependencias}
-Describa el entorno de desarrollo y luego liste cada una de las dependencias en el orden en que debe instalarlas.
-\begin{itemize}
-    \item \textbf{Dependencia A:} Detalle las instrucciones para la primera dependencia del entorno de desarrollo
+La aplicación está construida con el framework Electron que necesita el entorno de ejecución Node.js. Además, la aplicación utiliza bibliotecas de npm para algunas funcionalidades, así que también se debe descargar esa herramienta. 
+
+Lista de pasos para preparar el entorno de desarrollo:
+\begin{enumerate}
+	\item \textbf{Github} El repositorio del proyecto se encuentra en Github. Para trabajar colaborativamente en el repositorio necesita registrarse en este servicio. \url{https://github.com/}.
+	
+	\item \textbf{Git} El administrador de versiones del proyecto es Git. Para descargarlo siga las instrucciones en \url{https://git-scm.com/install/}.
+	
+	\item \textbf{VSCode} El editor de texto sugerido para desarrollar el proyecto es VSCode. Para descargarlo siga las instrucciones en \url{https://code.visualstudio.com/download}.
+	
+	\item \textbf{Node.js y NPM} Descargue la versión más reciente de Node.js siguiendo las instrucciones en \url{https://nodejs.org/es/download}.
     
-    \item \textbf{Dependencia B:} Detalle las instrucciones para la segunda dependencia del entorno de desarrollo
-    
-    %etc...
-\end{itemize}
+\end{enumerate}
+
 
 \subsection{Código fuente}
-Describa los pasos necesarios para descargar y configurar el código fuente en el sistema. Incluya si lo considera necesario una descripción de archivos de configuración o scripts de preparación de base de datos.
+Lista de pasos para descargar el código fuente y configurar lo necesario para empezar a trabajar:
 
-\subsection{Despliegue en entorno de pruebas}
-Describa los pasos para compilar o desplegar el sistema para probarlo en vivo en un entorno de pruebas.
+\begin{enumerate}
+	\item \textbf{Acceder al repositorio} Pida a un administrador del proyecto que le conceda permisos para trabajar en el repositorio del proyecto. 
+	
+	\item \textbf{Descargar código fuente} Puede descargar el código fuente de varias maneras. El comando `git clone` puede descargar el código del repositorio si git cuenta con los credenciales de Github. Para hacerlo puede seguir la guía en \url{https://docs.github.com/en/get-started/git-basics/caching-your-github-credentials-in-git}
+	
+	\item \textbf{Descargar Electron y otras bibliotecas} Ejecute el comando `npm ci` en la carpeta raíz del proyecto.
+	
+	\item \textbf{Descargar formatter}: Descargue Prettier en su editor de texto para que el código siga el formato definido. VSCode cuenta una externsión que configura Prettier de forma automática. También, se recomienda instalar ESLint para detectar errores en el código, VSCode también tiene una extensión para está herramienta.
+	
+	\item \textbf{Estándar de código}: Antes de programar lea el documento en "docs/standard.md". Este documento tiene una lista de buenas prácticas que se deben seguir en el desarrollo de la aplicación.
+	
+	\item \textbf{Ejecutar aplicación en entorno de desarrollo}: Para ejecutar la aplicación usando el código fuente utilice el comando `npm start`.
+	
+\end{enumerate}
 
 \section{Entorno de Producción}
 
-\subsection{Dependencias}
-Describa las características que debe tener el entorno de producción al que se va a instalar el sistema. Considere que las dependencias del entorno de desarrollo y de producción son típicamente distintas. Por ejemplo: si está desarrollando en MEAN, en el entorno de desarrollo necesitará instalar Angular y Angular-CLI, pero en el entorno de producción no es necesario ya que debe crear un build estático de la interfaz para producción.
+\subsection{Instrucciones de compilación}
+TODO
 
-En el entorno de producción deberían existir menos dependencias, y puede que algunas dependencias sean distintas.
-\begin{itemize}
-    \item \textbf{Dependencia A:} Detalle las instrucciones para la primera dependencia del entorno de producción
-    
-    \item \textbf{Dependencia B:} Detalle las instrucciones para la segunda dependencia del entorno de producción
-    
-\end{itemize}
+\subsection{Dependencias}
+El proceso de compilación empaqueta todas las dependencias necesarias en el ejecutable, por lo tanto el entorno de producción solo necesita tener el binario.
 
 \subsection{Instrucciones de instalación}
-Detalle qué pasos debe seguir para instalar el sistema en el entorno de producción, incluya pasos como creación de primero usuario o instalación en frío. Procure probar esta sección para garantizar que el sistema se puede instalar desde cero en un entorno de producción nuevo.
+El ejecutable es portable, así que no requiere instalarse en el sistema. Para ejecutar la aplicación solo correr el ejecutable.
