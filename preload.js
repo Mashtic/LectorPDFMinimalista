@@ -22,6 +22,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
 
   deletePages: (pages) => ipcRenderer.invoke("pdfMod:deletePages", pages),
+  reorderPages: (pages) => ipcRenderer.invoke("pdfMod:reorderPages", pages),
   openDeletePagesModal: (callback) => {
     ipcRenderer.on("pdfMod:openDeletePagesModal", callback);
   },

@@ -141,12 +141,44 @@ body.sidebar-open #pdf-page-counter {
 }
 
 /* Pages */
+.sidebar-reorder-bar {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px;
+}
+
+.sidebar-reorder-button {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid var(--sidebar-line);
+  border-radius: 5px;
+  background: #fff;
+  color: var(--sidebar-text-strong);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.sidebar-reorder-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
 .sidebar-thumbnail-list {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 14px;
   padding: 4px 0 24px;
+}
+
+.sidebar-thumbnail-list.is-reordering .sidebar-thumbnail {
+  cursor: grab;
+}
+
+.sidebar-thumbnail-list.is-reordering .sidebar-thumbnail.is-dragging {
+  opacity: 0.35;
 }
 
 .sidebar-thumbnail {
