@@ -12,12 +12,10 @@ const JUMP_TOP_MARGIN = 56;
 
 export class PdfViewer {
   constructor(pdfData, currentPage = 1) {
-    this.URL = null;
     this.dataPDF = pdfData;
     this.documentPDF = null;
     this.currentPage = currentPage;
     this.previousPage = 0;
-    //this.scale = 1;
     this.zoomState = createZoomState({ scale: 1 });
     this.pages = new Map();
     this.onTextLayerRendered = null;
