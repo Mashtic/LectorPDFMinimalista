@@ -11,6 +11,7 @@ function createPresentationWindow() {
       contextIsolation: true,
       preload: path.join(__dirname, "../preload.js"),
     },
+    icon: path.join(__dirname, '../build/icon.png'),
   });
 
   win.loadFile(

@@ -12,6 +12,7 @@ function createMainWindow() {
       contextIsolation: true,
       preload: path.join(__dirname, "../preload.js"),
     },
+    icon: path.join(__dirname, '../build/icon.png'),
   });
 
   win.loadFile(path.join(__dirname, "../renderer/index.html"));

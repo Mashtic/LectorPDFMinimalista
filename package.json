@@ -36,10 +36,12 @@
     "appId": "com.disin.folio",
     "productName": "Folio",
     "linux": {
-      "target": [
-        "AppImage"
-      ],
-      "category": "Utility"
+      "target": "AppImage",
+      "category": "Utility",
+      "icon": "build/icon.png",
+      "desktop": {
+        "StartupWMClass": "folio"
+      }
     },
     "win": {
       "target": [
