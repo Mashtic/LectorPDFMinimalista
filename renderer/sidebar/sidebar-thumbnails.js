@@ -39,12 +39,12 @@ export class SidebarThumbnails {
     const reorderButton = document.createElement("button");
     reorderButton.type = "button";
     reorderButton.className = "sidebar-reorder-button";
-    reorderButton.textContent = "Reordenar páginas";
+    reorderButton.textContent = "Reorder Pages";
     reorderButton.setAttribute("aria-pressed", "false");
     const saveOrderButton = document.createElement("button");
     saveOrderButton.type = "button";
     saveOrderButton.className = "sidebar-reorder-button sidebar-save-order";
-    saveOrderButton.textContent = "Guardar orden";
+    saveOrderButton.textContent = "Save Edits";
     saveOrderButton.hidden = true;
     reorderBar.append(reorderButton, saveOrderButton);
     this.container.appendChild(reorderBar);
@@ -55,26 +55,27 @@ export class SidebarThumbnails {
     reorderButton.addEventListener("click", () => {
       const enabled = reorderButton.getAttribute("aria-pressed") !== "true";
       reorderButton.setAttribute("aria-pressed", String(enabled));
-      reorderButton.textContent = enabled ? "Terminar reordenamiento" : "Reordenar páginas";
+      reorderButton.textContent = enabled ? "Cancel" : "Reorder Pages";
       list.classList.toggle("is-reordering", enabled);
       saveOrderButton.hidden = !enabled;
     });
     saveOrderButton.addEventListener("click", async () => {
       saveOrderButton.disabled = true;
-      saveOrderButton.textContent = "Guardando…";
+      saveOrderButton.textContent = "Saving…";
       try {
         await window.electronAPI.reorderPages(this.order);
         window.location.reload();
       } catch (error) {
         saveOrderButton.disabled = false;
-        saveOrderButton.textContent = "Guardar orden";
+        saveOrderButton.textContent = "Save Edits";
         console.error("Could not reorder PDF pages", error);
       }
     });
 
     for (const [pageNumber, entry] of this.viewer.pages) {
       const baseViewport = entry.page.getViewport({ scale: 1 });
-      const height = (THUMBNAIL_WIDTH * baseViewport.height) / baseViewport.width;
+      const height =
+        (THUMBNAIL_WIDTH * baseViewport.height) / baseViewport.width;
 
       const button = document.createElement("button");
       button.type = "button";
@@ -108,7 +109,9 @@ export class SidebarThumbnails {
         event.dataTransfer.effectAllowed = "move";
         button.classList.add("is-dragging");
       });
-      button.addEventListener("dragend", () => button.classList.remove("is-dragging"));
+      button.addEventListener("dragend", () =>
+        button.classList.remove("is-dragging"),
+      );
       button.addEventListener("dragover", (event) => {
         if (!list.classList.contains("is-reordering")) return;
         event.preventDefault();
@@ -119,12 +122,20 @@ export class SidebarThumbnails {
         event.preventDefault();
         const draggedPage = Number(event.dataTransfer.getData("text/plain"));
         const targetPage = Number(button.dataset.pageNumber);
-        if (!this.order.includes(draggedPage) || draggedPage === targetPage) return;
+        if (!this.order.includes(draggedPage) || draggedPage === targetPage)
+          return;
         const draggedItem = this.items.get(draggedPage).button;
         const targetItem = this.items.get(targetPage).button;
         const rect = targetItem.getBoundingClientRect();
-        list.insertBefore(draggedItem, event.clientY < rect.top + rect.height / 2 ? targetItem : targetItem.nextSibling);
-        this.order = [...list.children].map((item) => Number(item.dataset.pageNumber));
+        list.insertBefore(
+          draggedItem,
+          event.clientY < rect.top + rect.height / 2
+            ? targetItem
+            : targetItem.nextSibling,
+        );
+        this.order = [...list.children].map((item) =>
+          Number(item.dataset.pageNumber),
+        );
       });
 
       list.appendChild(button);
