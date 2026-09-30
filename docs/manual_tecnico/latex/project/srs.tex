@@ -1,0 +1,89 @@
+\chapter{Especificación de funcionalidad}
+\section{Descripción del producto}
+
+El producto es una aplicación de escritorio para el sistema operativo Windows. La aplicación funciona como un lector de documentos PDF, que también cuenta con funciones para hacer modificaciones. Sigue una filosofía minimalista que se refleja en la UX/UI del programa.
+
+El lector tiene funcionalidades básicas como zoom, scroll, búsqueda de texto, salto a una página específica y selección de texto con posibilidad de copiar. Además, renderiza las páginas aplicando Lazy Loading para mejorar el rendimiento. También, tiene una sección para mostrar el outline del documento y otra para mostrar la lista de paginas del documento. Por último, el lector tiene modo de presentación en pantalla completa.
+
+La aplicación también tiene un módulo de herramientas que modifican y editan el archivo pdf. Es posible eliminar páginas y concatenar páginas de otro archivo pdf. También se incluyen las funciones de guardar y guardar como, para conservar las modificaciones en los documentos.
+
+La codificación para las historias de usuario es US-XXX, donde X representa el número consecutivo de historias de usuario. 
+
+Durante el desarrollo se realizan más tareas que utilizan otro tipo de codificación. Estas tareas no se incluyen en este documento porque son de tipo  administrativo o de mantenimiento y no son relevantes para entender el producto final (así que tampoco son relevantes entre sprints).
+
+Para las tareas sobre documentación del código se usa la codificación: DC-XXX. Para las tareas de refactorización del código se usa la codificación: FX-XXX. 
+
+\subsection{Historias de usuario}
+
+% La pila del producto debe actualizarla cada iteración del proyecto. Divida las historias en épicas o MVPs, de forma que sea más fácil identificar cuáles historias corresponden a cada fase.
+% Añada a cada historia criterios de calidad, para esto pregúntese ¿cómo verifica el usuario que la funcionalidad está completa? ¿qué espera el usuario de 
+
+%% PILA DE PRODUCTO %%
+\begin{longtable}{|l||p{7cm}|p{4.5cm}|}
+
+\multicolumn{3}{c}{Lector PDF minimalista}\\
+\hline
+\textbf{Código} & \textbf{Descripción} & \textbf{Criterios de Calidad}\\
+\hline\hline
+\endfirsthead
+\hline
+\textbf{Código} & \textbf{Descripción} & \textbf{Criterios de Calidad}\\
+\hline\hline
+\endhead
+
+% Omita las historias eliminadas
+% En esta tabla no coloree las historias, mantenga la última versión de la pila general del producto
+\textbf{US-001} & \textbf{App minimalista}: Ocultar la información en la interfaz de usuario para dar un estilo minimalista a la aplicación. Esto se hace mediante la implementación de estilos de css que modifican la interfaz del renderer y configuraciones de la ventana de electron en el proceso principal..& Como usuario, quiero una interfaz limpia y minimalista para la aplicación, de modo que pueda enfocarme en la lectura del contenido sin distracciones visuales..\\
+\hline
+\textbf{US-002} & \textbf{Compaginar archivos pdf}: Compaginar 2 archivos pdf abiertos para obtener un archivo pdf resultante que es la unión del final del primer pdf con el inicio del segundo pdf. Esto se hace utilizando la biblioteca pdf-lib (en el proceso principal).  & Como usuario, quiero poder compaginar múltiples documentos o páginas, para organizar la estructura del documento final de manera lógica antes de exportarlo.\\
+\hline
+%\textbf{US-003} & \textbf{Mezclar archivos pdf}: Mezclar las páginas de 2 archivos pdf abiertos. Las páginas se pueden reordenan de cualquier manera. El resultado se muestra en el visualizador. Internamente se utiliza pdf-lib para manejar los archivos (en el proceso principal). & Como usuario, quiero poder intercalar o mezclar páginas de dos o más PDFs distintos, para consolidar información de múltiples fuentes en un solo archivo.\\
+%\hline
+\textbf{US-004} & \textbf{Abrir varios archivos pdf}: Se puede abrir un segundo archivo pdf siempre y cuando ya exista uno cargado en memoria. El segundo pdf también se carga en memoria. Esto se hace usando la biblioteca estándar de nodejs para leer archivos junto con las funciones para mostrar dialogs de electron.  & Como usuario, quiero tener la capacidad de abrir dos archivos PDF simultáneamente (en pantalla dividida o pestañas), para comparar su contenido o trabajar con ambos de forma paralela.\\
+\hline
+\textbf{US-005} & \textbf{Visualización ajustada al PDF}: Las dimensiones de la ventana se ajustan al visualizador del documento pdf. Esto se logra usando funciones de electron para modificar la ventana, y scripts en el renderer que comunican el tamaño del visualizador. & Como usuario, quiero que la aplicación renderice y adapte correctamente la visualización del documento al tamaño de mi ventana, para una experiencia ergonómica.\\
+\hline
+\textbf{US-006} & \textbf{Presentar PDF}:  Un pdf abierto puede mostrarse en modo presentación. Para esto se abre una nueva ventana de electron en modo pantalla completa. Esta ventana carga un visualizador diferente en el renderer que implementa las funcionalidades del modo presentación. El visualizador está implementado como una clase de javascript que internamente utiliza la biblioteca PDF.js & Como usuario, quiero activar un modo de presentación a pantalla completa, para poder exponer el contenido del documento a una audiencia ocultando los menús y herramientas.\\
+\hline
+\textbf{US-007} & \textbf{Eliminar páginas de un PDF}:  Eliminar páginas de un documento pdf cargado en memoria. Se elige una lista con cualquiera de las páginas del documento para ser eliminadas. Internamente se utiliza la biblioteca pdf-lib para modificar el archivo (en el proceso principal). & Como usuario, quiero poder seleccionar y eliminar páginas específicas de un PDF, para remover información irrelevante o incorrecta del documento original.\\
+\hline
+\hline
+\textbf{US-008} & \textbf{Guardar un PDF}:  Un pdf abierto, cargado en memoria, y modificado se puede guardar en el disco en la misma ruta que estaba el archivo original (sobrescribiendo el archivo). Esto se hace usando las funciones de la biblioteca estándar de nodejs para escribir archivos .& Como usuario, quiero poder guardar los cambios realizados sobre el archivo PDF actual, para asegurar y no perder el progreso de mi edición.\\
+\hline
+\hline
+\textbf{US-009} & \textbf{US-009: Reordenar páginas de un PDF}: La lista de páginas contiene un botón que permite reordenar las páginas arrastrándolas en la interfaz. Luego la información de la lista de páginas se transfiere al servicio de reordenamiento que utiliza pdf-lib internamente.  & Como usuario, quiero poder reordenar las páginas del documento (por ejemplo, arrastrándolas), para ajustar el flujo de lectura y la organización según mis necesidades.\\
+\hline
+\hline
+\textbf{US-010} & \textbf{Outline de PDF}:  Desplegar un outline que contiene la estructura del documento pdf. Este outline es jerárquico. Es posible que algunos documentos pdf no tengan outline, en ese caso no se despliega un outline. Esta funcionalidad está implementada en el renderer mediante javascript, haciendo uso de la información que está en la sección del visualizador de pdf (US-015). &  Como usuario, quiero visualizar el índice (outline) del documento en un panel lateral, para comprender rápidamente la jerarquía y estructura general del texto.\\
+\hline
+\hline
+\textbf{US-011} & \textbf{Navegar Outline}: Los elementos de la sección del outline son clickeables, cuando el usuario presiona un título del outline el visualizador de pdfs renderiza la página que contiene ese título. Esto se hace mediante scripts de javascript en el renderer. & Como usuario, quiero poder hacer clic en cualquier sección del índice (outline) y saltar directamente a esa página, para navegar ágilmente a través de documentos muy extensos.\\
+\hline
+\hline
+\textbf{US-012} & \textbf{Guardar Nuevo PDF}:  El documento pdf abierto y cargado en memoria se puede guardar en el disco como un nuevo documento, independiente de la fuente original. Para obtener la ruta del nuevo documento se utiliza los dialogs que provee electron, y para escribir el archivo se usan las funciones de la biblioteca fs de Node.js. & Como usuario, quiero tener la opción de "Guardar como" para generar un nuevo archivo con mis modificaciones, manteniendo el PDF original intacto como respaldo. Con el fin de recuperarlo fácilmente si necesito usarlo. \\
+\hline
+\hline
+\textbf{US-013} & \textbf{Buscar Texto}: Una combinación de teclas invoca un campo de texto donde se puede escribir la cadena de texto que se va a buscar dentro del documento pdf. Luego de escribir el visualizador del documento resalta el texto que coincide. Además del campo de texto, hay controles para navegar ppor el visualizador para encontrar todas las coincidencias. Esto se hace mediante scripts de javascript en el renderer que usan la información desplegada en el visualizador. & Como usuario, quiero utilizar una barra de búsqueda para encontrar palabras o frases específicas dentro del documento, para localizar datos puntuales sin tener que leer todo el texto.\\
+\hline
+\hline
+\textbf{US-014} & \textbf{Abrir un PDF}:  El usuario selecciona el documento pdf que quiere abrir. Puede ser mediante un dialog del sistema, internamente implementado con funciones de la biblioteca de electron. O, puede ser mediante el arrastre del archivo a la aplicación, internamente implementado con eventos del navegador en el renderer. Sin importar el método, al final el archivo es guardado como una variable global en el proceso principal para ser usado en cualquier parte del sistema. & Como usuario, quiero poder abrir un archivo PDF desde el explorador de archivos de mi dispositivo, para acceder a su contenido dentro de la aplicación.\\
+\hline
+\hline
+\textbf{US-015} & \textbf{Ver páginas de un PDF}:  Un pdf abierto se renderiza en el visualizador de la aplicación. Este trabajo lo hace la clase PdfViewer en base a la información del documento que está cargada en memoria. Este trabajo se hace en el renderer. Internamente se utiliza la biblioteca PDF.js. & Como usuario, quiero poder visualizar las páginas individuales del documento, para poder consumir la información que contienen.\\
+\hline
+\textbf{US-016} & \textbf{Copiar texto portapapeles}: Cuando se selecciona texto del visualizador (US-019) el usuario puede copiar el texto al portapapeles del sistema con un atajo del teclado. Esta funcionalidad es parte de la clase PdfViewer y proviene de la biblioteca PDF.js (ejecutado en el renderer).& Como usuario, quiero poder copiar el texto previamente seleccionado al portapapeles del sistema, para pegarlo y reutilizarlo en otras herramientas o correos.\\
+\hline
+\textbf{US-017} & \textbf{Zoom de un PDF}: Mediante atajos de teclado y el scroll del mouse el usuario puede cambiar el nivel de zoom del visualizador de pdf.  Esta funcionalidad es parte de la clase PdfViewer y proviene de la biblioteca PDF.js (ejecutado en el renderer). & Como usuario, quiero poder acercar (zoom in) y alejar (zoom out) la vista de la página, para visualizar detalles pequeños o evaluar la distribución completa de la hoja.\\
+\hline
+\textbf{US-018} & \textbf{Scroll de un PDF}: Mediante el scroll del mouse el usuario puede navegar verticalmente por el documento renderizado por el visualizador. Esta función incluye lazy loading de las páginas visualizadas para mejorar el rendimiento del programa.  Esta funcionalidad es parte de la clase PdfViewer y proviene de la biblioteca PDF.js (ejecutado en el renderer). & Como usuario, quiero poder desplazarme verticalmente (scroll) a lo largo del documento, para mantener una experiencia de lectura continua y fluida.\\
+\hline
+\textbf{US-019} & \textbf{Seleccionar texto}: El visualizador de pdf incluye una capa extra sobre el pdf renderizado que le permite al usuario seleccionar texto del documento. Esta funcionalidad es parte de la clase PdfViewer y proviene de la biblioteca PDF.js (ejecutado en el renderer). & Como usuario, quiero poder seleccionar bloques de texto arrastrando el cursor, como acción indispensable antes de poder copiar(US-016) o resaltar el contenido.\\
+\hline
+\textbf{US-020} & \textbf{Saltar a Página}: El usuario puede ingresar un número de página en el mismo elemento que se usa para desplegar la página actual. Al hacerlo, el visualizador cambia su posición vertical para que dicha página quede centrada en la pantalla y se renderice. Esta funcionalidad es parte de la clase PdfViewer y proviene de la biblioteca PDF.js (ejecutado en el renderer). & Como usuario, quiero poder ingresar un número específico de página, para saltar a esta inmediatamente sin tener que scrollear.\\
+\hline
+\textbf{US-021} & \textbf{Mostrar Conteo de Páginas}: Un elemento de la interfaz muestra la página actual que está renderizada en el visualizador y la cantidad total de páginas del documento.  Esta funcionalidad es parte de la clase PdfViewer y proviene de la biblioteca PDF.js (ejecutado en el renderer). & Como usuario, quiero poder la página en la que estoy en relación a la cantidad total de páginas, para saber con certeza en que parte del documento me encuentro.\\
+\hline
+\textbf{US-022} & \textbf{Menú Click Derecho}: Al hacer click derecho en cualquier punto de la interfaz se abre un menú contextual que despliega botones para ejecutar las funcionalidades de la aplicación. El menú contextual es construido usando funciones de la biblioteca de electron y utiliza elementos de la interfaz del sistema. Las funciones que se activan en el menú son callbacks que se inyectan desde por medio la biblioteca IPC de electron. & Como usuario, quiero poder mostrar un menú con click derecho, para acceder a todas las funcionalidades del sistema sin que estas se entrometan en el lector.\\
+\hline
+\end{longtable}
+

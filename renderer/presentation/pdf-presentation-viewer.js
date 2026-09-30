@@ -7,7 +7,6 @@ GlobalWorkerOptions.workerSrc = "./pdf.worker.mjs";
 
 export class PdfPresentationViewer {
   constructor(pdfData, currentPage = 1) {
-    this.URL = null;
     this.pdfData = pdfData;
     this.documentPDF = null;
     this.currentPage = currentPage;
