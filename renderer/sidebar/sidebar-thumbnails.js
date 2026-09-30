@@ -34,6 +34,44 @@ export class SidebarThumbnails {
     const list = document.createElement("div");
     list.className = "sidebar-thumbnail-list";
 
+    const reorderBar = document.createElement("div");
+    reorderBar.className = "sidebar-reorder-bar";
+    const reorderButton = document.createElement("button");
+    reorderButton.type = "button";
+    reorderButton.className = "sidebar-reorder-button";
+    reorderButton.textContent = "Reordenar páginas";
+    reorderButton.setAttribute("aria-pressed", "false");
+    const saveOrderButton = document.createElement("button");
+    saveOrderButton.type = "button";
+    saveOrderButton.className = "sidebar-reorder-button sidebar-save-order";
+    saveOrderButton.textContent = "Guardar orden";
+    saveOrderButton.hidden = true;
+    reorderBar.append(reorderButton, saveOrderButton);
+    this.container.appendChild(reorderBar);
+    this.list = list;
+    this.order = [];
+    this.reorderButton = reorderButton;
+    this.saveOrderButton = saveOrderButton;
+    reorderButton.addEventListener("click", () => {
+      const enabled = reorderButton.getAttribute("aria-pressed") !== "true";
+      reorderButton.setAttribute("aria-pressed", String(enabled));
+      reorderButton.textContent = enabled ? "Terminar reordenamiento" : "Reordenar páginas";
+      list.classList.toggle("is-reordering", enabled);
+      saveOrderButton.hidden = !enabled;
+    });
+    saveOrderButton.addEventListener("click", async () => {
+      saveOrderButton.disabled = true;
+      saveOrderButton.textContent = "Guardando…";
+      try {
+        await window.electronAPI.reorderPages(this.order);
+        window.location.reload();
+      } catch (error) {
+        saveOrderButton.disabled = false;
+        saveOrderButton.textContent = "Guardar orden";
+        console.error("Could not reorder PDF pages", error);
+      }
+    });
+
     for (const [pageNumber, entry] of this.viewer.pages) {
       const baseViewport = entry.page.getViewport({ scale: 1 });
       const height = (THUMBNAIL_WIDTH * baseViewport.height) / baseViewport.width;
@@ -43,6 +81,7 @@ export class SidebarThumbnails {
       button.className = "sidebar-thumbnail";
       button.dataset.pageNumber = pageNumber;
       button.setAttribute("aria-label", `Go to page ${pageNumber}`);
+      button.draggable = true;
 
       const canvas = document.createElement("canvas");
       canvas.className = "sidebar-thumbnail-canvas";
@@ -56,10 +95,40 @@ export class SidebarThumbnails {
       button.appendChild(canvas);
       button.appendChild(label);
       button.addEventListener("click", () => {
+        if (list.classList.contains("is-reordering")) return;
         this.viewer.jumpToPage(pageNumber);
       });
 
+      button.addEventListener("dragstart", (event) => {
+        if (!list.classList.contains("is-reordering")) {
+          event.preventDefault();
+          return;
+        }
+        event.dataTransfer.setData("text/plain", String(pageNumber));
+        event.dataTransfer.effectAllowed = "move";
+        button.classList.add("is-dragging");
+      });
+      button.addEventListener("dragend", () => button.classList.remove("is-dragging"));
+      button.addEventListener("dragover", (event) => {
+        if (!list.classList.contains("is-reordering")) return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+      });
+      button.addEventListener("drop", (event) => {
+        if (!list.classList.contains("is-reordering")) return;
+        event.preventDefault();
+        const draggedPage = Number(event.dataTransfer.getData("text/plain"));
+        const targetPage = Number(button.dataset.pageNumber);
+        if (!this.order.includes(draggedPage) || draggedPage === targetPage) return;
+        const draggedItem = this.items.get(draggedPage).button;
+        const targetItem = this.items.get(targetPage).button;
+        const rect = targetItem.getBoundingClientRect();
+        list.insertBefore(draggedItem, event.clientY < rect.top + rect.height / 2 ? targetItem : targetItem.nextSibling);
+        this.order = [...list.children].map((item) => Number(item.dataset.pageNumber));
+      });
+
       list.appendChild(button);
+      this.order.push(pageNumber);
       this.items.set(pageNumber, { button, canvas, isRendered: false });
       this.observer.observe(button);
     }
