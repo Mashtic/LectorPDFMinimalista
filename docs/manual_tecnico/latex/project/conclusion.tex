@@ -6,7 +6,8 @@
 El proceso renderer no cuenta con una forma de persistir datos pesados en memoria entre páginas o entre refrescos. Ya que el proceso renderer ejecuta Chromium las formas de guardar datos son el localStorage o sessionStorage, pero no son eficientes y tienen límites pequeños (<10MB). Por lo tanto, la solución a este problema es mantener la información persistente en el proceso principal y hacer que el proceso renderer la extraiga cuando lo necesita. Este método tiene la ventaja de que también permite compartir información entre varios procesos renderer (varias ventanas de la aplicación). Es importante resaltar que la comunicación entre procesos conlleva un overhead, sin embargo en este proyecto se procesan pocos datos(<1GB) y la latencia(<500ms) no es un aspecto importante.
 
 
-La implementación de "lazy loading" en el visor de archivos PDFs resultó crucial. Previo a su implementación, con un archivo PDF pesado la aplicación utilizaba alrededor de 2.9GB de memoria una vez cargado el PDF completo. Tras la implementación de lazy loading el mismo archivo consumía alrededor de 700MB de memoria. El problema que surge de esto es que las páginas se deben volver a renderizar cada vez que entran en pantalla lo que puede causar que se muestren páginas en blanco hasta que carguen, aunque esto solo debería ocurrir si las páginas son muy pesadas o después de un salto con la funcionalidad de salto de página o busqueda de palabras.
+La implementación de "lazy loading" en el visor de archivos PDFs resultó crucial. Previo a su implementación, con un archivo PDF pesado la aplicación utilizaba alrededor de 2.9GB de memoria una vez cargado el PDF completo. Tras la implementación de lazy loading el mismo archivo consumía alrededor de 700MB de memoria. El problema que surge de esto es que las páginas se deben volver a renderizar cada vez que entran en pantalla lo que puede causar que se muestren páginas en blanco hasta que carguen, aunque esto solo debería ocurrir si las páginas son muy pesadas o después de un salto con la funcionalidad de salto de página o búsqueda de palabras.
+
 
 A la hora de empezar un sprint es importante verificar que las historias de usuario tengan la menor dependencia entre sí. Durante el desarrollo de este proyecto, la historia de navegar el outline y la de reordenar páginas dependían completamente del sidebar, un panel lateral que contiene tanto las miniaturas de las páginas como el outline del documento. Por ende, 2 compañeros estuvieron "pegados" hasta que el desarrollador encargado del outline pudo terminar su historia de usuario. Cuando varias historias dependen de un mismo componente, conviene sacarlo a una historia aparte y hacerla de primera en el sprint.
 
@@ -21,6 +22,8 @@ A la hora de empezar un sprint es importante verificar que las historias de usua
 El tiempo de arranque de la aplicación es una problemática presente. Usualmente tarda más de 2 segundos en aparecer la ventana en pantalla, esto sin estar cargando ningún pdf.
 
 La búsqueda de texto presenta errores en documentos con formato IEEE de doble columna. Al buscar un término en estos documentos, las coincidencias pueden no encontrarse o resaltarse de forma incorrecta.
+
+Actualmente las acciones rápida con teclas tienen conflictos con la funcionalidad de búsqueda de palabras pues estas siguen activas mientras se trata de usar esta función, haciendo que el programa se controle de manera extraña.
 
 \subsubsection{Limitaciones}
 
