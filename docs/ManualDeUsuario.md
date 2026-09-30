@@ -12,6 +12,7 @@ La aplicación se llama **Folio** y no necesita instalación: se ejecuta el
 archivo directamente.
 
 - **Windows**: doble click sobre `Folio.exe`.
+- **Linux**: ejecutar el archivo `Folio.AppImage`.
 
 ### La ventana
 
