@@ -1,23 +1,36 @@
-const { app, BrowserWindow } = require('electron');
+const { app, Menu } = require("electron");
+const { createMainWindow } = require("./windows/main-window.js");
+const { registerWindowIpc } = require("./ipc/window-ipc.js");
+const { registerDeletePageIpc } = require("./ipc/delete-pages-ipc.js");
+const { registerPDFOpenIpc } = require("./ipc/pdf-open-ipc.js");
+const { registerPDFMergeIpc } = require("./ipc/pdf-merge-ipc.js");
+const { cleanupPreviews } = require("./services/pdf-merge-service.js");
+const { registerGlobalVarIpc } = require("./ipc/global-var-ipc.js");
+const { registerPDFSaveIpc } = require("./ipc/pdf-save-ipc.js");
 
-function createWindow () {
-  const win = new BrowserWindow({
-    width: 1000,
-    height: 800,
-    webPreferences: {
-      plugins: true, 
-      nodeIntegration: true,
-      contextIsolation: false
-    }
-  });
+// const {
+//   createPresentationWindow,
+// } = require("./windows/presentation-window.js");
 
-  win.loadFile('index.html');
-}
+app.whenReady().then(() => {
+  registerWindowIpc();
+  registerDeletePageIpc();
+  registerPDFOpenIpc();
+  registerPDFMergeIpc();
+  registerGlobalVarIpc();
+  registerPDFSaveIpc();
 
-app.whenReady().then(createWindow);
+  Menu.setApplicationMenu(null);
+  createMainWindow();
+  // createPresentationWindow();
+});
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
     app.quit();
   }
+});
+
+app.on("before-quit", () => {
+  cleanupPreviews();
 });

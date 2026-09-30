@@ -1,0 +1,192 @@
+/* WINDOW */
+:root {
+  --bg-color: #fafafa;
+  --text-muted: #999999;
+  --text-hover: #333333;
+
+  color-scheme: dark;
+  font-family: Arial, sans-serif;
+  background: #202124;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  height: 100vh;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--bg-color);
+}
+
+html {
+  height: 100vh;
+  margin: 0;
+  background-color: var(--bg-color);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow: hidden;
+}
+
+/* Electron Drag Bar */
+#title-bar {
+  height: 32px;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  -webkit-app-region: drag;
+  z-index: 9999;
+}
+
+/* Floating Window Button */
+#floating-toggle {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 10001;
+  -webkit-app-region: no-drag;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+#floating-toggle[hidden] {
+  display: none;
+}
+
+#floating-toggle:hover {
+  color: var(--text-hover);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+#floating-toggle.active {
+  color: #2e8b57;
+  background: rgba(46, 139, 87, 0.12);
+}
+
+#floating-toggle:focus-visible {
+  outline: 2px solid #8a8a8a;
+  outline-offset: 2px;
+}
+
+/* Welcome Screen */
+#welcome-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+#OpenFileBtn {
+  -webkit-app-region: no-drag;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 20px 40px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  transition: all 0.2s ease-in-out;
+}
+
+#OpenFileBtn svg {
+  transition: transform 0.2s ease;
+}
+
+#OpenFileBtn:hover {
+  color: var(--text-hover);
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+#OpenFileBtn:hover svg {
+  transform: translateY(-2px);
+}
+
+#save-status {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 10000;
+  padding: 9px 14px;
+  border: 1px solid #3ca66b;
+  border-radius: 4px;
+  background: #2e8b57;
+  color: #ffffff;
+  font-size: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+#save-status.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#viewer-actions {
+  position: fixed;
+  top: 42px;
+  left: 16px;
+  z-index: 1001;
+  -webkit-app-region: no-drag;
+}
+
+#viewer-actions[hidden] {
+  display: none;
+}
+
+#OpenAnotherFileBtn {
+  padding: 8px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #333333;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
+}
+
+#OpenAnotherFileBtn:hover {
+  background: #f4f4f4;
+}
+
+body.is-dropping-pdf::after {
+  content: "Suelta el PDF para abrirlo";
+  position: fixed;
+  inset: 0;
+  z-index: 20000;
+  display: grid;
+  place-items: center;
+  border: 3px dashed #4a90e2;
+  background: rgb(255 255 255 / 82%);
+  color: #1f5f9e;
+  font-size: 18px;
+  font-weight: 600;
+  pointer-events: none;
+}

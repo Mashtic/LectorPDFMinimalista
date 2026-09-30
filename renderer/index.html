@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Minimalist PDF Reader</title>
+    <link rel="stylesheet" type="text/css" href="./window/window.css" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="./delete-pages/delete-pages.css"
+    />
+    <link rel="stylesheet" type="text/css" href="./victor/merge/merge.css" />
+    <link rel="stylesheet" type="text/css" href="./victor/reader/reader.css" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="./viewer/pdf-viewer-style.css"
+    />
+    <link rel="stylesheet" type="text/css" href="./search/search-bar.css" />
+    <link rel="stylesheet" type="text/css" href="./sidebar/sidebar.css" />
+  </head>
+  <body>
+    <!-- WINDOW -->
+    <div id="title-bar"></div>
+
+    <button
+      id="floating-toggle"
+      type="button"
+      aria-pressed="false"
+      aria-label="Keep window on top"
+      title="Keep window on top"
+      hidden
+    >
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M9 3h6l-1 6 4 3v2H6v-2l4-3z"></path>
+        <line x1="12" y1="14" x2="12" y2="21"></line>
+      </svg>
+    </button>
+
+    <div id="welcome-screen">
+      <button id="OpenFileBtn" type="button">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+          ></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="12" y1="18" x2="12" y2="12"></line>
+          <line x1="9" y1="15" x2="15" y2="15"></line>
+        </svg>
+        <span>Open PDF Document...</span>
+      </button>
+    </div>
+
+    <!-- SIDEBAR -->
+    <button
+      id="sidebar-toggle"
+      type="button"
+      aria-label="Toggle sidebar"
+      aria-controls="sidebar"
+      aria-expanded="false"
+      hidden
+    >
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+      >
+        <line x1="4" y1="7" x2="20" y2="7"></line>
+        <line x1="4" y1="12" x2="20" y2="12"></line>
+        <line x1="4" y1="17" x2="20" y2="17"></line>
+      </svg>
+    </button>
+
+    <aside id="sidebar" aria-label="Document navigation" inert>
+      <div id="sidebar-tabs" role="tablist">
+        <button
+          id="sidebar-tab-pages"
+          class="sidebar-tab is-active"
+          type="button"
+          role="tab"
+          aria-selected="true"
+          aria-controls="sidebar-pages"
+          data-tab="pages"
+        >
+          Pages
+        </button>
+        <button
+          id="sidebar-tab-outline"
+          class="sidebar-tab"
+          type="button"
+          role="tab"
+          aria-selected="false"
+          aria-controls="sidebar-outline"
+          data-tab="outline"
+        >
+          Outline
+        </button>
+      </div>
+      <div
+        id="sidebar-pages"
+        class="sidebar-panel"
+        role="tabpanel"
+        aria-labelledby="sidebar-tab-pages"
+      ></div>
+      <div
+        id="sidebar-outline"
+        class="sidebar-panel"
+        role="tabpanel"
+        aria-labelledby="sidebar-tab-outline"
+        hidden
+      ></div>
+    </aside>
+
+    <!-- VIEWER -->
+    <main id="pdf-viewer-container">
+      <div id="viewer-actions" hidden>
+        <!-- <button id="OpenAnotherFileBtn" type="button">Añadir PDF</button> -->
+      </div>
+      <div id="pdf-viewer-list"></div>
+      <div id="pdf-page-counter">
+        <span id="pdf-page-input-wrapper">
+          <input type="text" id="pdf-page-count" name="currentPage" value="" />
+        </span>
+        <span id="pdf-total-pages"></span>
+      </div>
+    </main>
+
+    <div id="save-status" role="status" aria-live="polite"></div>
+
+    <!-- SEARCH BAR-->
+    <div id="pdf-search-bar" style="display: none">
+      <input
+        type="text"
+        id="pdf-search-input"
+        placeholder="Search in document..."
+      />
+      <span id="pdf-search-count">0/0</span>
+      <button
+        id="pdf-search-prev-btn"
+        type="button"
+        aria-label="Previous match"
+      >
+        ↑
+      </button>
+      <button id="pdf-search-next-btn" type="button" aria-label="Next match">
+        ↓
+      </button>
+      <button
+        id="pdf-search-close-btn"
+        type="button"
+        aria-label="Close search bar"
+      >
+        ×
+      </button>
+    </div>
+
+    <!-- TODO: Import scripts once they are placed properly -->
+    <script src="./index.js" type="module"></script>
+    <script type="module" src="./viewer/pdf-viewer-renderer.js"></script>
+  </body>
+</html>

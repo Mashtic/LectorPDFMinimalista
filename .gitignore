@@ -141,3 +141,16 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+
+# Latex
+*.aux
+*.blg
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.lof
+
+
+*.bkp

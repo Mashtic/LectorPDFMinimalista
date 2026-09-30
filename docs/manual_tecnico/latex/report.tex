@@ -1,0 +1,89 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage[usenames, dvipsnames]{color}
+\usepackage[top=0.70in, bottom=0.70in, left=0.8in,right=0.80in]{geometry}
+\usepackage[pdftex]{graphicx}
+\usepackage[bookmarks,  colorlinks=false]{hyperref}
+\hypersetup{pdfborder = {0 0 0}}
+\usepackage[final]{pdfpages}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage[]{apacite}
+\usepackage{pslatex} 
+\usepackage{array}
+\usepackage{setspace}
+\usepackage{float}
+\usepackage{enumerate}
+\usepackage{longtable}
+\usepackage{amssymb}
+\usepackage[font=small,labelfont=bf]{caption}
+\def\figurename{\textbf{Figura }}
+\usepackage{listings}
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\usepackage{fancyhdr}
+\fancypagestyle{plain}{%
+\fancyfoot[L]{\emph{TEC, Unidad de Ingeniería en Computación de San José}} 
+\fancyfoot[R]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+}
+\pagestyle{fancy}
+
+%% REEMPLAZAR POR EL NOMBRE DE SU PROYECTO %%
+\rhead{\emph{Lector PDF Minimalista}}
+
+\fancyfoot[LO,LE]{\emph{TEC, Unidad de Ingeniería en Computación de San José}}
+\cfoot{}
+\fancyfoot[RO, RE]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\usepackage{pgf}
+\usepackage{pgfpages}
+
+
+%GLOBAL SETTINGS OVER, DOCUMENT BEGINS
+\begin{document}
+\renewcommand\bibname{Referencias bibliográficas}
+\lhead{ }
+
+%FROM HERE YOUR PAGES START GETTING ADDED
+
+% includes the cover page
+\input{project/cover.tex}
+\newpage
+
+\input{project/abstract.tex} % adds the abstract page
+\newpage
+
+%TABLE OF CONTENTS AND LIST OF FIGURES ARE AUTOMATICALLY ADDED BY FOLLOWING COMMANDS
+%ADD FIGURE OF TABLES IF YOU NEED TO, CHECK DOCUMENTATION
+\pagenumbering{roman} %numbering before main content starts
+
+
+%To reset the Header & Footer for TOC and LOF
+\pagestyle{empty}
+\addtocontents{toc}{\protect\thispagestyle{empty}}
+\tableofcontents % adds Index Page
+
+\addtocontents{lof}{\protect\thispagestyle{empty}}
+\listoffigures % adds List of Figures
+\cleardoublepage
+
+%And reset back the settings we choose for Header and Footer
+\pagestyle{fancy}
+
+\newpage
+\pagenumbering{arabic} %reset numbering to normal for the main content
+
+\input{project/introduction.tex} % adds the introduction page
+\input{project/srs.tex} % Especificación de requerimientos
+\input{project/system-design.tex} % Diseño del sistema
+\input{project/installation.tex} % Prototipos de interfaz de usuario
+\input{project/api.tex} % Pruebas Capturas de pantalla
+\input{project/conclusion.tex} % Conclusiones del informe
+\input{project/ref.tex} % Referencias bibliográficas
+
+\end{document}

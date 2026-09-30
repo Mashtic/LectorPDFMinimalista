@@ -1,0 +1,231 @@
+#pdf-viewer-container {
+  display: none;
+
+  width: 100%;
+  height: 100vh;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  box-sizing: border-box;
+}
+
+#pdf-viewer-list > * {
+  margin-top: 15px;
+}
+
+#pdf-viewer-list > *:first-child {
+  margin-top: 7px;
+}
+
+.pdf-page {
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  box-shadow: 0 0 15px -3px;
+}
+
+#pdf-page-counter {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  background: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 20%);
+
+  z-index: 1000;
+  color: black;
+}
+
+#pdf-page-counter {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  display: flex;
+  align-items: center;
+
+  background: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 20%);
+
+  z-index: 1000;
+  color: black;
+}
+
+#pdf-page-input-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 6px 4px;
+  margin: -6px -4px;
+
+  cursor: text;
+}
+
+#pdf-page-count {
+  field-sizing: content;
+
+  width: auto;
+  min-width: 1.5ch;
+
+  appearance: none;
+  -webkit-appearance: none;
+
+  margin: 0;
+  padding: 0;
+
+  border: 1px solid transparent;
+  outline: none;
+  border-radius: 3px;
+
+  background: transparent;
+
+  font: inherit;
+  line-height: inherit;
+  color: inherit;
+  text-align: center;
+
+  box-sizing: border-box;
+}
+#pdf-page-count:focus {
+  background: #eee;
+  box-shadow: inset 0 0 0 1px #999;
+}
+
+canvas {
+  display: block;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+}
+
+.textLayer {
+  position: absolute;
+  text-align: initial;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0.25;
+  line-height: 1;
+  -webkit-text-size-adjust: none;
+  -moz-text-size-adjust: none;
+  text-size-adjust: none;
+  forced-color-adjust: none;
+  transform-origin: 0 0;
+  z-index: 2;
+  --min-font-size: 1;
+  --total-scale-factor: var(--scale-factor, 1);
+  --text-scale-factor: calc(var(--total-scale-factor) * var(--scale-x, 1));
+  --min-font-size-inv: calc(1 / var(--min-font-size));
+}
+
+.textLayer span,
+.textLayer br {
+  font-size: calc(var(--text-scale-factor) * var(--font-height));
+  --scale-x: 1;
+  --rotate: 0deg;
+  transform: rotate(var(--rotate)) scaleX(var(--scale-x)) scale(var(--min-font-size-inv));
+}
+
+.textLayer :is(span, br) {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+}
+
+.textLayer span.markedContent {
+  top: 0;
+  height: 0;
+}
+
+.textLayer .highlight {
+  --highlight-bg-color: rgb(180 0 170);
+  --highlight-selected-bg-color: rgb(0 100 0);
+
+  margin: -1px;
+  padding: 1px;
+  background-color: var(--highlight-bg-color);
+  border-radius: 4px;
+}
+
+@media screen and (forced-colors: active) {
+  .textLayer .highlight {
+    --highlight-bg-color: Highlight;
+    --highlight-selected-bg-color: ButtonText;
+  }
+}
+
+.textLayer .highlight.appended {
+  position: initial;
+}
+
+.textLayer .highlight.begin {
+  border-radius: 4px 0 0 4px;
+}
+
+.textLayer .highlight.end {
+  border-radius: 0 4px 4px 0;
+}
+
+.textLayer .highlight.middle {
+  border-radius: 0;
+}
+
+.textLayer .highlight.selected {
+  background-color: var(--highlight-selected-bg-color);
+}
+
+.textLayer ::-moz-selection {
+  background: blue;
+  background: AccentColor;
+}
+
+.textLayer ::selection {
+  background: blue;
+  background: AccentColor;
+}
+
+.textLayer br::-moz-selection {
+  background: transparent;
+}
+
+.textLayer br::selection {
+  background: transparent;
+}
+
+.textLayer .endOfContent {
+  display: block;
+  position: absolute;
+  inset: 100% 0 0;
+  z-index: -1;
+  cursor: default;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+.textLayer .endOfContent.active {
+  top: 0;
+}

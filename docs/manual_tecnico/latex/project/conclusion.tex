@@ -1,0 +1,60 @@
+\chapter{Conclusiones y trabajo futuro}
+\section{Conclusiones}
+
+%Documente el aprendizaje acumulado durante el desarrollo del proyecto. Las conclusiones deben ser hechos concretos que puedan ser de utilidad para un lector externo que no conoce el proyecto.
+
+El proceso renderer no cuenta con una forma de persistir datos pesados en memoria entre páginas o entre refrescos. Ya que el proceso renderer ejecuta Chromium las formas de guardar datos son el localStorage o sessionStorage, pero no son eficientes y tienen límites pequeños (<10MB). Por lo tanto, la solución a este problema es mantener la información persistente en el proceso principal y hacer que el proceso renderer la extraiga cuando lo necesita. Este método tiene la ventaja de que también permite compartir información entre varios procesos renderer (varias ventanas de la aplicación). Es importante resaltar que la comunicación entre procesos conlleva un overhead, sin embargo en este proyecto se procesan pocos datos(<1GB) y la latencia(<500ms) no es un aspecto importante.
+
+
+La implementación de "lazy loading" en el visor de archivos PDFs resultó crucial. Previo a su implementación, con un archivo PDF pesado la aplicación utilizaba alrededor de 2.9GB de memoria una vez cargado el PDF completo. Tras la implementación de lazy loading el mismo archivo consumía alrededor de 700MB de memoria. El problema que surge de esto es que las páginas se deben volver a renderizar cada vez que entran en pantalla lo que puede causar que se muestren páginas en blanco hasta que carguen, aunque esto solo debería ocurrir si las páginas son muy pesadas o después de un salto con la funcionalidad de salto de página o búsqueda de palabras.
+
+
+A la hora de empezar un sprint es importante verificar que las historias de usuario tengan la menor dependencia entre sí. Durante el desarrollo de este proyecto, la historia de navegar el outline y la de reordenar páginas dependían completamente del sidebar, un panel lateral que contiene tanto las miniaturas de las páginas como el outline del documento. Por ende, 2 compañeros estuvieron "pegados" hasta que el desarrollador encargado del outline pudo terminar su historia de usuario. Cuando varias historias dependen de un mismo componente, conviene sacarlo a una historia aparte y hacerla de primera en el sprint.
+
+
+\section{Problemáticas y limitaciones}
+%Recuerde que sólo debe registrar aquellas problemáticas que el sistema TIENE, no debe mencionar problemas que aparecieron durante el desarrollo, pero que se resolvieron adecuadamente.
+%Considere como problemáticas errores o comportamientos indeseables que el sistema tiene. Por ejemplo fugas de memoria, puntos en los que el sistema se cuelga, etc...
+%Limitaciones por el otro lado, son cosas que el sistema NO puede hacer, ya sea por diseño o por que se quería incluir pero no fue posible. Por ejemplo la falta de multijugador por Internet es una limitación, también liste aquí las plataformas para las cuales el sistema está diseñado (sistema operativo, requerimientos mínimos, resolución recomendada, etc...).
+
+\subsubsection{Problemáticas}
+
+El tiempo de arranque de la aplicación es una problemática presente. Usualmente tarda más de 2 segundos en aparecer la ventana en pantalla, esto sin estar cargando ningún pdf.
+
+La búsqueda de texto presenta errores en documentos con formato IEEE de doble columna. Al buscar un término en estos documentos, las coincidencias pueden no encontrarse o resaltarse de forma incorrecta.
+
+Actualmente las acciones rápida con teclas tienen conflictos con la funcionalidad de búsqueda de palabras pues estas siguen activas mientras se trata de usar esta función, haciendo que el programa se controle de manera extraña.
+
+\subsubsection{Limitaciones}
+
+
+
+Los requerimientos mínimos del sistema son los siguientes:
+\begin{itemize}
+	\item \textbf{RAM: }200MB. Esta es la memoria para el programa base, si se carga un pdf entonces se necesita al menos una cantidad de memoria igual al tamaño del archivo.
+	\item \textbf{Almacenamiento:} 250 MB. Tamaño del ejecutable de la aplicación.
+	\item \textbf{Procesamiento:} Un procesador Intel i8 serie 8000 o similar. Es probable que funcione con menos procesamiento pero no ha sido probado.
+	\item \textbf{Sistema operativo:} Se compilan ejecutables para los sistemas operativos Windows 11 y cualquier distribución de Linux que soporte el formato AppImage.
+\end{itemize}
+
+
+\section{Trabajo futuro}
+
+Se recomienda implementar un documento de estilo global para normalizar aspectos del estilo a lo largo de la aplicación. Esto mejora la estética de la aplicación y facilita el desarrollo.
+
+Se puede implementar una interfaz web del sistema.
+
+Se puede implementar gestión de múltiples firmas con bloqueo de concurrencia. (Investigar acerca de Docusign).
+
+
+%%%Texto explicativo, no debe aparecer en el documento final
+%\section{NOTAS SOBRE LAS REFERENCIAS BIBLIOGRÁFICAS}
+%En el archivo references.bib puede agregar las fuentes bibliográficas usadas en el documento en formato \emph{bibtex}.
+%Puede incluir fuentes que no citó en el archivo de referencias. Aquellas que no citó automáticamente serán omitidas en la lista de referencias.
+%Para citar una referencia en el texto debe usar el comando \emph{cite}. 
+%
+%Por ejemplo el artículo de Dean se cita usando \cite{dean2003}. 
+%Note cómo los libros de Ortíz y Sánchez no salen en las referencias. 
+%
+%\emph{Procure eliminar esta sección de su documento}
+%%%Aquí termina el texto explicativo

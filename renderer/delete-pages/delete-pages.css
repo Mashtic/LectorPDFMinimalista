@@ -1,0 +1,121 @@
+:root {
+  --ink: #1b1f27;
+  --ink-soft: #5b6472;
+  --line: #e1e4ea;
+  --surface: #ffffff;
+  --page: #f3f4f6;
+  --accent: #1f6f5c;
+  --accent-hover: #175747;
+  --overlay: rgba(15, 17, 21, 0.55);
+}
+
+.delete-input {
+    background: var(--bg-color);
+}
+
+.open-trigger {
+  padding: 0.65rem 1.1rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.open-trigger:hover {
+  border-color: var(--ink-soft);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 10;
+}
+.overlay.is-open {
+  display: flex;
+}
+
+.modal {
+  width: 100%;
+  max-width: 380px;
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 1.75rem;
+  box-shadow: 0 20px 50px rgba(15, 17, 21, 0.25);
+}
+
+.modal h2 {
+  margin: 0 0 0.4rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ink)
+}
+
+.modal p {
+  margin: 0 0 1.1rem;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.modal label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
+  color: var(--ink-soft);
+}
+
+.modal input[type='text'] {
+  width: 100%;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: var(--ink);
+  outline: none;
+}
+.modal input[type='text']:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(31, 111, 92, 0.15);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+}
+
+.btn {
+  padding: 0.55rem 1.05rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.btn-cancel {
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--ink);
+}
+.btn-cancel:hover {
+  background: var(--page);
+}
+
+.btn-accept {
+  background: var(--accent);
+  color: #fff;
+}
+.btn-accept:hover {
+  background: var(--accent-hover);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

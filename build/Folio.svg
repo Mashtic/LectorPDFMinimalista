@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:affinity="https://www.affinity.studio/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-miterlimit:1.5;">
+    <g transform="matrix(1,0,0,1,41.682029,5.743564)">
+        <g transform="matrix(1.040816,0,0,1,-21.246255,-24.943585)">
+            <rect x="102.4" y="61.703" width="289.477" height="392.533" style="fill:rgb(235,235,235);stroke:black;stroke-width:23.68px;"/>
+        </g>
+        <g transform="matrix(1,0,0,1,18.316637,-26.584585)">
+            <text x="120.779px" y="348.554px" style="font-family:'NiagaraSolid-Reg', 'Niagara Solid', fantasy;font-stretch:condensed;font-size:289.576px;">F</text>
+        </g>
+        <g transform="matrix(1,0,0,1,-5.251252,-24.943585)">
+            <rect x="47.262" y="61.703" width="43.323" height="392.533" style="stroke:black;stroke-width:24.17px;"/>
+        </g>
+        <g transform="matrix(1,0,0,1,-17.28907,0)">
+            <path d="M85.333,429.292L85.333,496.903L119.911,477.21L119.911,429.292L85.333,429.292"/>
+        </g>
+        <g transform="matrix(-1,0,0,1,221.533876,0)">
+            <path d="M85.333,429.292L85.333,496.903L119.911,477.21L119.911,429.292L85.333,429.292"/>
+        </g>
+    </g>
+</svg>

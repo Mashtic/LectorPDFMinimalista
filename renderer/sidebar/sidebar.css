@@ -1,0 +1,326 @@
+/* SIDEBAR */
+:root {
+  --sidebar-width: 240px;
+  --sidebar-bg: #f3f3f3;
+  --sidebar-line: #e4e4e4;
+  --sidebar-text: #555555;
+  --sidebar-text-strong: #222222;
+  --sidebar-hover: rgba(0, 0, 0, 0.05);
+}
+
+/* Hamburger button */
+#sidebar-toggle {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 10001;
+  -webkit-app-region: no-drag;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted, #999999);
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+#sidebar-toggle[hidden] {
+  display: none;
+}
+
+#sidebar-toggle:hover {
+  color: var(--text-hover, #333333);
+  background: var(--sidebar-hover);
+}
+
+#sidebar-toggle:focus-visible,
+.sidebar-tab:focus-visible,
+.sidebar-thumbnail:focus-visible,
+.sidebar-outline-link:focus-visible,
+.sidebar-outline-toggle:focus-visible {
+  outline: 2px solid #8a8a8a;
+  outline-offset: 2px;
+}
+
+/* Panel */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 10000;
+  -webkit-app-region: no-drag;
+
+  display: flex;
+  flex-direction: column;
+  width: var(--sidebar-width);
+
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-line);
+
+  transform: translateX(-100%);
+  transition: transform 0.2s ease;
+}
+
+body.sidebar-open #sidebar {
+  transform: translateX(0);
+}
+
+/* Push the document to the right while the sidebar is open */
+#pdf-viewer-container {
+  transition: padding-left 0.2s ease;
+}
+
+body.sidebar-open #pdf-viewer-container {
+  padding-left: var(--sidebar-width);
+}
+
+#pdf-page-counter {
+  transition: left 0.2s ease;
+}
+
+body.sidebar-open #pdf-page-counter {
+  left: calc(50% + var(--sidebar-width) / 2);
+}
+
+/* Tabs */
+#sidebar-tabs {
+  display: flex;
+  gap: 16px;
+  height: 56px;
+  padding: 0 16px 0 56px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.sidebar-tab {
+  padding: 4px 0;
+  border: none;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted, #999999);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.sidebar-tab:hover {
+  color: var(--sidebar-text-strong);
+}
+
+.sidebar-tab.is-active {
+  color: var(--sidebar-text-strong);
+  border-bottom-color: var(--sidebar-text-strong);
+}
+
+.sidebar-panel {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.sidebar-panel[hidden] {
+  display: none;
+}
+
+.sidebar-empty {
+  margin: 8px 20px;
+  color: var(--text-muted, #999999);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Pages */
+.sidebar-reorder-bar {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px;
+}
+
+.sidebar-reorder-button {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid var(--sidebar-line);
+  border-radius: 5px;
+  background: #fff;
+  color: var(--sidebar-text-strong);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.sidebar-reorder-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.sidebar-thumbnail-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 4px 0 24px;
+}
+
+.sidebar-thumbnail-list.is-reordering .sidebar-thumbnail {
+  cursor: grab;
+}
+
+.sidebar-thumbnail-list.is-reordering .sidebar-thumbnail.is-dragging {
+  opacity: 0.35;
+}
+
+.sidebar-thumbnail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.sidebar-thumbnail-canvas {
+  display: block;
+  background: #ffffff;
+  box-shadow: 0 0 6px -2px rgba(0, 0, 0, 0.35);
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition: outline-color 0.15s ease;
+}
+
+.sidebar-thumbnail:hover .sidebar-thumbnail-canvas {
+  outline-color: #d0d0d0;
+}
+
+.sidebar-thumbnail.is-active .sidebar-thumbnail-canvas {
+  outline-color: #8a8a8a;
+}
+
+.sidebar-thumbnail-label {
+  color: var(--text-muted, #999999);
+  font-size: 12px;
+}
+
+.sidebar-thumbnail.is-active .sidebar-thumbnail-label {
+  color: var(--sidebar-text-strong);
+}
+
+/* Outline */
+.sidebar-outline-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#sidebar-outline > .sidebar-outline-list {
+  padding: 0 8px 24px;
+}
+
+.sidebar-outline-item.is-collapsed > .sidebar-outline-list {
+  display: none;
+}
+
+.sidebar-outline-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-left: calc(var(--outline-depth, 0) * 14px);
+  border-radius: 4px;
+}
+
+.sidebar-outline-row:hover {
+  background: var(--sidebar-hover);
+}
+
+.sidebar-outline-toggle,
+.sidebar-outline-spacer {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.sidebar-outline-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-muted, #999999);
+  cursor: pointer;
+}
+
+.sidebar-outline-toggle svg {
+  transform: rotate(90deg);
+  transition: transform 0.15s ease;
+}
+
+.sidebar-outline-item.is-collapsed > .sidebar-outline-row svg {
+  transform: rotate(0deg);
+}
+
+.sidebar-outline-link {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 6px 5px 0;
+  border: none;
+  background: transparent;
+  color: var(--sidebar-text);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.sidebar-outline-link:hover {
+  color: var(--sidebar-text-strong);
+}
+
+.sidebar-outline-link:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+/* In a narrow window (floating mode) the sidebar overlays the document
+   instead of pushing it, so the page keeps its fitted width */
+@media (max-width: 900px) {
+  body.sidebar-open #pdf-viewer-container {
+    padding-left: 0;
+  }
+
+  body.sidebar-open #pdf-page-counter {
+    left: 50%;
+  }
+}
+
+body.sidebar-no-transition #sidebar,
+body.sidebar-no-transition #pdf-viewer-container,
+body.sidebar-no-transition #pdf-page-counter {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #sidebar,
+  #pdf-viewer-container,
+  #pdf-page-counter,
+  .sidebar-outline-toggle svg {
+    transition: none;
+  }
+}

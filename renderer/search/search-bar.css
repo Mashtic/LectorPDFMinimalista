@@ -1,0 +1,71 @@
+#pdf-search-bar {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  background: var(--surface, #fff);
+  border: 1px solid var(--line, #e1e4ea);
+  border-radius: 8px;
+  padding: 6px 8px;
+
+  z-index: 1000;
+}
+
+#pdf-search-input {
+  border: none;
+  outline: none;
+  background: transparent;
+
+  padding: 4px 6px;
+  min-width: 160px;
+
+  font: inherit;
+  color: var(--ink, #1b1f27);
+}
+
+#pdf-search-input::placeholder {
+  color: var(--ink-soft, #5b6472);
+}
+
+#pdf-search-count {
+  min-width: 3.5ch;
+  text-align: center;
+  font-size: 0.85em;
+  color: var(--ink-soft, #5b6472);
+}
+
+#pdf-search-bar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 26px;
+  height: 26px;
+
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-soft, #5b6472);
+  cursor: pointer;
+
+  font-size: 1em;
+  line-height: 1;
+  transition: all 0.15s ease;
+}
+
+#pdf-search-bar button:hover {
+  background: var(--page, #f3f4f6);
+  color: var(--ink, #1b1f27);
+}
+
+::highlight(pdf-search) {
+  background-color: rgb(255 224 0 / 60%);
+}
+
+::highlight(pdf-search-active) {
+  background-color: rgb(255 140 0 / 85%);
+}
