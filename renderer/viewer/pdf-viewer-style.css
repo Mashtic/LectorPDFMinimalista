@@ -10,6 +10,48 @@
   box-sizing: border-box;
 }
 
+#pdf-viewer-container::-webkit-scrollbar,
+#sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+#pdf-viewer-container::-webkit-scrollbar-track,
+#sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#pdf-viewer-container::-webkit-scrollbar-thumb,
+#sidebar::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background: #999999;
+  background-clip: padding-box;
+}
+
+#pdf-viewer-container::-webkit-scrollbar-thumb:hover,
+#sidebar::-webkit-scrollbar-thumb:hover {
+  background: #333333;
+  background-clip: padding-box;
+}
+
+#pdf-viewer-container::-webkit-scrollbar-button,
+#pdf-viewer-container::-webkit-scrollbar-button:single-button,
+#pdf-viewer-container::-webkit-scrollbar-button:vertical:decrement,
+#pdf-viewer-container::-webkit-scrollbar-button:vertical:increment,
+#sidebar::-webkit-scrollbar-button,
+#sidebar::-webkit-scrollbar-button:single-button,
+#sidebar::-webkit-scrollbar-button:vertical:decrement,
+#sidebar::-webkit-scrollbar-button:vertical:increment {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+#pdf-viewer-container::-webkit-scrollbar-corner,
+#sidebar::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 #pdf-viewer-list > * {
   margin-top: 15px;
 }
