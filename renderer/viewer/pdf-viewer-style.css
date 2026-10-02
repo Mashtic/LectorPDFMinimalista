@@ -29,39 +29,31 @@
 
 #pdf-page-counter {
   position: fixed;
-  top: 16px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: auto;
+  left: auto;
+  right: 16px;
+  bottom: 16px;
+  transform: none;
 
   display: flex;
   align-items: center;
   gap: 4px;
 
-  background: white;
-  padding: 8px 16px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 20%);
+  min-height: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted, #999999);
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
 
   z-index: 1000;
-  color: black;
 }
 
-#pdf-page-counter {
-  position: fixed;
-  top: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-
-  display: flex;
-  align-items: center;
-
-  background: white;
-  padding: 8px 16px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 20%);
-
-  z-index: 1000;
-  color: black;
+#pdf-page-counter:hover {
+  color: var(--text-hover, #333333);
+  background: rgba(0, 0, 0, 0.05);
 }
 
 #pdf-page-input-wrapper {
