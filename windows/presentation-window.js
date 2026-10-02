@@ -7,7 +7,7 @@ function createPresentationWindow() {
     frame: false,
     webPreferences: {
       plugins: true,
-      nodeIntegration: true,
+      nodeIntegration: false,
       contextIsolation: true,
       preload: path.join(__dirname, "../preload.js"),
     },
