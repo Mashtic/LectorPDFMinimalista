@@ -25,6 +25,9 @@ function createMainWindow() {
     if (input.type === "keyDown" && input.key === "m") {
       showContextMenu(win);
     }
+    if (input.type === "keyDown" && input.control && input.shift && input.key.toLowerCase() == "i") {
+      win.webContents.openDevTools(); 
+    }
   });
 
   return win;
