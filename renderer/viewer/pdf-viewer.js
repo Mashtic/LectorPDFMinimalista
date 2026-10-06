@@ -2,8 +2,10 @@ import {
   GlobalWorkerOptions,
   getDocument,
   TextLayer,
+  AnnotationMode,
 } from "../../node_modules/pdfjs-dist/build/pdf.mjs";
 import { createZoomState, setZoom, zoomIn, zoomOut } from "../zoom/zoom.js";
+import { AnnotationManager } from "./annotation-manager.js";
 
 GlobalWorkerOptions.workerSrc = "./pdf.worker.mjs";
 
@@ -21,6 +23,15 @@ export class PdfViewer {
     this.onTextLayerRendered = null;
     this.onTextLayerUnloaded = null;
     this.onCurrentPageChanged = null;
+    this.annotationManager = new AnnotationManager({
+      getDocument: () => this.documentPDF,
+      getScale: () => this.scale,
+      getPageEntries: () => this.pages,
+      rerenderPage: (pageNumber) => {
+        const entry = this.pages.get(pageNumber);
+        if (entry) this.renderPage(pageNumber, entry.canvas);
+      },
+    });
   }
 
   get scale() {
@@ -215,6 +226,7 @@ export class PdfViewer {
       const renderContext = {
         canvasContext: canvasContext,
         viewport,
+        annotationMode: AnnotationMode.ENABLE_STORAGE, 
       };
 
       const renderTask = page.render(renderContext);
@@ -225,6 +237,13 @@ export class PdfViewer {
 
       entry.renderTask.promise
         .then(() => {
+          this.annotationManager.renderAnnotationLayer(
+            pageNumber,
+            entry,
+            page,
+            viewport,
+          );
+
           if (entry.textLayerInstance) {
             entry.textLayer.style.setProperty("--scale-factor", viewport.scale);
             entry.textLayer.style.width = `${viewport.width}px`;
@@ -295,6 +314,7 @@ export class PdfViewer {
     entry.textDivs = null;
     entry.textLayerInstance = null;
     this.onTextLayerUnloaded?.(pageNumber);
+    this.annotationManager.destroyLayer(pageNumber);
 
     if (entry.page) {
       entry.page.cleanup();

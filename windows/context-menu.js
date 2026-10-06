@@ -22,6 +22,12 @@ function showContextMenu(window) {
   if (getGlobalVar("currentPDF")) {
     template.push(
       {
+        label: "Highlight Selection",
+        click: () => {
+          window.webContents.send("addHighlight");
+        },
+      },
+      {
         label: "Save As",
         click: () => {
           window.webContents.send("dialog:openSaveFileDialog");
