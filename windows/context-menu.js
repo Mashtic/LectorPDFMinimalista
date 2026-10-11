@@ -9,7 +9,7 @@ function notImplementedYet() {
   console.log("Function not implemented yet");
 }
 
-function showContextMenu(window) {
+function showContextMenu(window, selectionText = "") {
   const template = [
     {
       label: "Open New File",
@@ -20,6 +20,20 @@ function showContextMenu(window) {
   ];
 
   if (getGlobalVar("currentPDF")) {
+    template.push({
+      label: "Comments",
+      click: () => {
+        window.webContents.send("comments:open", "");
+      },
+    });
+    if (selectionText) {
+      template.push({
+        label: "Comment selection",
+        click: () => {
+          window.webContents.send("comments:open", selectionText);
+        },
+      });
+    }
     template.push(
       {
         label: "Save As",

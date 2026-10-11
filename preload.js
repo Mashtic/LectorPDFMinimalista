@@ -37,4 +37,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   setGlobalVar: (key, value) =>
     ipcRenderer.invoke("global-var:set", key, value),
   getGlobalVar: (key) => ipcRenderer.invoke("global-var:get", key),
+  onOpenComments: (callback) => {
+    ipcRenderer.on("comments:open", (_event, selectedText) => callback(selectedText));
+  },
+  addPdfComment: (comment) => ipcRenderer.invoke("pdf:addComment", comment),
 });

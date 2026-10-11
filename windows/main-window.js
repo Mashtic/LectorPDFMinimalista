@@ -17,8 +17,8 @@ function createMainWindow() {
 
   win.loadFile(path.join(__dirname, "../renderer/index.html"));
 
-  win.webContents.on("context-menu", () => {
-    showContextMenu(win);
+  win.webContents.on("context-menu", (_event, params) => {
+    showContextMenu(win, params.selectionText);
   });
 
   win.webContents.on("before-input-event", (event, input) => {
