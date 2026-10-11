@@ -7,6 +7,7 @@ const { registerPDFMergeIpc } = require("./ipc/pdf-merge-ipc.js");
 const { cleanupPreviews } = require("./services/pdf-merge-service.js");
 const { registerGlobalVarIpc } = require("./ipc/global-var-ipc.js");
 const { registerPDFSaveIpc } = require("./ipc/pdf-save-ipc.js");
+const { registerCommentsIpc } = require("./ipc/comments-ipc.js");
 
 // const {
 //   createPresentationWindow,
@@ -19,6 +20,7 @@ app.whenReady().then(() => {
   registerPDFMergeIpc();
   registerGlobalVarIpc();
   registerPDFSaveIpc();
+  registerCommentsIpc();
 
   Menu.setApplicationMenu(null);
   createMainWindow();

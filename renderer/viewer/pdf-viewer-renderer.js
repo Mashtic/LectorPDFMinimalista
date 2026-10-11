@@ -71,6 +71,10 @@ if (currentPDF) {
     }
   });
 
+  document.addEventListener("pdf-comment-added", (event) => {
+    viewer.commitPDFChange(event.detail);
+  });
+
   viewContainer.addEventListener(
     "wheel",
     (event) => {
@@ -84,6 +88,12 @@ if (currentPDF) {
     },
     { passive: false },
   );
+
+  viewer.onDocumentModified = (dataPDF) => {
+    document.dispatchEvent(
+      new CustomEvent("pdf-modified", { detail: dataPDF }),
+    );
+  };
 }
 
 document.addEventListener("keydown", (event) => {

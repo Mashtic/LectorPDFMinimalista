@@ -15,7 +15,7 @@ import {
   showCommentTooltip,
   hideCommentTooltip,
   isCommentPopupOpen,
-} from "../highlight-comments/highlight-comments.js";
+} from "../comments/highlight-comments.js";
 
 GlobalWorkerOptions.workerSrc = "./pdf.worker.mjs";
 
@@ -37,10 +37,9 @@ export class PdfViewer {
     this.observers = [];
     this.linkService = new SimpleLinkService();
 
-    // This is here so that if we want perform and action when a PDF is modified
-    // but no saved, like showing a message asking the user if they want to
-    // save it before closing.
-    // Currently it does nothing xd.
+    // This is here if we want to perform and action when a PDF is modified
+    // but not saved, like showing a message asking the user if they want to
+    // save before closing and such.
     this.onDocumentModified = null;
   }
 
