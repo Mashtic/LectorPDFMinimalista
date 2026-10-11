@@ -280,7 +280,7 @@ export function showCommentPopup({
 
   const saveButton = document.createElement("button");
   saveButton.type = "button";
-  saveButton.textContent = "Save";
+  saveButton.textContent = "Accept";
 
   const cancelButton = document.createElement("button");
   cancelButton.type = "button";
