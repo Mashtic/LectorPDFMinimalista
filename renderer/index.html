@@ -17,6 +17,7 @@
     />
     <link rel="stylesheet" type="text/css" href="./search/search-bar.css" />
     <link rel="stylesheet" type="text/css" href="./sidebar/sidebar.css" />
+    <link rel="stylesheet" type="text/css" href="./comments/comments.css" />
   </head>
   <body>
     <!-- WINDOW -->
@@ -148,6 +149,19 @@
 
     <div id="save-status" role="status" aria-live="polite"></div>
 
+    <aside id="comments-panel" aria-label="Comments" hidden>
+      <header class="comments-header">
+        <div><h2>Comments</h2><span id="comments-count">0 comments</span><div class="comments-save-hint">Save the PDF to keep comments in the file.</div></div>
+        <button id="comments-close" type="button" aria-label="Close comments">×</button>
+      </header>
+      <div id="comments-list" aria-live="polite"></div>
+      <form id="comment-form">
+        <blockquote id="comment-selection" hidden></blockquote>
+        <textarea id="comment-input" placeholder="Write a comment..." rows="3" required></textarea>
+        <button type="submit">Comment</button>
+      </form>
+    </aside>
+
     <!-- SEARCH BAR-->
     <div id="pdf-search-bar" style="display: none">
       <input
@@ -178,5 +192,6 @@
     <!-- TODO: Import scripts once they are placed properly -->
     <script src="./index.js" type="module"></script>
     <script type="module" src="./viewer/pdf-viewer-renderer.js"></script>
+    <script type="module" src="./comments/comments.js"></script>
   </body>
 </html>

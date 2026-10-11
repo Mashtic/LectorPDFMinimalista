@@ -1,0 +1,33 @@
+#comments-panel {
+  position: fixed;
+  z-index: 10020;
+  top: 42px;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  width: min(360px, calc(100vw - 32px));
+  overflow: hidden;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  background: #fff;
+  color: #252525;
+  box-shadow: 0 8px 30px rgb(0 0 0 / 14%);
+  font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+#comments-panel[hidden] { display: none; }
+.comments-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid #eee; }
+.comments-header h2 { margin: 0 0 4px; font-size: 16px; font-weight: 600; }
+#comments-count, .comment-meta { color: #888; font-size: 11px; }
+.comments-save-hint { margin-top: 5px; color: #999; font-size: 11px; }
+#comments-close { border: 0; background: transparent; color: #777; font-size: 23px; cursor: pointer; }
+#comments-list { flex: 1; overflow: auto; padding: 12px 16px; }
+.comment-card { padding: 12px 0; border-bottom: 1px solid #eee; }
+.comment-card p { margin: 0 0 9px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+.comment-card blockquote, #comment-selection { margin: 0 0 9px; padding: 7px 9px; border-left: 2px solid #d5d5d0; background: #f7f7f5; color: #777; font-size: 12px; line-height: 1.45; }
+#comment-form { padding: 14px 16px 16px; border-top: 1px solid #eee; }
+#comment-input { display: block; width: 100%; resize: vertical; padding: 10px; border: 1px solid #ddd; border-radius: 6px; outline: none; background: #fafafa; color: #252525; font: inherit; line-height: 1.45; }
+#comment-input:focus { border-color: #aaa; }
+#comment-form button[type="submit"] { display: block; margin: 10px 0 0 auto; padding: 8px 13px; border: 1px solid #dedede; border-radius: 6px; background: #f4f4f4; color: #333; font: inherit; cursor: pointer; }
+#comment-form button[type="submit"]:hover { background: #ebebeb; }
