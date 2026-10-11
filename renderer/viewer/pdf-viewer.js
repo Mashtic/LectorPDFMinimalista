@@ -7,13 +7,15 @@ import {
 import { SimpleLinkService } from "../../node_modules/pdfjs-dist/web/pdf_viewer.mjs";
 import { createZoomState, setZoom, zoomIn, zoomOut } from "../zoom/zoom.js";
 import {
-  setHighlightComment,
-  deleteHighlight,
   getAnnotationText,
-  getHighlightRects,
+  getHighlightRectangles,
+  isCommentable,
   showCommentPopup,
   closeCommentPopup,
-} from "./highlight-comments.js";
+  showCommentTooltip,
+  hideCommentTooltip,
+  isCommentPopupOpen,
+} from "../highlight-comments/highlight-comments.js";
 
 GlobalWorkerOptions.workerSrc = "./pdf.worker.mjs";
 
@@ -31,11 +33,15 @@ export class PdfViewer {
     this.onTextLayerRendered = null;
     this.onTextLayerUnloaded = null;
     this.onCurrentPageChanged = null;
-    // Called with the new PDF bytes after a comment was edited/deleted,
-    // so the host app can persist them (e.g. via electronAPI)
-    this.onDocumentModified = null;
+
     this.observers = [];
     this.linkService = new SimpleLinkService();
+
+    // This is here so that if we want perform and action when a PDF is modified
+    // but no saved, like showing a message asking the user if they want to
+    // save it before closing.
+    // Currently it does nothing xd.
+    this.onDocumentModified = null;
   }
 
   get scale() {
@@ -43,8 +49,6 @@ export class PdfViewer {
   }
 
   async load() {
-    // pdf.js transfers the buffer to its worker, which detaches (empties) it.
-    // Keep our own intact copy for pdf-lib and hand pdf.js a clone.
     this.dataPDF =
       this.dataPDF instanceof Uint8Array
         ? this.dataPDF
@@ -128,9 +132,6 @@ export class PdfViewer {
     this.updateCurrentPage();
   }
 
-  // ---- Highlight comments -------------------------------------------
-
-  /** Reads every highlight that carries a comment, across all pages. */
   async getHighlightComments() {
     const comments = [];
 
@@ -139,16 +140,22 @@ export class PdfViewer {
       const annotations = await page.getAnnotations({ intent: "display" });
 
       for (const annotation of annotations) {
-        if (annotation.subtype !== "Highlight") continue;
+        if (!isCommentable(annotation)) {
+          continue;
+        }
 
         const text = getAnnotationText(annotation);
-        if (!text) continue;
+
+        if (!text) {
+          continue;
+        }
 
         comments.push({
           pageNumber: number,
           id: annotation.id,
           text,
           author: annotation.titleObj?.str ?? "",
+          created: annotation.creationDate ?? "",
           modified: annotation.modificationDate ?? "",
         });
       }
@@ -158,22 +165,27 @@ export class PdfViewer {
   }
 
   async editHighlightComment(pageNumber, annotationId, text) {
-    const bytes = await setHighlightComment(
-      this.dataPDF,
+    const updatedDataPDF = await window.electronAPI.setHighlightComment({
+      dataPDF: this.dataPDF,
       pageNumber,
       annotationId,
       text,
-    );
-    await this.commitPdfChange(bytes);
+    });
+
+    await this.commitPDFChange(updatedDataPDF);
   }
 
   async deleteHighlightComment(pageNumber, annotationId) {
-    const bytes = await deleteHighlight(this.dataPDF, pageNumber, annotationId);
-    await this.commitPdfChange(bytes);
+    const updatedDataPDF = await window.electronAPI.deleteHighlight({
+      dataPDF: this.dataPDF,
+      pageNumber,
+      annotationId,
+    });
+
+    await this.commitPDFChange(updatedDataPDF);
   }
 
-  // Swaps in the modified bytes and re-renders, keeping the scroll position
-  async commitPdfChange(bytes) {
+  async commitPDFChange(updatedDataPDF) {
     const container = document.getElementById("pdf-viewer-container");
     const scrollTop = container.scrollTop;
     const scrollLeft = container.scrollLeft;
@@ -186,11 +198,10 @@ export class PdfViewer {
       entry.renderTask?.cancel();
     }
 
-    const oldTask = this.loadingTask;
+    const previousLoadingTask = this.loadingTask;
 
-    this.dataPDF = bytes;
-    // slice(): pdf.js transfers the buffer to its worker and would detach ours
-    this.loadingTask = getDocument({ data: bytes.slice() });
+    this.dataPDF = new Uint8Array(updatedDataPDF);
+    this.loadingTask = getDocument({ data: this.dataPDF.slice() });
     this.documentPDF = await this.loadingTask.promise;
     this.linkService.setDocument(this.documentPDF);
 
@@ -205,10 +216,16 @@ export class PdfViewer {
     container.scrollLeft = scrollLeft;
     this.updateCurrentPage();
 
-    this.onDocumentModified?.(bytes);
+    try {
+      await window.electronAPI.setGlobalVar("currentPDF", this.dataPDF);
+    } catch (error) {
+      console.error("Failed to update currentPDF:", error);
+    }
+
+    this.onDocumentModified?.(this.dataPDF);
 
     try {
-      await oldTask?.destroy();
+      await previousLoadingTask?.destroy();
     } catch (error) {
       console.warn("Failed to destroy previous PDF loading task:", error);
     }
@@ -216,7 +233,10 @@ export class PdfViewer {
 
   async renderHighlightCommentLayer(page, viewport, entry, pageNumber) {
     const layer = entry.wrapper?.highlightCommentLayer;
-    if (!layer) return;
+
+    if (!layer) {
+      return;
+    }
 
     const annotations = await page.getAnnotations({ intent: "display" });
 
@@ -225,41 +245,76 @@ export class PdfViewer {
     layer.style.height = `${viewport.height}px`;
 
     for (const annotation of annotations) {
-      if (annotation.subtype !== "Highlight") continue;
+      if (!isCommentable(annotation)) {
+        continue;
+      }
 
       const text = getAnnotationText(annotation);
-      const author = annotation.titleObj?.str ?? "";
 
-      for (const rect of getHighlightRects(annotation, viewport)) {
-        const hit = document.createElement("div");
-        hit.className = "highlight-comment-hit";
-        if (text) {
-          hit.classList.add("has-comment");
-          hit.title = text;
-        }
-        hit.style.position = "absolute";
-        hit.style.pointerEvents = "auto";
-        hit.style.cursor = "pointer";
-        hit.style.left = `${rect.left}px`;
-        hit.style.top = `${rect.top}px`;
-        hit.style.width = `${rect.width}px`;
-        hit.style.height = `${rect.height}px`;
-
-        hit.addEventListener("click", (event) => {
-          showCommentPopup({
-            x: event.clientX,
-            y: event.clientY + 12,
-            text,
-            author,
-            onSave: (newText) =>
-              this.editHighlightComment(pageNumber, annotation.id, newText),
-            onDelete: () =>
-              this.deleteHighlightComment(pageNumber, annotation.id),
-          });
-        });
-
-        layer.appendChild(hit);
+      if (!text) {
+        continue;
       }
+
+      const author = annotation.titleObj?.str ?? "";
+      const rectangles = getHighlightRectangles(annotation, viewport);
+
+      if (!rectangles.length) {
+        continue;
+      }
+
+      const top = Math.min(...rectangles.map((rectangle) => rectangle.top));
+      const right = Math.max(
+        ...rectangles.map((rectangle) => rectangle.left + rectangle.width),
+      );
+      const size = 20;
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "highlight-comment-button";
+      button.setAttribute("aria-label", "Comment");
+      button.innerHTML =
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+        '<circle cx="5" cy="12" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="19" cy="12" r="2.2"/></svg>';
+
+      button.style.position = "absolute";
+      button.style.pointerEvents = "auto";
+      button.style.width = `${size}px`;
+      button.style.height = `${size}px`;
+      button.style.left = `${Math.max(0, Math.min(right + 4, viewport.width - size))}px`;
+      button.style.top = `${Math.max(0, top - size / 2)}px`;
+
+      button.addEventListener("mouseenter", () => {
+        if (isCommentPopupOpen()) {
+          return;
+        }
+
+        const box = button.getBoundingClientRect();
+        showCommentTooltip({ x: box.left, y: box.bottom + 6, text, author });
+      });
+
+      button.addEventListener("mouseleave", hideCommentTooltip);
+
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        hideCommentTooltip();
+
+        const box = button.getBoundingClientRect();
+
+        showCommentPopup({
+          x: box.left,
+          y: box.bottom + 6,
+          text,
+          author,
+          created: annotation.creationDate,
+          modified: annotation.modificationDate,
+          onSave: (newText) =>
+            this.editHighlightComment(pageNumber, annotation.id, newText),
+          onDelete: () =>
+            this.editHighlightComment(pageNumber, annotation.id, ""),
+        });
+      });
+
+      layer.appendChild(button);
     }
   }
 
@@ -614,6 +669,7 @@ export class PdfViewer {
       annotationLayer.style.width = `${viewport.width}px`;
       annotationLayer.style.height = `${viewport.height}px`;
       annotationLayer.style.zIndex = "3";
+      annotationLayer.style.pointerEvents = "none";
 
       const annotationEditorLayer = document.createElement("div");
       annotationEditorLayer.className = "annotationEditorLayer";
@@ -622,6 +678,7 @@ export class PdfViewer {
       annotationEditorLayer.style.width = `${viewport.width}px`;
       annotationEditorLayer.style.height = `${viewport.height}px`;
       annotationEditorLayer.style.zIndex = "4";
+      annotationEditorLayer.style.pointerEvents = "none";
 
       wrapper.appendChild(canvas);
       wrapper.appendChild(textLayer);
