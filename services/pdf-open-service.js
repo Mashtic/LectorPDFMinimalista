@@ -21,4 +21,11 @@ async function readPdfFile() {
   return {path: filePaths[0], content: fileContent};
 }
 
-module.exports = { readPdfFile };
+
+async function readPdfFromPath(filePath) {
+  const content = await readFile(filePath);
+
+  return { path: filePath, content};
+}
+
+module.exports = { readPdfFile, readPdfFromPath };
