@@ -1,0 +1,71 @@
+\chapter{Conclusiones y trabajo futuro}
+\section{Conclusiones}
+%Documente el aprendizaje acumulado durante el desarrollo del proyecto. Las conclusiones deben ser hechos concretos que puedan ser de utilidad para un lector externo que no conoce el proyecto.
+Durante el primer sprint se logró construir una versión funcional del lector de PDF y establecer la base principal de la aplicación. El prototipo permite abrir y visualizar documentos, desplazarse entre sus páginas, utilizar el zoom, consultar el outline, seleccionar y copiar texto, mostrar el conteo de páginas
+y saltar directamente a una página específica.
+
+También se implementaron varias funciones de gestión de documentos, como eliminar y reordenar páginas, guardar los cambios y utilizar la opción ''Guardar como''. Además, se incorporó la posibilidad de añadir otro archivo PDF y generar una vista previa del documento resultante. Estas funciones permitieron comprobar que la aplicación puede realizar operaciones básicas de edición sin necesidad de utilizar una base de datos, ya que los cambios se mantienen en memoria hasta que el usuario decide guardarlos.
+
+El desarrollo permitió establecer una estructura organizada basada en Electron, con una separación entre el proceso principal, el renderer, los servicios y la comunicación mediante IPC. El uso de PDF.js para visualizar los documentos y
+pdf-lib para modificarlos facilitó la implementación de las funciones principales del MVP.
+
+Las pruebas realizadas muestran que la mayoría de las funciones implementadas responden de acuerdo con lo esperado. Sin embargo, algunas funcionalidades todavía requieren trabajo adicional. La mezcla o intercalado de páginas y la apertura simultánea de varios archivos PDF no se encuentran implementadas por completo para este sprint. A pesar de estas limitaciones, el sprint permitió entregar una base funcional sobre la cual se pueden desarrollar las siguientes etapas del proyecto.
+
+
+\section{Problemáticas y limitaciones}
+%Recuerde que sólo debe registrar aquellas problemáticas que el sistema TIENE, no debe mencionar problemas que aparecieron durante el desarrollo, pero que se resolvieron adecuadamente.
+%Considere como problemáticas errores o comportamientos indeseables que el sistema tiene. Por ejemplo fugas de memoria, puntos en los que el sistema se cuelga, etc...
+%Limitaciones por el otro lado, son cosas que el sistema NO puede hacer, ya sea por diseño o por que se quería incluir pero no fue posible. Por ejemplo la falta de multijugador por Internet es una limitación, también liste aquí las plataformas para las cuales el sistema está diseñado (sistema operativo, requerimientos mínimos, resolución recomendada, etc...).
+
+\subsubsection{Problemáticas}
+
+El tiempo de arranque de la aplicación es una problemática  presente. En algunas ocasiones tarda más de dos segundos en mostrar la ventana, incluso cuando no se está cargando ningún documento PDF.
+
+La búsqueda de texto presenta errores en documentos con formato IEEE de doble columna. En estos casos, algunas coincidencias pueden no encontrarse o resaltarse de manera incorrecta.
+
+Las acciones rápidas del teclado pueden entrar en conflicto con la barra de búsqueda, ya que algunas teclas continúan ejecutando acciones de navegación mientras el usuario escribe. Esto puede provocar que el documento cambie de página inesperadamente.
+
+En documentos pesados, algunas páginas pueden tardar en aparecer después de utilizar el salto de página o la búsqueda de texto. Esto se relaciona con el mecanismo de carga diferida, ya que las páginas se renderizan conforme se acercan al área visible. Mientras termina el renderizado, puede mostrarse temporalmente un espacio en blanco.
+
+Además, después de realizar operaciones como eliminar o reordenar páginas, el visor debe recargarse para mostrar el documento actualizado. Esta recarga puede interrumpir momentáneamente la posición de lectura y obliga a volver a renderizar las páginas visibles.
+
+\subsubsection{Limitaciones}
+
+La aplicación trabaja actualmente con archivos PDF. El soporte para los formatos EPUB, DVI y Markdown, así como la conversión entre estos formatos, todavía no está implementado en esta versión.
+
+La opción Merge Files del menú contextual aún no está disponible. Actualmente es posible añadir otro archivo PDF al documento abierto y concatenarlo al final, pero todavía no se pueden intercalar libremente las páginas de varios archivos según el orden elegido por el usuario.
+
+La apertura simultánea de varios archivos PDF tampoco está completamente disponible en la versión evaluada. El flujo principal trabaja con un documento a la vez y, cuando se agrega otro archivo, este se concatena al documento que ya se encuentra abierto.
+
+El documento y sus modificaciones se mantienen en memoria durante la ejecución de la aplicación. No se utiliza una base de datos ni existe un mecanismo de recuperación automática entre ejecuciones. Por esta razón, los cambios pueden perderse si la aplicación se cierra antes de utilizar las opciones Save o Save As.
+
+Las funciones de anotaciones, comentarios, firma gráfica e integración con el sistema de firma digital GAUDI del Banco Central de Costa Rica no forman parte de esta primera entrega. Estas funcionalidades quedan previstas para los siguientes sprints.
+
+El consumo de memoria puede aumentar considerablemente al abrir documentos grandes o páginas con contenido complejo. Por esta razón, los 200 MB corresponden únicamente a una referencia para la aplicación sin un documento pesado cargado y no representan un límite suficiente para todos los casos de uso.
+
+
+\section{Trabajo futuro}
+%Describa en esta sección qué considera que puede mejorarse en el futuro para este proyecto. 
+En los siguientes sprints se deberá incorporar la mezcla e intercalado de páginas y mejorar el manejo de varios documentos abiertos al mismo tiempo. Además, se harán algunas mejoras visuales a la interfaz de la aplicación, para mantener el mismo estilo de tonalidad y simpleza.
+
+Dentro de las funcionalidades, eliminar página se re-adaptará para lograr eliminarlas de forma individual desde el outline.
+
+Como parte del trabajo futuro se implementarán las anotaciones, el resaltado de texto, los comentarios y la firma gráfica sobre los documentos PDF. Después se trabajará en la integración con el sistema de firma digital GAUDI del Banco Central de Costa Rica.
+
+Finalmente, se incorporará el soporte para abrir y exportar archivos EPUB, DVI y Markdown, incluyendo la conversión de una carpeta de archivos Markdown en un único documento PDF. También se realizarán mejoras de usabilidad, estabilidad
+y empaquetado de la aplicación para su distribución.
+
+
+%%Texto explicativo, no debe aparecer en el documento final
+%\section{NOTAS SOBRE LAS REFERENCIAS BIBLIOGRÁFICAS}
+%En el archivo references.bib puede agregar las fuentes bibliográficas usadas en el documento en formato \emph{bibtex}.
+%Puede incluir fuentes que no citó en el archivo de referencias. %Aquellas que no citó automáticamente serán omitidas en la lista de referencias.
+%Para citar una referencia en el texto debe usar el comando %\emph{cite}. 
+
+%Por ejemplo el artículo de Dean se cita usando \cite{dean2003}. 
+%Note cómo los libros de Ortíz y Sánchez no salen en las referencias. 
+
+%\emph{Procure eliminar esta sección de su documento}
+%%Aquí termina el texto explicativo
+
+\cite{augmentedtext}

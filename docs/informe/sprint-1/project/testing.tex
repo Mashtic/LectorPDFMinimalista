@@ -1,0 +1,116 @@
+\chapter{Control de calidad}
+%Introduzca en esta sección la estrategia utilizada para el control de calidad del producto. Incluya los miembros del equipo que participaron del proceso de control de calidad. Si utilizó alguna herramienta de pruebas automatizadas, descríbala en esta seccción. Procure citar y referenciar la bibliografía según corresponda.
+El control de calidad del sistema se realizará mediante pruebas manuales funcionales ejecutadas por los miembros del equipo de desarrollo. Estas pruebas tienen como objetivo comprobar que las funcionalidades implementadas respondan de acuerdo con los requerimientos definidos para cada historia de usuario.
+
+Para cada prueba se verificará la interacción del usuario con la aplicación, el resultado visual obtenido y, cuando corresponda, la conservación de los cambios realizados en el documento PDF. Las pruebas se organizaron según las principales áreas funcionales del sistema: interfaz y menú contextual, visualización y navegación, texto y outline, edición y guardado, y combinación de archivos PDF.
+
+\section{Guiones de pruebas}
+%Indique cuántos guiones de pruebas se utilizaron para comprobar la calidad del producto. Cuáles fueron los criterios empleados para definir cada prueba.
+Se definieron cinco guiones de pruebas manuales. Cada guion agrupa historias de usuario relacionadas con una misma área funcional. Las columnas de resultado obtenido y condición se completarán después de ejecutar las pruebas sobre la versión correspondiente del sistema.
+
+\begin{longtable}{ | p{2cm} | p{3cm} | p{4cm} | p{4cm} | c |}
+      \hline
+      \textbf{Historias} & \textbf{Descripción} & \textbf{Resultado Esperado} & \textbf{Resultado Obtenido} & \textbf{Condición}\\
+      \hline
+      \textbf{US001} & El usuario inicia la aplicación y observa la interfaz principal. & La aplicación muestra una interfaz limpia, con los controles principales disponibles sin sobrecargar el área de lectura. & La aplicación muestra una interfaz limpia, con los controles principales disponibles sin sobrecargar el área de lectura. & PASÓ \\
+      \hline
+    
+       \textbf{US005} & El usuario cambia el tamaño de la ventana o activa el modo flotante. & El documento se adapta correctamente al espacio disponible y mantiene una visualización adecuada. & El documento se adapta correctamente al espacio disponible y mantiene una visualización adecuada. & PASÓ \\
+       \hline
+    
+       \textbf{US022} &
+       El usuario hace clic derecho sobre la ventana de la aplicación. & Se muestra el menú contextual con las opciones disponibles para el estado actual del documento. & Se muestra el menú contextual con las opciones disponibles para el estado actual del documento. & PASÓ \\
+       \hline
+    
+      \caption{Guion de pruebas 1: Interfaz y menú contextual}
+      \label{TestScript1}
+\end{longtable}
+
+\begin{longtable}{ | p{2cm} | p{3cm} | p{4cm} | p{4cm} | c |}
+      \hline
+      \textbf{Historias} & \textbf{Descripción} & \textbf{Resultado Esperado} & \textbf{Resultado Obtenido} & \textbf{Condición}\\
+      \hline
+      \textbf{US014} & El usuario selecciona un archivo PDF desde el diálogo de apertura. & El archivo PDF se abre correctamente y queda disponible para su lectura. & El archivo PDF se abre correctamente y queda disponible para su lectura. & PASÓ \\
+      \hline
+
+      \textbf{US015} & El usuario abre un PDF con varias páginas. & Las páginas del documento se renderizan correctamente dentro del visor. & Las páginas del documento se renderizan correctamente dentro del visor. & PASÓ \\
+      \hline
+
+      \textbf{US017} & El usuario utiliza los controles o atajos de zoom. & El documento aumenta o disminuye su escala sin perder la posición de lectura. & El documento aumenta o disminuye su escala sin perder la posición de lectura. & PASÓ \\
+      \hline
+
+      \textbf{US018} & El usuario desplaza el documento verticalmente mediante el scroll. & Las páginas se muestran de forma continua y el usuario puede recorrer el documento sin interrupciones. & Las páginas se muestran de forma continua y el usuario puede recorrer el documento sin interrupciones. & PASÓ \\
+      \hline
+
+      \textbf{US020} & El usuario escribe un número de página y presiona Enter. & El visor se desplaza directamente hasta la página indicada. & El visor se desplaza directamente hasta la página indicada. & PASÓ \\
+      \hline
+
+      \textbf{US021} & El usuario observa el indicador de página mientras se desplaza por el documento. & La aplicación muestra la página actual y la cantidad total de páginas. & La aplicación muestra la página actual y la cantidad total de páginas. & PASÓ \\
+      \hline
+
+      \textbf{US006} & El usuario activa la opción de modo presentación. & El PDF se abre en una ventana de pantalla completa y muestra una página a la vez, ocultando los controles principales. & El PDF se abre en una ventana de pantalla completa y muestra una página a la vez, ocultando los controles principales. & PASÓ \\
+      \hline
+      
+      \caption{Guion de pruebas 2: Apertura, visualización y navegación}
+      \label{TestScript1}
+\end{longtable}
+
+\begin{longtable}{ | p{2cm} | p{3cm} | p{4cm} | p{4cm} | c |}
+      \hline
+      \textbf{Historias} & \textbf{Descripción} & \textbf{Resultado Esperado} & \textbf{Resultado Obtenido} & \textbf{Condición}\\
+      \hline
+      \textbf{US010} & El usuario abre el panel lateral y selecciona la pestaña Outline. & Se muestra la estructura jerárquica del documento cuando el PDF contiene un outline. & Se muestra la estructura jerárquica del documento cuando el PDF contiene un outline. & PASÓ \\
+      \hline
+
+      \textbf{US011} & El usuario selecciona una sección del outline. & El visor se desplaza hasta la página o posición correspondiente a la sección seleccionada. & El visor se desplaza hasta la página o posición correspondiente a la sección seleccionada. & PASÓ \\
+      \hline
+
+      \textbf{US013} & El usuario abre la barra de búsqueda e introduce una palabra o frase. & La aplicación localiza las coincidencias dentro del documento y permite desplazarse entre ellas. & La aplicación localiza las coincidencias dentro del documento y permite desplazarse entre ellas. & PASÓ \\
+      \hline
+
+      \textbf{US019} & El usuario arrastra el cursor sobre una sección de texto. & El texto queda seleccionado y puede utilizarse en acciones posteriores, como copiarlo. & El texto queda seleccionado y puede utilizarse en acciones posteriores, como copiarlo. & PASÓ \\
+      \hline
+
+      \textbf{US016} & El usuario selecciona texto y utiliza la opción o atajo para copiarlo. & El texto seleccionado se copia correctamente al portapapeles del sistema. &  El texto seleccionado se copia correctamente al portapapeles del sistema. & PASÓ \\
+      \hline
+      
+      \caption{Guion de pruebas 3: Texto, búsqueda y outline}
+      \label{TestScript1}
+\end{longtable}
+
+\begin{longtable}{ | p{2cm} | p{3cm} | p{4cm} | p{4cm} | c |}
+      \hline
+      \textbf{Historias} & \textbf{Descripción} & \textbf{Resultado Esperado} & \textbf{Resultado Obtenido} & \textbf{Condición}\\
+      \hline
+      \textbf{US007} & El usuario selecciona una o varias páginas y confirma su eliminación. & Las páginas seleccionadas se eliminan del documento abierto y el visor se actualiza correctamente. & Las páginas seleccionadas se eliminan del documento abierto y el visor se actualiza correctamente. & PASÓ \\
+      \hline
+
+      \textbf{US009} & El usuario activa el modo de reordenamiento y arrastra una miniatura de página. & La página se coloca en la nueva posición y el documento conserva el orden indicado después de guardar. & La página se coloca en la nueva posición y el documento conserva el orden indicado después de guardar. & PASÓ \\
+      \hline
+
+      \textbf{US008} & El usuario modifica el documento y selecciona la opción Save. & Los cambios se escriben correctamente sobre el archivo PDF original. & Los cambios se escriben correctamente sobre el archivo PDF original. & PASÓ \\
+      \hline
+
+      \textbf{US012} & El usuario modifica el documento y selecciona la opción Save As. & La aplicación permite escoger una ubicación y guarda una copia nueva sin modificar el archivo original. & La aplicación permite escoger una ubicación y guarda una copia nueva sin modificar el archivo original. & PASÓ \\
+      \hline
+      
+      \caption{Guion de pruebas 4: Edición y guardado de documentos}
+      \label{TestScript1}
+\end{longtable}
+
+\begin{longtable}{ | p{2cm} | p{3cm} | p{4cm} | p{4cm} | c |}
+      \hline
+      \textbf{Historias} & \textbf{Descripción} & \textbf{Resultado Esperado} & \textbf{Resultado Obtenido} & \textbf{Condición}\\
+      \hline
+      \textbf{US002} & El usuario abre un PDF y selecciona otro archivo para añadirlo al documento actual. & El segundo PDF se concatena al final del primero y el documento resultante puede visualizarse y guardarse. & El segundo PDF se concatena al final del primero y el documento resultante puede visualizarse y guardarse. & PASÓ \\
+      \hline
+
+      \textbf{US003} & El usuario selecciona la opción para mezclar o intercalar páginas de varios archivos PDF. & La aplicación genera un documento combinado con las páginas organizadas según el orden indicado por el usuario. & Se trabajó, pero por motivos técnicos no se logró incorporar & PENDIENTE \\
+      \hline
+ 
+      \textbf{US004} & El usuario abre un PDF y posteriormente selecciona un segundo archivo. & La aplicación permite abrir ambos documentos simultáneamente, según el comportamiento definido para esta funcionalidad. & Se trabajó, pero por motivos técnicos no se logró incorporar & PENDIENTE \\
+      \hline
+      
+      \caption{Guion de pruebas 5: Combinación y apertura de archivos PDF}
+      \label{TestScript1}
+\end{longtable}
