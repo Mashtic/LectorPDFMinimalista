@@ -36,6 +36,12 @@ function showContextMenu(window, selectionText = "") {
     }
     template.push(
       {
+        label: "Highlight Selection",
+        click: () => {
+          window.webContents.send("addHighlight");
+        },
+      },
+      {
         label: "Save As",
         click: () => {
           window.webContents.send("dialog:openSaveFileDialog");

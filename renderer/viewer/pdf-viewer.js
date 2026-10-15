@@ -3,9 +3,10 @@ import {
   getDocument,
   TextLayer,
   AnnotationLayer,
-} from "../../node_modules/pdfjs-dist/build/pdf.mjs";
-import { SimpleLinkService } from "../../node_modules/pdfjs-dist/web/pdf_viewer.mjs";
-import { createZoomState, setZoom, zoomIn, zoomOut } from "../zoom/zoom.js";
+  AnnotationMode,
+} from '../../node_modules/pdfjs-dist/build/pdf.mjs';
+import { SimpleLinkService } from '../../node_modules/pdfjs-dist/web/pdf_viewer.mjs';
+import { createZoomState, setZoom, zoomIn, zoomOut } from '../zoom/zoom.js';
 import {
   getAnnotationText,
   getHighlightRectangles,
@@ -15,9 +16,10 @@ import {
   showCommentTooltip,
   hideCommentTooltip,
   isCommentPopupOpen,
-} from "../comments/highlight-comments.js";
+} from '../comments/highlight-comments.js';
+import { AnnotationManager } from './annotation-manager.js';
 
-GlobalWorkerOptions.workerSrc = "./pdf.worker.mjs";
+GlobalWorkerOptions.workerSrc = './pdf.worker.mjs';
 
 // Space kept above an outline target so it is not hidden by the page counter
 const JUMP_TOP_MARGIN = 56;
@@ -41,6 +43,16 @@ export class PdfViewer {
     // but not saved, like showing a message asking the user if they want to
     // save before closing and such.
     this.onDocumentModified = null;
+    this.annotationManager = new AnnotationManager({
+      getDocument: () => this.documentPDF,
+      getScale: () => this.scale,
+      getPageEntries: () => this.pages,
+      rerenderPage: (pageNumber) => {
+        const entry = this.pages.get(pageNumber);
+        if (entry) this.renderPage(pageNumber, entry.canvas);
+      },
+      commitPDFChange: (updatedDataPDF) => {this.commitPDFChange(updatedDataPDF)}
+    });
   }
 
   get scale() {
@@ -66,7 +78,7 @@ export class PdfViewer {
       document.body.offsetHeight / 2,
     );
 
-    const canvas = elements.find((element) => element.tagName === "CANVAS");
+    const canvas = elements.find((element) => element.tagName === 'CANVAS');
 
     if (!canvas) return;
 
@@ -74,14 +86,14 @@ export class PdfViewer {
 
     if (this.currentPage == this.previousPage) return;
 
-    const counter = document.getElementById("pdf-page-count");
+    const counter = document.getElementById('pdf-page-count');
     counter.value = `${this.currentPage}`;
 
-    const totalPages = document.getElementById("pdf-total-pages");
+    const totalPages = document.getElementById('pdf-total-pages');
     totalPages.innerHTML = ` / ${this.documentPDF.numPages}`;
 
     this.previousPage = this.currentPage;
-    window.electronAPI.setGlobalVar("currentPage", this.currentPage);
+    window.electronAPI.setGlobalVar('currentPage', this.currentPage);
     this.onCurrentPageChanged?.(this.currentPage);
   }
 
@@ -121,7 +133,7 @@ export class PdfViewer {
     const viewport = entry.page.getViewport({ scale: this.scale });
     const [, offsetInPage] = viewport.convertToViewportPoint(0, pdfTop);
 
-    const container = document.getElementById("pdf-viewer-container");
+    const container = document.getElementById('pdf-viewer-container');
     const pageOffset =
       entry.wrapper.getBoundingClientRect().top -
       container.getBoundingClientRect().top;
@@ -136,7 +148,7 @@ export class PdfViewer {
 
     for (let number = 1; number <= this.documentPDF.numPages; number++) {
       const page = await this.documentPDF.getPage(number);
-      const annotations = await page.getAnnotations({ intent: "display" });
+      const annotations = await page.getAnnotations({ intent: 'display' });
 
       for (const annotation of annotations) {
         if (!isCommentable(annotation)) {
@@ -153,9 +165,9 @@ export class PdfViewer {
           pageNumber: number,
           id: annotation.id,
           text,
-          author: annotation.titleObj?.str ?? "",
-          created: annotation.creationDate ?? "",
-          modified: annotation.modificationDate ?? "",
+          author: annotation.titleObj?.str ?? '',
+          created: annotation.creationDate ?? '',
+          modified: annotation.modificationDate ?? '',
         });
       }
     }
@@ -185,7 +197,7 @@ export class PdfViewer {
   }
 
   async commitPDFChange(updatedDataPDF) {
-    const container = document.getElementById("pdf-viewer-container");
+    const container = document.getElementById('pdf-viewer-container');
     const scrollTop = container.scrollTop;
     const scrollLeft = container.scrollLeft;
 
@@ -204,7 +216,7 @@ export class PdfViewer {
     this.documentPDF = await this.loadingTask.promise;
     this.linkService.setDocument(this.documentPDF);
 
-    document.querySelector("#pdf-viewer-list").replaceChildren();
+    document.querySelector('#pdf-viewer-list').replaceChildren();
     this.pages.clear();
     this.previousPage = 0;
 
@@ -216,9 +228,9 @@ export class PdfViewer {
     this.updateCurrentPage();
 
     try {
-      await window.electronAPI.setGlobalVar("currentPDF", this.dataPDF);
+      await window.electronAPI.setGlobalVar('currentPDF', this.dataPDF);
     } catch (error) {
-      console.error("Failed to update currentPDF:", error);
+      console.error('Failed to update currentPDF:', error);
     }
 
     this.onDocumentModified?.(this.dataPDF);
@@ -226,7 +238,7 @@ export class PdfViewer {
     try {
       await previousLoadingTask?.destroy();
     } catch (error) {
-      console.warn("Failed to destroy previous PDF loading task:", error);
+      console.warn('Failed to destroy previous PDF loading task:', error);
     }
   }
 
@@ -237,7 +249,7 @@ export class PdfViewer {
       return;
     }
 
-    const annotations = await page.getAnnotations({ intent: "display" });
+    const annotations = await page.getAnnotations({ intent: 'display' });
 
     layer.replaceChildren();
     layer.style.width = `${viewport.width}px`;
@@ -254,7 +266,7 @@ export class PdfViewer {
         continue;
       }
 
-      const author = annotation.titleObj?.str ?? "";
+      const author = annotation.titleObj?.str ?? '';
       const rectangles = getHighlightRectangles(annotation, viewport);
 
       if (!rectangles.length) {
@@ -267,22 +279,22 @@ export class PdfViewer {
       );
       const size = 20;
 
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "highlight-comment-button";
-      button.setAttribute("aria-label", "Comment");
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'highlight-comment-button';
+      button.setAttribute('aria-label', 'Comment');
       button.innerHTML =
         '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
         '<circle cx="5" cy="12" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="19" cy="12" r="2.2"/></svg>';
 
-      button.style.position = "absolute";
-      button.style.pointerEvents = "auto";
+      button.style.position = 'absolute';
+      button.style.pointerEvents = 'auto';
       button.style.width = `${size}px`;
       button.style.height = `${size}px`;
       button.style.left = `${Math.max(0, Math.min(right + 4, viewport.width - size))}px`;
       button.style.top = `${Math.max(0, top - size / 2)}px`;
 
-      button.addEventListener("mouseenter", () => {
+      button.addEventListener('mouseenter', () => {
         if (isCommentPopupOpen()) {
           return;
         }
@@ -291,9 +303,9 @@ export class PdfViewer {
         showCommentTooltip({ x: box.left, y: box.bottom + 6, text, author });
       });
 
-      button.addEventListener("mouseleave", hideCommentTooltip);
+      button.addEventListener('mouseleave', hideCommentTooltip);
 
-      button.addEventListener("click", (event) => {
+      button.addEventListener('click', (event) => {
         event.stopPropagation();
         hideCommentTooltip();
 
@@ -309,7 +321,7 @@ export class PdfViewer {
           onSave: (newText) =>
             this.editHighlightComment(pageNumber, annotation.id, newText),
           onDelete: () =>
-            this.editHighlightComment(pageNumber, annotation.id, ""),
+            this.editHighlightComment(pageNumber, annotation.id, ''),
         });
       });
 
@@ -345,9 +357,9 @@ export class PdfViewer {
   zoomAtPoint(clientX, clientY, direction) {
     const wrapper = document
       .elementFromPoint(clientX, clientY)
-      ?.closest(".pdf-page");
+      ?.closest('.pdf-page');
     if (!wrapper) {
-      if (direction === "in") this.zoomInPages();
+      if (direction === 'in') this.zoomInPages();
       else this.zoomOutPages();
       return;
     }
@@ -356,13 +368,13 @@ export class PdfViewer {
     const fracX = (clientX - rectBefore.left) / rectBefore.width;
     const fracY = (clientY - rectBefore.top) / rectBefore.height;
 
-    if (direction === "in") {
+    if (direction === 'in') {
       this.zoomInPages();
     } else {
       this.zoomOutPages();
     }
 
-    const container = document.getElementById("pdf-viewer-container");
+    const container = document.getElementById('pdf-viewer-container');
     const rectAfter = wrapper.getBoundingClientRect();
     const targetClientX = rectAfter.left + fracX * rectAfter.width;
     const targetClientY = rectAfter.top + fracY * rectAfter.height;
@@ -395,7 +407,7 @@ export class PdfViewer {
 
   async renderTextLayer(page, viewport, entry, pageNumber) {
     if (entry.textLayerInstance) {
-      entry.textLayer.style.setProperty("--scale-factor", viewport.scale);
+      entry.textLayer.style.setProperty('--scale-factor', viewport.scale);
       entry.textLayer.style.width = `${viewport.width}px`;
       entry.textLayer.style.height = `${viewport.height}px`;
 
@@ -409,7 +421,7 @@ export class PdfViewer {
       entry.textLayer || document.getElementById(`text-layer-${pageNumber}`);
 
     textLayer.replaceChildren();
-    textLayer.style.setProperty("--scale-factor", viewport.scale);
+    textLayer.style.setProperty('--scale-factor', viewport.scale);
     textLayer.style.width = `${viewport.width}px`;
     textLayer.style.height = `${viewport.height}px`;
 
@@ -433,7 +445,7 @@ export class PdfViewer {
 
     if (!annotationLayer) return;
 
-    const annotations = await page.getAnnotations({ intent: "display" });
+    const annotations = await page.getAnnotations({ intent: 'display' });
 
     annotationLayer.replaceChildren();
 
@@ -473,7 +485,7 @@ export class PdfViewer {
 
     this.documentPDF.getPage(pageNumber).then((page) => {
       entry.page = page;
-      const canvasContext = canvas.getContext("2d");
+      const canvasContext = canvas.getContext('2d');
 
       const viewport = page.getViewport({
         scale: this.scale,
@@ -493,6 +505,7 @@ export class PdfViewer {
       const renderContext = {
         canvasContext: canvasContext,
         viewport,
+        annotationMode: AnnotationMode.ENABLE_STORAGE,
       };
 
       const renderTask = page.render(renderContext);
@@ -503,6 +516,12 @@ export class PdfViewer {
 
       entry.renderTask.promise
         .then(async () => {
+          this.annotationManager.renderAnnotationLayer(
+            pageNumber,
+            entry,
+            page,
+            viewport,
+          );
           await this.renderTextLayer(page, viewport, entry, pageNumber);
           await this.renderHighlightCommentLayer(
             page,
@@ -543,7 +562,7 @@ export class PdfViewer {
     const textLayer = document.getElementById(`text-layer-${pageNumber}`);
 
     if (textLayer) {
-      textLayer.innerHTML = "";
+      textLayer.innerHTML = '';
     }
 
     entry.wrapper?.highlightCommentLayer?.replaceChildren();
@@ -551,6 +570,7 @@ export class PdfViewer {
     entry.textDivs = null;
     entry.textLayerInstance = null;
     this.onTextLayerUnloaded?.(pageNumber);
+    this.annotationManager.destroyLayer(pageNumber);
 
     if (entry.page) {
       entry.page.cleanup();
@@ -563,7 +583,7 @@ export class PdfViewer {
   setupObservers() {
     this.observers.forEach((observer) => observer.disconnect());
 
-    const wrappers = document.querySelectorAll("#pdf-viewer-list .pdf-page");
+    const wrappers = document.querySelectorAll('#pdf-viewer-list .pdf-page');
 
     const loadObserver = new IntersectionObserver(
       (entries) => {
@@ -573,7 +593,7 @@ export class PdfViewer {
           }
 
           const wrapper = entry.target;
-          const canvas = wrapper.querySelector("canvas");
+          const canvas = wrapper.querySelector('canvas');
           const pageNumber = Number(canvas.dataset.pageNumber);
 
           this.renderPage(pageNumber, canvas);
@@ -584,7 +604,7 @@ export class PdfViewer {
       },
       {
         root: null,
-        rootMargin: "750px 0px",
+        rootMargin: '750px 0px',
         threshold: 0,
       },
     );
@@ -593,7 +613,7 @@ export class PdfViewer {
       (entries) => {
         entries.forEach((entry) => {
           const wrapper = entry.target;
-          const canvas = wrapper.querySelector("canvas");
+          const canvas = wrapper.querySelector('canvas');
           const pageNumber = Number(canvas.dataset.pageNumber);
 
           if (!entry.isIntersecting) {
@@ -605,7 +625,7 @@ export class PdfViewer {
       },
       {
         root: null,
-        rootMargin: "2000px 0px",
+        rootMargin: '2000px 0px',
         threshold: 0,
       },
     );
@@ -618,7 +638,7 @@ export class PdfViewer {
   }
 
   async renderPages() {
-    const canvasDiv = document.querySelector("#pdf-viewer-list");
+    const canvasDiv = document.querySelector('#pdf-viewer-list');
 
     const pageNumbers = Array.from(
       { length: this.documentPDF.numPages },
@@ -636,62 +656,62 @@ export class PdfViewer {
     );
 
     for (const { number, page, viewport } of pages) {
-      const wrapper = document.createElement("div");
-      wrapper.className = "pdf-page";
+      const wrapper = document.createElement('div');
+      wrapper.className = 'pdf-page';
 
       wrapper.style.width = `${viewport.width}px`;
       wrapper.style.height = `${viewport.height}px`;
-      wrapper.style.position = "relative";
+      wrapper.style.position = 'relative';
 
-      const canvas = document.createElement("canvas");
+      const canvas = document.createElement('canvas');
       canvas.dataset.pageNumber = number;
 
-      canvas.style.position = "absolute";
-      canvas.style.left = "0";
-      canvas.style.top = "0";
+      canvas.style.position = 'absolute';
+      canvas.style.left = '0';
+      canvas.style.top = '0';
       canvas.style.width = `${viewport.width}px`;
       canvas.style.height = `${viewport.height}px`;
-      canvas.style.zIndex = "1";
+      canvas.style.zIndex = '1';
 
-      const textLayer = document.createElement("div");
-      textLayer.className = "textLayer";
+      const textLayer = document.createElement('div');
+      textLayer.className = 'textLayer';
       textLayer.id = `text-layer-${number}`;
 
       textLayer.style.width = `${viewport.width}px`;
       textLayer.style.height = `${viewport.height}px`;
-      textLayer.style.zIndex = "2";
+      textLayer.style.zIndex = '2';
 
-      const annotationLayer = document.createElement("div");
-      annotationLayer.className = "annotationLayer";
+      const annotationLayer = document.createElement('div');
+      annotationLayer.className = 'annotationLayer';
       annotationLayer.id = `annotation-layer-${number}`;
 
       annotationLayer.style.width = `${viewport.width}px`;
       annotationLayer.style.height = `${viewport.height}px`;
-      annotationLayer.style.zIndex = "3";
-      annotationLayer.style.pointerEvents = "none";
+      annotationLayer.style.zIndex = '3';
+      annotationLayer.style.pointerEvents = 'none';
 
-      const annotationEditorLayer = document.createElement("div");
-      annotationEditorLayer.className = "annotationEditorLayer";
+      const annotationEditorLayer = document.createElement('div');
+      annotationEditorLayer.className = 'annotationEditorLayer';
       annotationEditorLayer.id = `annotation-editor-layer-${number}`;
 
       annotationEditorLayer.style.width = `${viewport.width}px`;
       annotationEditorLayer.style.height = `${viewport.height}px`;
-      annotationEditorLayer.style.zIndex = "4";
-      annotationEditorLayer.style.pointerEvents = "none";
+      annotationEditorLayer.style.zIndex = '4';
+      annotationEditorLayer.style.pointerEvents = 'none';
 
       wrapper.appendChild(canvas);
       wrapper.appendChild(textLayer);
       wrapper.appendChild(annotationLayer);
       wrapper.appendChild(annotationEditorLayer);
 
-      const highlightCommentLayer = document.createElement("div");
-      highlightCommentLayer.className = "highlight-comment-layer";
+      const highlightCommentLayer = document.createElement('div');
+      highlightCommentLayer.className = 'highlight-comment-layer';
       highlightCommentLayer.id = `highlight-comment-layer-${number}`;
-      highlightCommentLayer.style.position = "absolute";
-      highlightCommentLayer.style.left = "0";
-      highlightCommentLayer.style.top = "0";
-      highlightCommentLayer.style.zIndex = "5";
-      highlightCommentLayer.style.pointerEvents = "none";
+      highlightCommentLayer.style.position = 'absolute';
+      highlightCommentLayer.style.left = '0';
+      highlightCommentLayer.style.top = '0';
+      highlightCommentLayer.style.zIndex = '5';
+      highlightCommentLayer.style.pointerEvents = 'none';
       highlightCommentLayer.style.width = `${viewport.width}px`;
       highlightCommentLayer.style.height = `${viewport.height}px`;
 
