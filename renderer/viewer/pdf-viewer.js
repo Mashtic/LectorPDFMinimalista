@@ -1,4 +1,5 @@
 import {
+  AnnotationMode,
   GlobalWorkerOptions,
   getDocument,
   TextLayer,
@@ -215,6 +216,7 @@ export class PdfViewer {
       const renderContext = {
         canvasContext: canvasContext,
         viewport,
+        annotationMode: AnnotationMode.DISABLE,
       };
 
       const renderTask = page.render(renderContext);
