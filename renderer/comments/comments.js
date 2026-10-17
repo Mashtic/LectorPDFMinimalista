@@ -10,17 +10,34 @@ let comments = [];
 let contextPage = null;
 let pendingQuote = "";
 let pendingQuads = [];
-let pdfData = null;
-let pdfDocument = null;
-let loadingTask = null;
 let latestLoadId = 0;
+let annotationStore = null;
 
-const pdfDataReady = window.electronAPI
-  .getGlobalVar("currentPDF")
-  .then((data) => {
-    pdfData = data;
-    loadPdfComments();
-  });
+import("./annotation-store.js").then((module) => {
+  annotationStore = module.annotationStore;
+  annotationStore.addEventListener("change", refreshComments);
+  refreshComments();
+});
+
+async function refreshComments() {
+  if (!annotationStore) return;
+
+  const loadId = ++latestLoadId;
+  const entries = await annotationStore.getAllComments();
+
+  if (loadId !== latestLoadId) return;
+
+  comments = entries.map((e) => ({
+    text: e.text,
+    quote: e.quote,
+    page: e.pageNumber,
+    quads: Array.from(e.annotation.quadPoints || []),
+    rect: e.annotation.rect || null,
+    createdAt: "",
+  }));
+
+  renderComments();
+}
 
 document.addEventListener(
   "contextmenu",
@@ -35,7 +52,6 @@ window.electronAPI.onOpenComments(async (selectedText) => {
   pendingQuote = selectedText.trim();
   const selectedGeometry = pendingQuote ? captureSelectionGeometry() : null;
   window.getSelection()?.removeAllRanges();
-  await loadPdfComments();
   pendingQuads = selectedGeometry
     ? await convertSelectionToPdfQuads(selectedGeometry)
     : [];
@@ -61,93 +77,18 @@ form.addEventListener("submit", (event) => {
     Number(form.dataset.page) ||
     Number(document.getElementById("pdf-page-count").value) ||
     1;
-  window.electronAPI
-    .addPdfComment({
-      pageNumber: page,
-      text: message,
-      quote: pendingQuote,
-      quads: pendingQuads,
-    })
-    .then((updatedData) => {
-      pdfData = new Uint8Array(updatedData);
-      document.dispatchEvent(
-        new CustomEvent("pdf-comment-added", { detail: updatedData }),
-      );
-      comments.push({
-        text: message,
-        quote: pendingQuote,
-        page,
-        quads: pendingQuads,
-        createdAt: new Date().toISOString(),
-      });
-      input.value = "";
-      pendingQuote = "";
-      pendingQuads = [];
-      quote.hidden = true;
-      form.dataset.page = "";
-      // The PDF is the only source of truth: re-read the list from it
-      loadPdfComments();
-    })
-    .catch((error) => console.error("Could not add the PDF comment", error));
+  annotationStore.createComment({
+    pageNumber: page,
+    text: message,
+    quote: pendingQuote,
+    quads: pendingQuads,
+  });
+  input.value = "";
+  pendingQuote = "";
+  pendingQuads = [];
+  quote.hidden = true;
+  form.dataset.page = "";
 });
-
-async function loadPdfComments() {
-  await pdfDataReady;
-  if (!pdfData) return;
-
-  // Only the most recent call may update the list (calls can overlap)
-  const loadId = ++latestLoadId;
-
-  try {
-    const { getDocument } =
-      await import("../../node_modules/pdfjs-dist/build/pdf.mjs");
-    const { getAnnotationText, isCommentable, formatPDFDate } =
-      await import("./highlight-comments.js");
-
-    const newLoadingTask = getDocument({ data: new Uint8Array(pdfData) });
-    const loadedDocument = await newLoadingTask.promise;
-
-    const savedComments = [];
-    for (let page = 1; page <= loadedDocument.numPages; page++) {
-      const pdfPage = await loadedDocument.getPage(page);
-      // Same filter as the comment bubbles, so both always agree
-      const annotations = await pdfPage.getAnnotations({ intent: "display" });
-      for (const annotation of annotations) {
-        const annotationText =
-          annotation.contents ||
-          annotation.contentsObj?.str ||
-          annotation.richText?.str ||
-          "";
-        if (annotationText.trim()) {
-          savedComments.push({
-            text: annotationText,
-            quote: annotation.subject || "",
-            page,
-            quads: Array.from(annotation.quadPoints || []),
-            rect: annotation.rect || null,
-            createdAt: "",
-          });
-        }
-      }
-    }
-
-    if (loadId !== latestLoadId) {
-      await newLoadingTask.destroy();
-      return;
-    }
-
-    const previousLoadingTask = loadingTask;
-    loadingTask = newLoadingTask;
-    pdfDocument = loadedDocument;
-    comments = savedComments;
-    renderComments();
-
-    // Release the previous document so it does not leak
-    await previousLoadingTask?.destroy();
-  } catch (error) {
-    console.error("Could not read PDF comments", error);
-  }
-}
 
 function captureSelectionGeometry() {
   const selection = window.getSelection();
@@ -187,6 +128,7 @@ function captureSelectionGeometry() {
 }
 
 async function convertSelectionToPdfQuads(geometry) {
+  const pdfDocument = annotationStore?.document;
   if (!pdfDocument || !geometry?.rects.length) return [];
   const page = await pdfDocument.getPage(geometry.pageNumber);
   const baseViewport = page.getViewport({ scale: 1 });
@@ -230,7 +172,6 @@ function renderComments() {
     body.textContent = comment.text;
     card.append(body);
 
-    // createdAt is already formatted by loadPdfComments
     const details = document.createElement("div");
     details.className = "comment-meta";
     details.textContent = [
@@ -244,11 +185,8 @@ function renderComments() {
   }
 }
 
-document.addEventListener("pdf-modified", (event) => {
-  pdfData = new Uint8Array(event.detail);
-  loadPdfComments();
-});
 async function goToComment(comment) {
+  const pdfDocument = annotationStore?.document;
   const pageNumber = Number(comment.page);
   const wrapper = document
     .querySelector(`.pdf-page canvas[data-page-number="${pageNumber}"]`)

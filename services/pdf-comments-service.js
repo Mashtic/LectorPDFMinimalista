@@ -10,13 +10,21 @@ const {
 } = require("pdf-lib");
 const { getGlobalVar, setGlobalVar } = require("./global-var-service.js");
 
-async function addPdfComment({ pageNumber, text, quote, quads = [] }) {
-  const source = getGlobalVar("currentPDF");
-  if (!source) throw new Error("No PDF is currently open");
+let annotationBase = null;
 
-  const pdf = await PDFDocument.load(source);
-  const page = pdf.getPage(Number(pageNumber) - 1);
-  if (!page) throw new Error("Invalid PDF page");
+const LOAD_OPTIONS = { updateMetadata: false };
+const SAVE_OPTIONS = { useObjectStreams: false };
+
+function setAnnotationBase(bytes) {
+  annotationBase = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+}
+
+function appendComment(pdf, { pageNumber, text, quote, quads = [] }) {
+  const index = Number(pageNumber) - 1;
+  if (!Number.isInteger(index) || index < 0 || index >= pdf.getPageCount()) {
+    throw new Error(`Invalid PDF page: ${pageNumber}`);
+  }
+  const page = pdf.getPage(index);
 
   const context = pdf.context;
   const annotationsKey = PDFName.of("Annots");
@@ -71,10 +79,6 @@ async function addPdfComment({ pageNumber, text, quote, quads = [] }) {
     });
   }
   annotations.push(context.register(annotation));
-
-  const updatedPdf = await pdf.save();
-  setGlobalVar("currentPDF", updatedPdf);
-  return Array.from(updatedPdf);
 }
 
 function referenceFromAnnotationId(annotationId) {
@@ -128,10 +132,7 @@ function findAnnotation(documentPDF, pageNumber, annotationId) {
   };
 }
 
-async function setHighlightComment(dataPDF, pageNumber, annotationId, text) {
-  const documentPDF = await PDFDocument.load(dataPDF, {
-    updateMetadata: false,
-  });
+function changeHighlightComment(documentPDF, pageNumber, annotationId, text) {
   const { dictionary } = findAnnotation(documentPDF, pageNumber, annotationId);
 
   const contentsKey = PDFName.of("Contents");
@@ -152,14 +153,9 @@ async function setHighlightComment(dataPDF, pageNumber, annotationId, text) {
 
   dictionary.delete(PDFName.of("RC"));
   dictionary.set(PDFName.of("M"), PDFString.fromDate(new Date()));
-
-  return documentPDF.save();
 }
 
-async function deleteHighlight(dataPDF, pageNumber, annotationId) {
-  const documentPDF = await PDFDocument.load(dataPDF, {
-    updateMetadata: false,
-  });
+function removeHighlight(documentPDF, pageNumber, annotationId) {
   const { annotations, reference, dictionary } = findAnnotation(
     documentPDF,
     pageNumber,
@@ -196,8 +192,74 @@ async function deleteHighlight(dataPDF, pageNumber, annotationId) {
 
     documentPDF.context.delete(target);
   }
-
-  return documentPDF.save();
 }
 
-module.exports = { addPdfComment, setHighlightComment, deleteHighlight };
+async function applyAnnotationOps({
+  base,
+  edits = [],
+  deletions = [],
+  creates = [],
+} = {}) {
+  const source = base ?? annotationBase;
+  if (!source) {
+    throw new Error("No annotation base: call setAnnotationBase() first");
+  }
+
+  if (!edits.length && !deletions.length && !creates.length) {
+    setGlobalVar("currentPDF", source);
+    return true;
+  }
+
+  console.time("applyAnnotationOps: load");
+  const pdf = await PDFDocument.load(source, LOAD_OPTIONS);
+  console.timeEnd("applyAnnotationOps: load");
+
+  for (const { pageNumber, annotationId, text } of edits) {
+    changeHighlightComment(pdf, pageNumber, annotationId, text);
+  }
+  for (const { pageNumber, annotationId } of deletions) {
+    removeHighlight(pdf, pageNumber, annotationId);
+  }
+  for (const comment of creates) {
+    appendComment(pdf, comment);
+  }
+
+  console.time("applyAnnotationOps: save");
+  const updated = await pdf.save(SAVE_OPTIONS);
+  console.timeEnd("applyAnnotationOps: save");
+
+  setGlobalVar("currentPDF", updated);
+  return true;
+}
+
+async function addPdfComment({ pageNumber, text, quote, quads = [] }) {
+  const source = getGlobalVar("currentPDF");
+  if (!source) throw new Error("No PDF is currently open");
+
+  const pdf = await PDFDocument.load(source, LOAD_OPTIONS);
+  appendComment(pdf, { pageNumber, text, quote, quads });
+
+  const updatedPdf = await pdf.save(SAVE_OPTIONS);
+  setGlobalVar("currentPDF", updatedPdf);
+  return updatedPdf;
+}
+
+async function setHighlightComment(dataPDF, pageNumber, annotationId, text) {
+  const documentPDF = await PDFDocument.load(dataPDF, LOAD_OPTIONS);
+  changeHighlightComment(documentPDF, pageNumber, annotationId, text);
+  return documentPDF.save(SAVE_OPTIONS);
+}
+
+async function deleteHighlight(dataPDF, pageNumber, annotationId) {
+  const documentPDF = await PDFDocument.load(dataPDF, LOAD_OPTIONS);
+  removeHighlight(documentPDF, pageNumber, annotationId);
+  return documentPDF.save(SAVE_OPTIONS);
+}
+
+module.exports = {
+  addPdfComment,
+  setHighlightComment,
+  deleteHighlight,
+  setAnnotationBase,
+  applyAnnotationOps,
+};

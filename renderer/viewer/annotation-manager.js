@@ -2,10 +2,10 @@ import {
   AnnotationLayer,
   AnnotationType,
   AnnotationEditorType,
-} from '../../node_modules/pdfjs-dist/build/pdf.mjs';
+} from "../../node_modules/pdfjs-dist/build/pdf.mjs";
 
 // pdf.js treats annotationStorage keys with this prefix as new annotations
-const ANNOTATION_EDITOR_PREFIX = 'pdfjs_internal_editor_';
+const ANNOTATION_EDITOR_PREFIX = "pdfjs_internal_editor_";
 
 const DEFAULT_HIGHLIGHT_COLOR = [255, 235, 59]; // RGB, 0-255
 const DEFAULT_HIGHLIGHT_OPACITY = 0.4;
@@ -88,13 +88,16 @@ export class AnnotationManager {
     //   Page number -> page entry ({ wrapper, canvas, page, rendered, textDivs, ... }).
     // rerenderPage
     //   Re-renders a page (canvas + layers).
+    // store
+    //   The AnnotationStore (overlay of user changes on the loaded document).
     this.host = host;
+    this.store = host.store;
 
     this.highlights = new Map();
     this.nextHighlightId = 1;
-    this.onHighlightsChanged = async () => {
-      host.commitPDFChange(await this.documentPDF.saveDocument());
-    };
+    // No reload: the highlight already lives in annotationStorage and is drawn
+    // by refreshPage(). The store only has to know the bytes are out of date.
+    this.onHighlightsChanged = () => this.store.noteExternalChange();
 
     this.layers = new Map();
   }
@@ -276,13 +279,24 @@ export class AnnotationManager {
     return id;
   }
 
-  /** Re-renders a page so both the canvas and the annotation layer pick up changes. */
+  /**
+   * Re-renders only the annotation layer of a page. The canvas is rendered
+   * with AnnotationMode.DISABLE, so it never needs to be redrawn for this.
+   */
   refreshPage(pageNumber) {
     const entry = this.host.getPageEntries().get(pageNumber);
-    if (!entry?.rendered) return;
+    if (!entry?.rendered || !entry.page) return;
 
     this.destroyLayer(pageNumber);
-    this.host.rerenderPage(pageNumber);
+    this.layers.get(pageNumber)?.div.replaceChildren();
+    const viewport = entry.page.getViewport({ scale: this.host.getScale() });
+    return this.renderAnnotationLayer(pageNumber, entry, entry.page, viewport);
+  }
+
+  /** Forget everything tied to the previous document (call on a full reload). */
+  reset() {
+    this.highlights.clear();
+    this.layers.clear();
   }
 
   destroyLayer(pageNumber) {
@@ -302,10 +316,10 @@ export class AnnotationManager {
     let state = this.layers.get(pageNumber);
 
     if (!state) {
-      const div = document.createElement('div');
-      div.className = 'annotationLayer';
+      const div = document.createElement("div");
+      div.className = "annotationLayer";
       div.id = `annotation-layer-${pageNumber}`;
-      div.style.zIndex = '3'; // above the text layer (2)
+      div.style.zIndex = "3"; // above the text layer (2)
       entry.wrapper.appendChild(div);
 
       state = { div, layer: null, token: 0 };
@@ -314,14 +328,14 @@ export class AnnotationManager {
 
     const { div } = state;
 
-    div.style.setProperty('--scale-factor', viewport.scale);
-    div.style.setProperty('--user-unit', page.userUnit);
+    div.style.setProperty("--scale-factor", viewport.scale);
+    div.style.setProperty("--user-unit", page.userUnit);
     div.style.setProperty(
-      '--total-scale-factor',
+      "--total-scale-factor",
       viewport.scale * page.userUnit,
     );
-    div.style.setProperty('--scale-round-x', '1px');
-    div.style.setProperty('--scale-round-y', '1px');
+    div.style.setProperty("--scale-round-x", "1px");
+    div.style.setProperty("--scale-round-y", "1px");
 
     if (state.layer) {
       state.layer.update({ viewport });
@@ -338,12 +352,20 @@ export class AnnotationManager {
     });
     state.layer = layer;
 
-    const fromFile = (await page.getAnnotations({ intent: 'display' })).filter(
-      (annotation) => annotation.annotationType === AnnotationType.HIGHLIGHT,
-    );
-    const created = [...this.highlights.values()]
-      .filter((highlight) => highlight.pageNumber === pageNumber)
-      .map((highlight) => highlight.data);
+    // File highlights with the user's edits applied (deleted ones dropped)
+    const fromFile = (await page.getAnnotations({ intent: "display" }))
+      .filter(
+        (annotation) => annotation.annotationType === AnnotationType.HIGHLIGHT,
+      )
+      .map((annotation) => this.store.applyOverrides(pageNumber, annotation))
+      .filter(Boolean);
+    const created = [
+      ...[...this.highlights.values()]
+        .filter((highlight) => highlight.pageNumber === pageNumber)
+        .map((highlight) => highlight.data),
+      // Comments created in this session that are not in the loaded file
+      ...this.store.getLocalHighlights(pageNumber),
+    ];
 
     // The page was unloaded or refreshed while we were waiting
     if (token !== state.token) return;
@@ -351,9 +373,9 @@ export class AnnotationManager {
     await layer.render({ annotations: [...fromFile, ...created] });
 
     // Highlights without a popup must not swallow clicks / text selection
-    for (const section of div.querySelectorAll('section.highlightAnnotation')) {
-      if (!section.classList.contains('popupTriggerArea')) {
-        section.style.pointerEvents = 'none';
+    for (const section of div.querySelectorAll("section.highlightAnnotation")) {
+      if (!section.classList.contains("popupTriggerArea")) {
+        section.style.pointerEvents = "none";
       }
     }
   }

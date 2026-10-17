@@ -18,6 +18,7 @@ import {
   isCommentPopupOpen,
 } from "../comments/highlight-comments.js";
 import { AnnotationManager } from "./annotation-manager.js";
+import { annotationStore } from "../comments/annotation-store.js";
 
 GlobalWorkerOptions.workerSrc = "./pdf.worker.mjs";
 
@@ -43,16 +44,22 @@ export class PdfViewer {
     // but not saved, like showing a message asking the user if they want to
     // save before closing and such.
     this.onDocumentModified = null;
+
+    this.annotationStore = annotationStore;
+    this.annotationStore.addEventListener("change", (event) => {
+      const { pageNumber } = event.detail;
+      if (pageNumber) this.refreshPageLayers(pageNumber);
+      if (this.annotationStore.isDirty) this.onDocumentModified?.();
+    });
+
     this.annotationManager = new AnnotationManager({
+      store: this.annotationStore,
       getDocument: () => this.documentPDF,
       getScale: () => this.scale,
       getPageEntries: () => this.pages,
       rerenderPage: (pageNumber) => {
         const entry = this.pages.get(pageNumber);
         if (entry) this.renderPage(pageNumber, entry.canvas);
-      },
-      commitPDFChange: (updatedDataPDF) => {
-        this.commitPDFChange(updatedDataPDF);
       },
     });
   }
@@ -69,6 +76,7 @@ export class PdfViewer {
     this.loadingTask = getDocument({ data: this.dataPDF.slice() });
     this.documentPDF = await this.loadingTask.promise;
     this.linkService.setDocument(this.documentPDF);
+    this.annotationStore.attach(this.documentPDF, this.dataPDF);
     await this.renderPages();
     this.setupObservers();
     this.updateCurrentPage();
@@ -149,27 +157,16 @@ export class PdfViewer {
     const comments = [];
 
     for (let number = 1; number <= this.documentPDF.numPages; number++) {
-      const page = await this.documentPDF.getPage(number);
-      const annotations = await page.getAnnotations({ intent: "display" });
-
-      for (const annotation of annotations) {
-        if (!isCommentable(annotation)) {
-          continue;
-        }
-
-        const text = getAnnotationText(annotation);
-
-        if (!text) {
-          continue;
-        }
-
+      for (const comment of await this.annotationStore.getPageComments(
+        number,
+      )) {
         comments.push({
           pageNumber: number,
-          id: annotation.id,
-          text,
-          author: annotation.titleObj?.str ?? "",
-          created: annotation.creationDate ?? "",
-          modified: annotation.modificationDate ?? "",
+          id: comment.id,
+          text: comment.text,
+          author: comment.author,
+          created: comment.created,
+          modified: comment.modified,
         });
       }
     }
@@ -178,24 +175,29 @@ export class PdfViewer {
   }
 
   async editHighlightComment(pageNumber, annotationId, text) {
-    const updatedDataPDF = await window.electronAPI.setHighlightComment({
-      dataPDF: this.dataPDF,
-      pageNumber,
-      annotationId,
-      text,
-    });
-
-    await this.commitPDFChange(updatedDataPDF);
+    this.annotationStore.setCommentText(pageNumber, annotationId, text);
   }
 
   async deleteHighlightComment(pageNumber, annotationId) {
-    const updatedDataPDF = await window.electronAPI.deleteHighlight({
-      dataPDF: this.dataPDF,
-      pageNumber,
-      annotationId,
-    });
+    this.annotationStore.deleteHighlight(pageNumber, annotationId);
+  }
 
-    await this.commitPDFChange(updatedDataPDF);
+  getCurrentPDF() {
+    return this.annotationStore.getBytes();
+  }
+
+  async refreshPageLayers(pageNumber) {
+    const entry = this.pages.get(pageNumber);
+    if (!entry?.rendered || !entry.page) return;
+
+    const viewport = entry.page.getViewport({ scale: this.scale });
+    await this.annotationManager.refreshPage(pageNumber);
+    await this.renderHighlightCommentLayer(
+      entry.page,
+      viewport,
+      entry,
+      pageNumber,
+    );
   }
 
   async commitPDFChange(updatedDataPDF) {
@@ -217,6 +219,8 @@ export class PdfViewer {
     this.loadingTask = getDocument({ data: this.dataPDF.slice() });
     this.documentPDF = await this.loadingTask.promise;
     this.linkService.setDocument(this.documentPDF);
+    this.annotationManager.reset();
+    this.annotationStore.attach(this.documentPDF, this.dataPDF);
 
     document.querySelector("#pdf-viewer-list").replaceChildren();
     this.pages.clear();
@@ -251,24 +255,14 @@ export class PdfViewer {
       return;
     }
 
-    const annotations = await page.getAnnotations({ intent: "display" });
+    const comments = await this.annotationStore.getPageComments(pageNumber);
 
     layer.replaceChildren();
     layer.style.width = `${viewport.width}px`;
     layer.style.height = `${viewport.height}px`;
 
-    for (const annotation of annotations) {
-      if (!isCommentable(annotation)) {
-        continue;
-      }
-
-      const text = getAnnotationText(annotation);
-
-      if (!text) {
-        continue;
-      }
-
-      const author = annotation.titleObj?.str ?? "";
+    for (const comment of comments) {
+      const { text, author, annotation } = comment;
       const rectangles = getHighlightRectangles(annotation, viewport);
 
       if (!rectangles.length) {
@@ -318,12 +312,11 @@ export class PdfViewer {
           y: box.bottom + 6,
           text,
           author,
-          created: annotation.creationDate,
-          modified: annotation.modificationDate,
+          created: comment.created,
+          modified: comment.modified,
           onSave: (newText) =>
-            this.editHighlightComment(pageNumber, annotation.id, newText),
-          onDelete: () =>
-            this.editHighlightComment(pageNumber, annotation.id, ""),
+            this.editHighlightComment(pageNumber, comment.id, newText),
+          onDelete: () => this.editHighlightComment(pageNumber, comment.id, ""),
         });
       });
 

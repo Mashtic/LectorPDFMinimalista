@@ -2,6 +2,8 @@ const { ipcMain } = require("electron");
 const {
   setHighlightComment,
   deleteHighlight,
+  setAnnotationBase,
+  applyAnnotationOps,
 } = require("../services/pdf-comments-service.js");
 
 function registerCommentsIpc() {
@@ -17,6 +19,14 @@ function registerCommentsIpc() {
     (event, { dataPDF, pageNumber, annotationId }) => {
       return deleteHighlight(dataPDF, pageNumber, annotationId);
     },
+  );
+
+  ipcMain.handle("pdf:setAnnotationBase", (_e, bytes) =>
+    setAnnotationBase(bytes),
+  );
+
+  ipcMain.handle("pdf:applyAnnotationOps", (_e, ops) =>
+    applyAnnotationOps(ops),
   );
 }
 

@@ -50,4 +50,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   setHighlightComment: (data) =>
     ipcRenderer.invoke("set-highlight-comment", data),
   deleteHighlight: (data) => ipcRenderer.invoke("delete-highlight", data),
+  setAnnotationBase: (bytes) =>
+    ipcRenderer.invoke("pdf:setAnnotationBase", bytes),
+  applyAnnotationOps: (ops) =>
+    ipcRenderer.invoke("pdf:applyAnnotationOps", ops),
 });
