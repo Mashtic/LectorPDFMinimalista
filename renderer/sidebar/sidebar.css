@@ -8,6 +8,26 @@
   --sidebar-hover: rgba(0, 0, 0, 0.05);
 }
 
+.sidebar-thumbnail-list {
+  position: relative;
+}
+
+.sidebar-drop-indicator {
+  position: absolute;
+  left: 30px;
+  right: 30px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--drop-indicator-color, rgba(128, 128, 128, 0.6));
+  pointer-events: none;
+  display: none;
+  z-index: 2;
+}
+
+.sidebar-drop-indicator.is-visible {
+  display: block;
+}
+
 /* Hamburger button */
 #sidebar-toggle {
   position: fixed;
