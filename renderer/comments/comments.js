@@ -15,10 +15,12 @@ let pdfDocument = null;
 let loadingTask = null;
 let latestLoadId = 0;
 
-window.electronAPI.getGlobalVar("currentPDF").then((data) => {
-  pdfData = data;
-  loadPdfComments();
-});
+const pdfDataReady = window.electronAPI
+  .getGlobalVar("currentPDF")
+  .then((data) => {
+    pdfData = data;
+    loadPdfComments();
+  });
 
 document.addEventListener(
   "contextmenu",
@@ -32,6 +34,7 @@ document.addEventListener(
 window.electronAPI.onOpenComments(async (selectedText) => {
   pendingQuote = selectedText.trim();
   const selectedGeometry = pendingQuote ? captureSelectionGeometry() : null;
+  window.getSelection()?.removeAllRanges();
   await loadPdfComments();
   pendingQuads = selectedGeometry
     ? await convertSelectionToPdfQuads(selectedGeometry)
@@ -67,10 +70,16 @@ form.addEventListener("submit", (event) => {
     })
     .then((updatedData) => {
       pdfData = new Uint8Array(updatedData);
-      // The viewer reloads from these bytes
       document.dispatchEvent(
         new CustomEvent("pdf-comment-added", { detail: updatedData }),
       );
+      comments.push({
+        text: message,
+        quote: pendingQuote,
+        page,
+        quads: pendingQuads,
+        createdAt: new Date().toISOString(),
+      });
       input.value = "";
       pendingQuote = "";
       pendingQuads = [];
@@ -83,6 +92,7 @@ form.addEventListener("submit", (event) => {
 });
 
 async function loadPdfComments() {
+  await pdfDataReady;
   if (!pdfData) return;
 
   // Only the most recent call may update the list (calls can overlap)
@@ -103,17 +113,21 @@ async function loadPdfComments() {
       // Same filter as the comment bubbles, so both always agree
       const annotations = await pdfPage.getAnnotations({ intent: "display" });
       for (const annotation of annotations) {
-        const text = getAnnotationText(annotation);
-        if (!isCommentable(annotation) || !text) continue;
-
-        savedComments.push({
-          text,
-          quote: annotation.subject || "",
-          page,
-          createdAt: formatPDFDate(
-            annotation.creationDate || annotation.modificationDate,
-          ),
-        });
+        const annotationText =
+          annotation.contents ||
+          annotation.contentsObj?.str ||
+          annotation.richText?.str ||
+          "";
+        if (annotationText.trim()) {
+          savedComments.push({
+            text: annotationText,
+            quote: annotation.subject || "",
+            page,
+            quads: Array.from(annotation.quadPoints || []),
+            rect: annotation.rect || null,
+            createdAt: "",
+          });
+        }
       }
     }
 
@@ -195,6 +209,16 @@ function renderComments() {
   for (const comment of comments) {
     const card = document.createElement("article");
     card.className = "comment-card";
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-label", `Go to comment on page ${comment.page}`);
+    card.addEventListener("click", () => goToComment(comment));
+    card.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        goToComment(comment);
+      }
+    });
 
     if (comment.quote) {
       const excerpt = document.createElement("blockquote");
@@ -224,3 +248,106 @@ document.addEventListener("pdf-modified", (event) => {
   pdfData = new Uint8Array(event.detail);
   loadPdfComments();
 });
+async function goToComment(comment) {
+  const pageNumber = Number(comment.page);
+  const wrapper = document
+    .querySelector(`.pdf-page canvas[data-page-number="${pageNumber}"]`)
+    ?.closest(".pdf-page");
+  if (!wrapper) return;
+
+  const container = document.getElementById("pdf-viewer-container");
+  const canvas = wrapper.querySelector("canvas");
+  const page = pdfDocument && (await pdfDocument.getPage(pageNumber));
+  const viewport = page?.getViewport({
+    scale: canvas.clientWidth / page.getViewport({ scale: 1 }).width,
+  });
+  let targetY = 0;
+
+  if (viewport && comment.quads?.length) {
+    const quad = comment.quads.slice(0, 8);
+    targetY = Math.min(
+      ...[1, 3, 5, 7].map(
+        (index) =>
+          viewport.convertToViewportPoint(quad[index - 1], quad[index])[1],
+      ),
+    );
+  } else if (viewport && comment.rect?.length === 4) {
+    targetY = viewport.convertToViewportPoint(
+      comment.rect[0],
+      comment.rect[3],
+    )[1];
+  }
+
+  const pageOffset =
+    wrapper.getBoundingClientRect().top - container.getBoundingClientRect().top;
+  container.scrollTop += pageOffset + targetY - 24;
+  document.getElementById("pdf-page-count").value = pageNumber;
+  highlightCommentLocation(wrapper, viewport, comment);
+}
+
+function highlightCommentLocation(wrapper, viewport, comment) {
+  document
+    .querySelectorAll(".comment-location-highlight")
+    .forEach((element) => element.remove());
+  const quads = comment.quads || [];
+  const rectangles = [];
+
+  if (viewport && quads.length >= 8) {
+    for (let index = 0; index + 7 < quads.length; index += 8) {
+      const points = [0, 2, 4, 6].map((offset) =>
+        viewport.convertToViewportPoint(
+          quads[index + offset],
+          quads[index + offset + 1],
+        ),
+      );
+      const xs = points.map(([x]) => x);
+      const ys = points.map(([, y]) => y);
+      rectangles.push({
+        left: Math.min(...xs),
+        top: Math.min(...ys),
+        width: Math.max(...xs) - Math.min(...xs),
+        height: Math.max(...ys) - Math.min(...ys),
+      });
+    }
+  } else if (viewport && comment.rect?.length === 4) {
+    const [left, bottom] = viewport.convertToViewportPoint(
+      comment.rect[0],
+      comment.rect[1],
+    );
+    const [right, top] = viewport.convertToViewportPoint(
+      comment.rect[2],
+      comment.rect[3],
+    );
+    rectangles.push({
+      left: Math.min(left, right),
+      top: Math.min(top, bottom),
+      width: Math.abs(right - left),
+      height: Math.abs(bottom - top),
+    });
+  }
+
+  rectangles.forEach((rect) => {
+    const marker = document.createElement("div");
+    marker.className = "comment-location-highlight";
+    Object.assign(marker.style, {
+      position: "absolute",
+      left: `${rect.left}px`,
+      top: `${rect.top}px`,
+      width: `${rect.width}px`,
+      height: `${Math.max(rect.height, 3)}px`,
+      background: "rgb(255 210 50 / 45%)",
+      outline: "2px solid rgb(220 155 0 / 75%)",
+      pointerEvents: "none",
+      zIndex: "5",
+    });
+    wrapper.append(marker);
+  });
+  if (rectangles.length)
+    setTimeout(
+      () =>
+        wrapper
+          .querySelectorAll(".comment-location-highlight")
+          .forEach((element) => element.remove()),
+      1800,
+    );
+}

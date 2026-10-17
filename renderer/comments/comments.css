@@ -67,6 +67,14 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+.comment-card[role="button"] {
+  cursor: pointer;
+}
+.comment-card[role="button"]:hover,
+.comment-card[role="button"]:focus-visible {
+  background: #fafaf8;
+  outline: none;
+}
 .comment-card blockquote,
 #comment-selection {
   margin: 0 0 9px;
