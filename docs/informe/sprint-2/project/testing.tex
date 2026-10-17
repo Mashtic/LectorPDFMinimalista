@@ -1,0 +1,193 @@
+\chapter{Control de calidad}
+El control de calidad del sistema se realizará mediante pruebas manuales funcionales ejecutadas por los miembros del equipo de desarrollo. Estas pruebas tienen como objetivo comprobar que la funcionalidades implementadas respondan de acuerdo con los requerimientos definidos para cada historia de usuario.
+
+Para cada prueba se verificará la interacción del usuario con la aplicación, el resultado visual obtenido y, cuando corresponda, la conservación de los cambios realizados en el documento PDF. Las pruebas se organizaron según las principales áreas funcionales del sistema para esta iteración: comentarios, highlights, firma e instalación.
+
+\section{Guiones de pruebas}
+
+\begin{longtable}{ | p{2cm} | p{3cm} | p{4cm} | p{4cm} | c |}
+      \hline
+      \textbf{Historias} & \textbf{Descripción} & \textbf{Resultado Esperado} & \textbf{Resultado Obtenido} & \textbf{Condición}\\
+      \hline
+      US-023 &
+      El usuario con tarjeta de firma digital abre un PDF, selecciona la opción de firmar, se autentica con GAUDI y confirma la firma sin salir de la aplicación. &
+      El documento queda firmado digitalmente con el certificado de la tarjeta, sin abrir programas externos. Al reabrir el archivo, la firma es válida. &
+       &
+      \\
+      \hline
+      US-024 &
+      El usuario abre un PDF previamente firmado digitalmente y consulta el estado de la firma. &
+      La aplicación indica que el documento está firmado y muestra el nombre del firmante y la fecha de la firma. &
+       &
+      \\
+      \hline
+      US-033 &
+      El usuario selecciona la opción de firma gráfica, elige su imagen de firma y la coloca haciendo clic en una página del documento. &
+      La imagen de firma aparece en la página seleccionada con el mismo aspecto que la vista previa. &
+       &
+      \\
+      \hline
+      US-034 &
+      Tras colocar la firma gráfica, el usuario la arrastra a otra posición y cambia su tamaño con los controles de la imagen. &
+      La firma cambia de posición y tamaño según lo indicado y conserva esa ubicación al fijarla en la página. &
+       &
+      \\
+      \hline
+      US-035 &
+      El usuario carga una imagen de firma y la guarda en la aplicación. Luego cierra la aplicación, la vuelve a abrir y accede a la opción de insertar firma. &
+      La imagen guardada aparece disponible en la lista de firmas sin necesidad de buscar el archivo original. &
+       &
+      \\
+      \hline
+      US-036 &
+      El usuario inserta una firma gráfica en un documento y observa el aviso que aparece. &
+      La aplicación muestra un aviso que indica que la firma gráfica no tiene validez legal y que solo la firma digital verificada la tiene. &
+       &
+      \\
+      \hline
+ 
+      \caption{Guión de Pruebas 1: firma digital y gráfica}
+      \label{TestScript1}
+\end{longtable}
+ 
+\begin{longtable}{ | p{2cm} | p{3cm} | p{4cm} | p{4cm} | c |}
+      \hline
+      \textbf{Historias} & \textbf{Descripción} & \textbf{Resultado Esperado} & \textbf{Resultado Obtenido} & \textbf{Condición}\\
+      \hline
+      US-025 &
+      El usuario abre un PDF, hace una selección con el cursor y activa la opción de resaltar. &
+      El fragmento seleccionado queda con un fondo de color que lo diferencia del resto del texto. &
+       &
+      \\
+      \hline
+      US-026 &
+      El usuario selecciona un fragmento de texto, despliega la lista de colores de resaltado y elige un color distinto al predeterminado. &
+      La aplicación muestra varios colores disponibles y el texto resaltado toma el color elegido. &
+       &
+      \\
+      \hline
+      US-027 &
+      El usuario hace clic sobre un resaltado existente y selecciona la opción de eliminarlo. &
+      El resaltado desaparece y el texto queda sin marca. &
+       &
+      \\
+      \hline
+      US-028 &
+      El usuario crea un resaltado, guarda el documento, lo cierra y lo vuelve a abrir. &
+      El resaltado se conserva en la misma posición y con el mismo color al reabrir el archivo. &
+       &
+      \\
+      \hline
+ 
+      \caption{Guión de Pruebas 2: highlights}
+      \label{TestScript2}
+\end{longtable}
+ 
+\begin{longtable}{ | p{2cm} | p{3cm} | p{4cm} | p{4cm} | c |}
+      \hline
+      \textbf{Historias} & \textbf{Descripción} & \textbf{Resultado Esperado} & \textbf{Resultado Obtenido} & \textbf{Condición}\\
+      \hline
+      US-029 &
+      El usuario selecciona un fragmento de texto, elige la opción de agregar comentario, escribe un texto y confirma. &
+      El comentario queda asociado a la selección y se muestra un indicador en esa parte del documento. &
+       &
+      \\
+      \hline
+      US-031 &
+      El usuario accede al panel de comentarios desde el menú contextual. Hace click en un comentario. &
+      El panel de comentarios muestra una lista con todos los comentarios del documento. Al hacer click en un comentario el visualizador se dirige a la posición del comentario en el documento. &
+       &
+      \\
+      \hline
+      US-030 &
+      El usuario abre el panel de comentarios, selecciona un comentario existente, modifica su texto y luego elimina otro comentario del documento. &
+      El comentario editado muestra el nuevo texto y el comentario eliminado desaparece del documento. &
+       &
+      \\      
+      \hline
+      US-032 &
+      El usuario agrega un comentario, guarda el archivo, lo cierra y lo vuelve a abrir. &
+      Los comentarios se mantienen en el documento y pueden visualizarse al reabrirlo. &
+       &
+      \\      
+      \hline
+      US-039 &
+      El usuario abre un PDF creado con otro editor que contiene anotaciones. &
+      Las anotaciones existentes se muestran sobre la página en su posición original. &
+       &
+      \\
+      \hline
+ 
+      \caption{Guión de Pruebas 3: comentarios}
+      \label{TestScript3}
+\end{longtable}
+ 
+\begin{longtable}{ | p{2cm} | p{3cm} | p{4cm} | p{4cm} | c |}
+      \hline
+      \textbf{Historias} & \textbf{Descripción} & \textbf{Resultado Esperado} & \textbf{Resultado Obtenido} & \textbf{Condición}\\
+      \hline
+      US-037 &
+      El usuario ejecuta el instalador en Windows, acepta las opciones por defecto y finaliza la instalación. &
+      La aplicación queda instalada, aparece en el menú de inicio y en el escritorio si se seleccionó esa opción. &
+       &
+      \\
+      \hline
+      US-038 &
+      El usuario hace clic derecho sobre un archivo PDF, selecciona la opción “Abrir con” y elige la aplicación. &
+      La aplicación se abre con el PDF cargado y visible en el visor. &
+       &
+      \\
+      \hline
+      
+ 
+      \caption{Guión de Pruebas 4: instalación y anotaciones externas}
+      \label{TestScript4}
+
+\end{longtable}
+
+\begin{longtable}{ | p{2cm} | p{3cm} | p{4cm} | p{4cm} | c |}
+      \hline
+      \textbf{Historias} & \textbf{Descripción} & \textbf{Resultado Esperado} & \textbf{Resultado Obtenido} & \textbf{Condición}\\
+      \hline
+      FX-005 &
+      El usuario inicia el modo presentación desde el visor de un PDF abierto. &
+      El modo presentación recibe el documento y la página actual, y muestra el contenido correctamente. &
+       &
+      \\
+      \hline
+      FX-006 &
+      El usuario abre un PDF con varias páginas y observa el conteo de páginas y la barra de desplazamiento. &
+      El conteo de páginas se muestra en la esquina inferior derecha con estilo minimalista, y la barra de desplazamiento mantiene el estilo visual de la aplicación, no el del sistema. &
+       &
+      \\
+      \hline
+      FX-007 &
+      El usuario selecciona una o varias páginas desde el outline y ejecuta la acción de eliminar. &
+      La acción de eliminar páginas está disponible desde el outline y elimina únicamente las páginas seleccionadas. &
+       &
+      \\
+      \hline
+      FX-008 &
+      El usuario arrastra una página a una nueva posición dentro de la función de reordenar páginas. &
+      La aplicación muestra una indicación visual durante el arrastre y la página queda en la posición donde se soltó. &
+       &
+      \\
+      \hline
+      FX-009 &
+      El usuario abre un PDF y revisa la visualización de las páginas en el visor. &
+      Las sombras de las páginas se renderizan correctamente. &
+       &
+      \\
+      \hline
+      FX-010 &
+      El usuario abre un PDF con comentarios distribuidos en varias páginas y revisa el panel de comentarios. &
+      Los comentarios aparecen agrupados por página dentro del panel de comentarios. &
+       &
+      \\
+      \hline
+ 
+      \caption{Guión de Pruebas 5: fixes de la iteración 2}
+      \label{TestScript5}
+\end{longtable}
+ 
+
