@@ -84,14 +84,6 @@ body.sidebar-open #pdf-viewer-container {
   padding-left: var(--sidebar-width);
 }
 
-#pdf-page-counter {
-  transition: left 0.2s ease;
-}
-
-body.sidebar-open #pdf-page-counter {
-  left: calc(50% + var(--sidebar-width) / 2);
-}
-
 /* Tabs */
 #sidebar-tabs {
   display: flex;
@@ -303,10 +295,6 @@ body.sidebar-open #pdf-page-counter {
 @media (max-width: 900px) {
   body.sidebar-open #pdf-viewer-container {
     padding-left: 0;
-  }
-
-  body.sidebar-open #pdf-page-counter {
-    left: 50%;
   }
 }
 
