@@ -6,7 +6,8 @@
   "scripts": {
     "start": "electron .",
     "live": "nodemon --ext js,css,html --exec electron .",
-    "build": "electron-builder --linux --win"
+    "build": "electron-builder --linux --win",
+    "build:win": "electron-builder --win"
   },
   "repository": {
     "type": "git",
@@ -42,8 +43,26 @@
     },
     "win": {
       "target": [
-        "portable"
+        "nsis"
+      ],
+      "icon": "build/icon.png",
+      "fileAssociations": [
+        {
+          "ext": "pdf",
+          "name": "PDF Document",
+          "description": "PDF Document",
+          "role": "Viewer"
+        }
       ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Folio",
+      "deleteAppDataOnUninstall": false,
+      "include": "build/installer.nsh"
     }
   }
 }
