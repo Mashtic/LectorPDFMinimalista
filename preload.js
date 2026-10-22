@@ -34,6 +34,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on("dialog:openAppendDialog", callback);
   },
 
+  signDocument: (pin) => ipcRenderer.invoke("sign:document", pin),
+  openSignModal: (callback) => {
+    ipcRenderer.on("sign:openSignModal", callback);
+  },
+
   addHighlight: (callback) => {
     ipcRenderer.on("addHighlight", callback);
   },

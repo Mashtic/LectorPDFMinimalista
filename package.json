@@ -7,7 +7,8 @@
     "start": "electron .",
     "live": "nodemon --ext js,css,html --exec electron .",
     "build": "electron-builder --linux --win",
-    "build:win": "electron-builder --win"
+    "build:win": "electron-builder --win",
+    "rebuild": "electron-rebuild -f -w pkcs11js"
   },
   "repository": {
     "type": "git",
@@ -22,13 +23,18 @@
   },
   "homepage": "https://github.com/Mashtic/LectorPDFMinimalista#readme",
   "devDependencies": {
+    "@electron/rebuild": "^4.2.1",
     "electron": "^44.1.1",
     "electron-builder": "^26.15.3",
     "nodemon": "^3.1.14"
   },
   "dependencies": {
+    "@signpdf/placeholder-plain": "^4.0.0",
+    "@signpdf/signpdf": "^4.0.0",
+    "node-forge": "^1.4.0",
     "pdf-lib": "^1.17.1",
-    "pdfjs-dist": "^6.3.289"
+    "pdfjs-dist": "^6.3.289",
+    "pkcs11js": "^2.1.7"
   },
   "allowScripts": {
     "electron-winstaller@5.4.0": true

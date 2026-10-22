@@ -8,6 +8,7 @@ const { cleanupPreviews } = require("./services/pdf-merge-service.js");
 const { registerGlobalVarIpc } = require("./ipc/global-var-ipc.js");
 const { registerPDFSaveIpc } = require("./ipc/pdf-save-ipc.js");
 const { registerCommentsIpc } = require("./ipc/comments-ipc.js");
+const { registerSignDocumentIpc } = require("./ipc/sign-document-ipc.js");
 const path = require("node:path");
 const { existsSync } = require("node:fs");
 const { readPdfFromPath } = require("./services/pdf-open-service.js");
@@ -47,6 +48,8 @@ app.whenReady().then(async () => {
   registerPDFMergeIpc();
   registerGlobalVarIpc();
   registerPDFSaveIpc();
+  registerCommentsIpc();
+  registerSignDocumentIpc();
   registerCommentsIpc();
 
   Menu.setApplicationMenu(null);

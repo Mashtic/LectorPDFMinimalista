@@ -1,6 +1,7 @@
 import { appendPdf, openFile, openPdfFromFile } from "./open-file/open-file.js";
 import { openDeletePagesModal } from "./delete-pages/delete-pages-renderer.js";
 import { saveCurrentPdf, saveFile } from "./save-file/save-file.js";
+import { openSignDocumentModal } from "./sign-document/sign-document-renderer.js";
 import "./window/window.js";
 
 
@@ -24,6 +25,10 @@ window.electronAPI.openSaveCurrentPdfDialog(() => {
 
 window.electronAPI.openAppendDialog(() => {
   appendPdf();
+});
+
+window.electronAPI.openSignModal(() => {
+  openSignDocumentModal();
 });
 
 document.addEventListener("dragover", (event) => {

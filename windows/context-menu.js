@@ -70,6 +70,12 @@ function showContextMenu(window, selectionText = "") {
         click: notImplementedYet,
       },
       {
+        label: "Sign Document",
+        click: () => {
+          window.webContents.send("sign:openSignModal");
+        },
+      },
+      {
         label: "Open in Presentation Mode",
         click: () => {
           openPresentationWindow();
