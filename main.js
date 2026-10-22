@@ -50,7 +50,6 @@ app.whenReady().then(async () => {
   registerPDFSaveIpc();
   registerCommentsIpc();
   registerSignDocumentIpc();
-  registerCommentsIpc();
 
   Menu.setApplicationMenu(null);
   await loadLaunchPdf();

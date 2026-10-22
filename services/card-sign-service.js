@@ -8,13 +8,25 @@ const forge = require("node-forge");
  * the card: the card receives a digest and returns the signature.
  */
 
+/*
+ * Costa Rican cards come with one of two middlewares: Idopte, used by the
+ * newer NXP ChipDoc cards, and Athena IDProtect, used by the older ones.
+ * The Idopte module is listed first because it ships with current cards.
+ */
 const MODULE_PATHS = {
-  win32: ["C:\\Windows\\System32\\asepkcs.dll"],
+  win32: [
+    "C:\\Program Files\\Smart Card Middleware\\bin\\idoPKCS.dll",
+    "C:\\Windows\\System32\\asepkcs.dll",
+  ],
   darwin: [
+    "/Library/Application Support/Idopte/libidopkcs11.dylib",
+    "/usr/local/lib/libidopkcs11.dylib",
     "/Library/Application Support/Athena/libASEP11.dylib",
     "/usr/local/lib/libASEP11.dylib",
   ],
   linux: [
+    "/usr/lib/idopte/libidopkcs11.so",
+    "/usr/lib/x86_64-linux-gnu/libidopkcs11.so",
     "/usr/lib/x64-athena/libASEP11.so",
     "/usr/lib/x86_64-linux-gnu/libASEP11.so",
     "/usr/local/lib/libASEP11.so",
