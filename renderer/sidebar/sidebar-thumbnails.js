@@ -1,4 +1,6 @@
 const THUMBNAIL_WIDTH = 150;
+const REORDER_SCROLL_EDGE = 80;
+const REORDER_SCROLL_SPEED = 8;
 
 export class SidebarThumbnails {
   constructor(viewer, container) {
@@ -39,6 +41,46 @@ export class SidebarThumbnails {
     list.appendChild(dropIndicator);
     this.dropIndicator = dropIndicator;
     this.draggedPage = null;
+    let autoScrollFrame = null;
+    let dragClientY = null;
+
+    const stopAutoScroll = () => {
+      if (autoScrollFrame !== null) {
+        cancelAnimationFrame(autoScrollFrame);
+        autoScrollFrame = null;
+      }
+    };
+
+    const autoScroll = (clientY) => {
+      if (!list.classList.contains("is-reordering")) {
+        stopAutoScroll();
+        return;
+      }
+
+      const rect = this.container.getBoundingClientRect();
+      const distanceFromTop = clientY - rect.top;
+      const distanceFromBottom = rect.bottom - clientY;
+      let scrollAmount = 0;
+
+      if (distanceFromTop >= 0 && distanceFromTop < REORDER_SCROLL_EDGE) {
+        scrollAmount = -REORDER_SCROLL_SPEED;
+      } else if (
+        distanceFromBottom >= 0 &&
+        distanceFromBottom < REORDER_SCROLL_EDGE
+      ) {
+        scrollAmount = REORDER_SCROLL_SPEED;
+      }
+
+      if (scrollAmount !== 0) {
+        this.container.scrollBy({ top: scrollAmount, behavior: "auto" });
+        autoScrollFrame = requestAnimationFrame(() =>
+          autoScroll(dragClientY),
+        );
+        return;
+      }
+
+      stopAutoScroll();
+    };
 
     const hideDropIndicator = () => {
       dropIndicator.classList.remove("is-visible");
@@ -82,7 +124,10 @@ export class SidebarThumbnails {
     };
 
     list.addEventListener("dragleave", (event) => {
-      if (!list.contains(event.relatedTarget)) hideDropIndicator();
+      if (!list.contains(event.relatedTarget)) {
+        hideDropIndicator();
+        stopAutoScroll();
+      }
     });
 
     const reorderBar = document.createElement("div");
@@ -226,16 +271,23 @@ export class SidebarThumbnails {
         event.dataTransfer.effectAllowed = "move";
         button.classList.add("is-dragging");
         this.draggedPage = pageNumber;
+        dragClientY = event.clientY;
       });
       button.addEventListener("dragend", () => {
         button.classList.remove("is-dragging");
         this.draggedPage = null;
+        dragClientY = null;
         hideDropIndicator();
+        stopAutoScroll();
       });
       button.addEventListener("dragover", (event) => {
         if (!list.classList.contains("is-reordering")) return;
         event.preventDefault();
         event.dataTransfer.dropEffect = "move";
+        dragClientY = event.clientY;
+        if (autoScrollFrame === null) {
+          autoScroll(dragClientY);
+        }
         const dragged = this.items.get(this.draggedPage);
         if (!dragged) return;
         const insertBefore = getInsertionPoint(button, event);
@@ -245,6 +297,8 @@ export class SidebarThumbnails {
         if (!list.classList.contains("is-reordering")) return;
         event.preventDefault();
         hideDropIndicator();
+        dragClientY = null;
+        stopAutoScroll();
         const draggedPage = Number(event.dataTransfer.getData("text/plain"));
         const targetPage = Number(button.dataset.pageNumber);
         if (!this.order.includes(draggedPage) || draggedPage === targetPage)

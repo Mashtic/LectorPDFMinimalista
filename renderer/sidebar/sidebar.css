@@ -16,12 +16,14 @@
   position: absolute;
   left: 30px;
   right: 30px;
-  height: 3px;
+  height: 2px;
   border-radius: 2px;
-  background: var(--drop-indicator-color, rgba(128, 128, 128, 0.6));
+  background: var(--drop-indicator-color, rgba(128, 128, 128, 0.45));
+  box-shadow: 0 0 4px rgba(128, 128, 128, 0.2);
   pointer-events: none;
   display: none;
   z-index: 2;
+  transition: top 0.08s ease, opacity 0.08s ease;
 }
 
 .sidebar-drop-indicator.is-visible {
