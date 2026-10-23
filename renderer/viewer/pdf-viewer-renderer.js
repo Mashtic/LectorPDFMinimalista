@@ -2,6 +2,7 @@ import { PdfViewer } from './pdf-viewer.js';
 import { PdfSearchController } from '../search/pdf-search.js';
 import { initializeSearchBar } from '../search/search-bar.js';
 import { initializeSidebar } from '../sidebar/sidebar.js';
+import { showSignatureStatus } from "../signature-status/signature-status-renderer.js";
 
 const welcomeScreen = document.getElementById('welcome-screen');
 const viewContainer = document.getElementById('pdf-viewer-container');
@@ -52,6 +53,7 @@ if (currentPDF) {
 
   initializeSearchBar(searchController);
   initializeSidebar(viewer);
+  showSignatureStatus();
 
   document.addEventListener('keydown', (event) => {
     if (event.key.toLowerCase() === 'j') {

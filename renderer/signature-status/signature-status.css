@@ -1,0 +1,36 @@
+/* SIGNATURE STATUS */
+
+#signature-status {
+  position: fixed;
+  top: 12px;
+  right: 56px;
+  z-index: 9998;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 280px;
+  padding: 5px 10px;
+
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1;
+  cursor: default;
+  user-select: none;
+}
+
+#signature-status span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#signature-status.is-signed {
+  color: #2e8b57;
+  background: rgba(46, 139, 87, 0.12);
+}
+
+#signature-status.is-warning {
+  color: #a1403a;
+  background: rgba(161, 64, 58, 0.12);
+}
