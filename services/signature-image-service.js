@@ -7,14 +7,17 @@ const { getGlobalVar, setGlobalVar } = require("./global-var-service.js");
  * Draws an image of a handwritten signature on a page. This is only a visual
  * mark: it does not sign the document. The digital signature lives in
  * pdf-sign-service.js.
+ *
+ * The placement arrives as fractions of the page (0 to 1) measured from the
+ * top left corner, because the viewer does not know the page size in points.
+ * This service turns them into PDF points, whose origin is the bottom left.
  */
 
 const PNG_HEADER = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
 const JPG_HEADER = Buffer.from([0xff, 0xd8, 0xff]);
 
-// Default size and margin of the stamp, in PDF points
-const DEFAULT_WIDTH = 160;
-const DEFAULT_MARGIN = 72;
+// Image chosen in the picker, waiting for the person to place it
+let pendingImage = null;
 
 function createImageError(code) {
   const error = new Error(`Signature image failed: ${code}`);
@@ -22,7 +25,23 @@ function createImageError(code) {
   return error;
 }
 
+function getMediaType(imageBytes) {
+  if (PNG_HEADER.equals(imageBytes.subarray(0, 4))) {
+    return "image/png";
+  }
+
+  if (JPG_HEADER.equals(imageBytes.subarray(0, 3))) {
+    return "image/jpeg";
+  }
+
+  throw createImageError("INVALID_IMAGE");
+}
+
 async function pickSignatureImage() {
+  if (!getGlobalVar("currentPDF")) {
+    throw createImageError("NO_DOCUMENT");
+  }
+
   const { canceled, filePaths } = await dialog.showOpenDialog({
     properties: ["openFile"],
     filters: [
@@ -37,43 +56,49 @@ async function pickSignatureImage() {
     return null;
   }
 
-  return filePaths[0];
+  let imageBytes;
+
+  try {
+    imageBytes = await readFile(filePaths[0]);
+  } catch {
+    throw createImageError("UNREADABLE_FILE");
+  }
+
+  const mediaType = getMediaType(imageBytes);
+  pendingImage = { bytes: imageBytes, mediaType };
+
+  // The preview is sent as a data URL so the viewer can show it before it is
+  // written into the document
+  return {
+    dataUrl: `data:${mediaType};base64,${imageBytes.toString("base64")}`,
+  };
 }
 
-async function embedImage(pdf, imageBytes) {
-  if (PNG_HEADER.equals(imageBytes.subarray(0, 4))) {
+function cancelSignatureImage() {
+  pendingImage = null;
+}
+
+async function embedImage(pdf, image) {
+  if (image.mediaType === "image/png") {
     // embedPng keeps the alpha channel, so transparency is preserved
-    return pdf.embedPng(imageBytes);
+    return pdf.embedPng(image.bytes);
   }
 
-  if (JPG_HEADER.equals(imageBytes.subarray(0, 3))) {
-    return pdf.embedJpg(imageBytes);
-  }
-
-  throw createImageError("INVALID_IMAGE");
+  return pdf.embedJpg(image.bytes);
 }
 
-function resolvePlacement(image, page, placement) {
+function toPdfRectangle(placement, page) {
   const { width: pageWidth, height: pageHeight } = page.getSize();
 
-  if (placement?.width) {
-    return {
-      x: placement.x,
-      y: placement.y,
-      width: placement.width,
-      height: placement.height,
-    };
-  }
-
-  // Without a placement the stamp goes where a signature line usually is
-  const width = Math.min(DEFAULT_WIDTH, pageWidth / 3);
-  const scaled = image.scale(width / image.width);
+  const width = placement.width * pageWidth;
+  const height = placement.height * pageHeight;
 
   return {
-    x: (pageWidth - scaled.width) / 2,
-    y: Math.min(DEFAULT_MARGIN, pageHeight / 4),
-    width: scaled.width,
-    height: scaled.height,
+    x: placement.x * pageWidth,
+    // The viewer measures from the top, PDF measures from the bottom
+    y: pageHeight - placement.y * pageHeight - height,
+    width,
+    height,
   };
 }
 
@@ -83,22 +108,16 @@ async function insertSignatureImage({ pageNumber, placement } = {}) {
     throw createImageError("NO_DOCUMENT");
   }
 
-  const imagePath = await pickSignatureImage();
-  if (!imagePath) {
-    return null;
+  if (!pendingImage) {
+    throw createImageError("NO_IMAGE");
   }
 
-  let imageBytes;
-
-  try {
-    imageBytes = await readFile(imagePath);
-  } catch {
-    throw createImageError("UNREADABLE_FILE");
+  if (!placement) {
+    throw createImageError("NO_PLACEMENT");
   }
 
   const pdf = await PDFDocument.load(source);
-  const pageIndex = Number(pageNumber) - 1;
-  const page = pdf.getPages()[pageIndex];
+  const page = pdf.getPages()[Number(pageNumber) - 1];
 
   if (!page) {
     throw createImageError("INVALID_PAGE");
@@ -107,17 +126,21 @@ async function insertSignatureImage({ pageNumber, placement } = {}) {
   let image;
 
   try {
-    image = await embedImage(pdf, imageBytes);
+    image = await embedImage(pdf, pendingImage);
   } catch (error) {
     throw error.code ? error : createImageError("INVALID_IMAGE");
   }
 
-  page.drawImage(image, resolvePlacement(image, page, placement));
+  page.drawImage(image, toPdfRectangle(placement, page));
 
-  const updated = Buffer.from(await pdf.save());
-  setGlobalVar("currentPDF", updated);
+  setGlobalVar("currentPDF", Buffer.from(await pdf.save()));
+  pendingImage = null;
 
   return { pageNumber: Number(pageNumber) };
 }
 
-module.exports = { insertSignatureImage };
+module.exports = {
+  pickSignatureImage,
+  insertSignatureImage,
+  cancelSignatureImage,
+};

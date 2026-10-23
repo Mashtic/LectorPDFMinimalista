@@ -36,6 +36,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   signDocument: (pin) => ipcRenderer.invoke("sign:document", pin),
   readSignatureInfo: () => ipcRenderer.invoke("signature:read"),
+  pickSignatureImage: () => ipcRenderer.invoke("signature:pickImage"),
+  insertSignatureImage: (options) =>
+    ipcRenderer.invoke("signature:insertImage", options),
+  cancelSignatureImage: () => ipcRenderer.invoke("signature:cancelImage"),
+  onInsertSignatureImage: (callback) => {
+    ipcRenderer.on("signature:openImagePicker", callback);
+  },
   openSignModal: (callback) => {
     ipcRenderer.on("sign:openSignModal", callback);
   },

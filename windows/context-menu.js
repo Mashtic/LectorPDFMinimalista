@@ -72,7 +72,7 @@ function showContextMenu(window, selectionText = "") {
       {
         label: "Insert Signature Image",
         click: () => {
-          window.webContents.send("signature:insertImage");
+          window.webContents.send("signature:openImagePicker");
         },
       },
       {
