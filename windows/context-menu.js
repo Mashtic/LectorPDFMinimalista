@@ -54,12 +54,6 @@ function showContextMenu(window, selectionText = "") {
         },
       },
       {
-        label: "Delete Pages",
-        click: () => {
-          window.webContents.send("pdfMod:openDeletePagesModal");
-        },
-      },
-      {
         label: "Append File",
         click: () => {
           window.webContents.send("dialog:openAppendDialog");

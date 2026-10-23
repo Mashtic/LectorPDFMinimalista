@@ -145,6 +145,39 @@ body.sidebar-open #pdf-viewer-container {
   display: none;
 }
 
+.sidebar-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-panel::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background: #999999;
+  background-clip: padding-box;
+}
+
+.sidebar-panel::-webkit-scrollbar-thumb:hover {
+  background: #333333;
+  background-clip: padding-box;
+}
+
+.sidebar-panel::-webkit-scrollbar-button,
+.sidebar-panel::-webkit-scrollbar-button:single-button,
+.sidebar-panel::-webkit-scrollbar-button:vertical:decrement,
+.sidebar-panel::-webkit-scrollbar-button:vertical:increment {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.sidebar-panel::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 .sidebar-empty {
   margin: 8px 20px;
   color: var(--text-muted, #999999);
@@ -177,6 +210,47 @@ body.sidebar-open #pdf-viewer-container {
   cursor: wait;
 }
 
+.sidebar-thumbnail-list.is-deleting .sidebar-thumbnail {
+  cursor: default;
+}
+
+.sidebar-thumbnail.is-deleted {
+  display: none;
+}
+
+.sidebar-delete-button {
+  position: absolute;
+  top: -6px;
+  right: calc(50% - 83px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #555555;
+  color: #ffffff;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sidebar-delete-button[hidden] {
+  display: none;
+}
+
+.sidebar-delete-button:hover {
+  background: #333333;
+}
+
+.sidebar-delete-button:focus-visible {
+  outline: 2px solid #8a8a8a;
+  outline-offset: 2px;
+}
+
 .sidebar-thumbnail-list {
   display: flex;
   flex-direction: column;
@@ -194,6 +268,7 @@ body.sidebar-open #pdf-viewer-container {
 }
 
 .sidebar-thumbnail {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;

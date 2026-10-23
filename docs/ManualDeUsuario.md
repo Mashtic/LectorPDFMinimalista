@@ -31,7 +31,6 @@ no un PDF abierto.
 | Open New File | Siempre | Abre el selector de archivos |
 | Save As | Con un PDF abierto | Guarda una copia con otro nombre o ubicación |
 | Save | Con un PDF abierto | Sobrescribe el archivo original |
-| Delete Pages | Con un PDF abierto | Abre el diálogo para eliminar páginas |
 | Append File | Con un PDF abierto | Concatena otro PDF al final del actual |
 | Merge Files | Con un PDF abierto | Aún no implementada |
 | Open in Presentation Mode | Con un PDF abierto | Abre el modo presentación |
@@ -169,13 +168,11 @@ tecla `C` lo copia al portapapeles.
 
 ## 9) Eliminar páginas
 
-1. Click derecho y elegir **Delete Pages**.
-2. Escribir los números de las páginas a eliminar separados por coma, por
-   ejemplo `2,5,9`.
-3. Presionar **Accept**.
-
-El documento se recarga sin esas páginas. **Escape**, el botón **Cancel** o un
-click fuera del diálogo lo cierran sin cambios.
+1. Abrir el menú de hamburguesa y seleccionar la pestaña **Pages**.
+2. Seleccionar **Delete Pages**.
+3. Pulsar la **X** junto a cada página que se quiera eliminar.
+4. Presionar **Save Changes** para aplicar los cambios o **Cancel** para
+   descartarlos.
 
 El cambio ocurre solo en el documento abierto; el archivo en disco no se
 modifica hasta guardarlo (sección 12).

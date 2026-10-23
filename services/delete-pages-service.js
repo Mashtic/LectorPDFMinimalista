@@ -3,15 +3,27 @@ const { setGlobalVar, getGlobalVar } = require("./global-var-service.js");
 
 async function deletePages(pages) {
   const pdfDoc = await PDFDocument.load(getGlobalVar("currentPDF"));
-  pages.sort((a, b) => a - b);
+  const pageCount = pdfDoc.getPageCount();
 
-  let offset = 0;
-  for (let i = 0; i < pages.length; i++) {
-    if (0 <= pages[i] && pages[i] < pdfDoc.getPageCount()) {
-      let k = pages[i] - offset;
-      pdfDoc.removePage(k);
-      offset++;
-    }
+  if (
+    !Array.isArray(pages) ||
+    pages.some(
+      (pageNumber) =>
+        !Number.isInteger(pageNumber) ||
+        pageNumber < 1 ||
+        pageNumber > pageCount,
+    )
+  ) {
+    throw new Error("Invalid PDF pages to delete");
+  }
+
+  const pagesToDelete = [...new Set(pages)].sort((a, b) => b - a);
+  if (pagesToDelete.length >= pageCount) {
+    throw new Error("A PDF must contain at least one page");
+  }
+
+  for (const pageNumber of pagesToDelete) {
+    pdfDoc.removePage(pageNumber - 1);
   }
 
   const pdfBytesModified = await pdfDoc.save();
