@@ -190,6 +190,20 @@ html.highlight-comment-selecting .highlight-comment-button {
   outline: none;
 }
 
+.highlight-comment-popup.is-delete-only {
+  width: auto;
+  padding: 6px;
+}
+
+.highlight-comment-popup.is-delete-only .header {
+  margin-bottom: 0;
+}
+
+.highlight-comment-popup.is-delete-only .metadata,
+.highlight-comment-popup.is-delete-only .comment-text {
+  display: none;
+}
+
 .highlight-comment-popup [hidden] {
   display: none !important;
 }

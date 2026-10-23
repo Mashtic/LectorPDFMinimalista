@@ -61,6 +61,7 @@ export class PdfViewer {
         const entry = this.pages.get(pageNumber);
         if (entry) this.renderPage(pageNumber, entry.canvas);
       },
+      onHighlightClick: (details) => this.showHighlightPopup(details),
     });
   }
 
@@ -179,7 +180,30 @@ export class PdfViewer {
   }
 
   async deleteHighlightComment(pageNumber, annotationId) {
+    if (annotationId.startsWith("user_highlight_")) {
+      this.annotationManager.deleteHighlight(annotationId, pageNumber);
+    }
     this.annotationStore.deleteHighlight(pageNumber, annotationId);
+  }
+
+  async showHighlightPopup({ pageNumber, annotation, event }) {
+    const comment = (await this.annotationStore.getPageComments(pageNumber)).find(
+      (entry) => entry.id === annotation.id,
+    );
+
+    showCommentPopup({
+      x: event.clientX,
+      y: event.clientY,
+      text: comment?.text || "",
+      author: comment?.author || "",
+      created: comment?.created || "",
+      modified: comment?.modified || "",
+      allowEdit: Boolean(comment?.text),
+      onSave: (newText) =>
+        this.editHighlightComment(pageNumber, annotation.id, newText),
+      onDelete: () =>
+        this.deleteHighlightComment(pageNumber, annotation.id),
+    });
   }
 
   getCurrentPDF() {

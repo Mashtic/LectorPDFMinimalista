@@ -3,11 +3,12 @@ import {
   AnnotationType,
   AnnotationEditorType,
 } from "../../node_modules/pdfjs-dist/build/pdf.mjs";
+import { getHighlightRectangles } from "../comments/highlight-comments.js";
 
 // pdf.js treats annotationStorage keys with this prefix as new annotations
 const ANNOTATION_EDITOR_PREFIX = "pdfjs_internal_editor_";
 
-const DEFAULT_HIGHLIGHT_COLOR = [255, 235, 59]; // RGB, 0-255
+const DEFAULT_HIGHLIGHT_COLOR = [144, 238, 144]; // RGB, 0-255
 const DEFAULT_HIGHLIGHT_OPACITY = 0.4;
 
 /**
@@ -279,6 +280,12 @@ export class AnnotationManager {
     return id;
   }
 
+  deleteHighlight(id, pageNumber) {
+    if (!this.highlights.delete(id)) return;
+    this.refreshPage(pageNumber);
+    this.onHighlightsChanged?.();
+  }
+
   /**
    * Re-renders only the annotation layer of a page. The canvas is rendered
    * with AnnotationMode.DISABLE, so it never needs to be redrawn for this.
@@ -339,6 +346,23 @@ export class AnnotationManager {
 
     if (state.layer) {
       state.layer.update({ viewport });
+      if (!state.highlightAnnotations) return;
+      state.highlightRects = state.highlightAnnotations.map((annotation) =>
+        getHighlightRectangles(annotation, viewport),
+      );
+      state.overlayRects = state.overlayAnnotations.map((annotation) =>
+        getHighlightRectangles(annotation, viewport),
+      );
+      let overlayIndex = 0;
+      for (const rectangles of state.overlayRects) {
+        for (const rectangle of rectangles) {
+          const overlay = state.highlightOverlays[overlayIndex++];
+          overlay.style.left = `${rectangle.left}px`;
+          overlay.style.top = `${rectangle.top}px`;
+          overlay.style.width = `${rectangle.width}px`;
+          overlay.style.height = `${rectangle.height}px`;
+        }
+      }
       return;
     }
 
@@ -366,11 +390,77 @@ export class AnnotationManager {
       // Comments created in this session that are not in the loaded file
       ...this.store.getLocalHighlights(pageNumber),
     ];
+    const commentIds = new Set(
+      (await this.store.getPageComments(pageNumber)).map(
+        (comment) => comment.id,
+      ),
+    );
 
     // The page was unloaded or refreshed while we were waiting
     if (token !== state.token) return;
 
-    await layer.render({ annotations: [...fromFile, ...created] });
+    state.highlightAnnotations = [...fromFile, ...created]
+      .filter((annotation) => !commentIds.has(annotation.id));
+    state.overlayAnnotations = state.highlightAnnotations;
+    state.highlightRects = state.highlightAnnotations.map((annotation) =>
+      getHighlightRectangles(annotation, viewport),
+    );
+    state.overlayRects = state.overlayAnnotations.map((annotation) =>
+      getHighlightRectangles(annotation, viewport),
+    );
+    state.highlightOverlays = [];
+
+    await layer.render({
+      annotations: [...fromFile, ...created].filter(
+        (annotation) => !state.overlayAnnotations.includes(annotation),
+      ),
+    });
+
+    if (state.highlightClickHandler) {
+      entry.wrapper.removeEventListener("click", state.highlightClickHandler);
+    }
+    state.highlightClickHandler = (event) => {
+      if (window.getSelection()?.isCollapsed === false) return;
+
+      const wrapperRect = entry.wrapper.getBoundingClientRect();
+      const x = event.clientX - wrapperRect.left;
+      const y = event.clientY - wrapperRect.top;
+      const selectedIndex = state.highlightRects.findIndex((rectangles) =>
+        rectangles.some(
+          (rectangle) =>
+            x >= rectangle.left &&
+            x <= rectangle.left + rectangle.width &&
+            y >= rectangle.top &&
+            y <= rectangle.top + rectangle.height,
+        ),
+      );
+
+      if (selectedIndex !== -1) {
+        event.stopPropagation();
+        this.host.onHighlightClick?.({
+          pageNumber,
+          annotation: state.highlightAnnotations[selectedIndex],
+          event,
+        });
+      }
+    };
+    entry.wrapper.addEventListener("click", state.highlightClickHandler);
+
+    state.overlayAnnotations.forEach((annotation, annotationIndex) => {
+      const rectangles = state.overlayRects[annotationIndex];
+      for (const rectangle of rectangles) {
+        const highlight = document.createElement("div");
+        highlight.className = "pdf-highlight-overlay";
+        const color = annotation.color || [144, 238, 144];
+        highlight.style.backgroundColor = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.4)`;
+        highlight.style.left = `${rectangle.left}px`;
+        highlight.style.top = `${rectangle.top}px`;
+        highlight.style.width = `${rectangle.width}px`;
+        highlight.style.height = `${rectangle.height}px`;
+        div.appendChild(highlight);
+        state.highlightOverlays.push(highlight);
+      }
+    });
 
     // Highlights without a popup must not swallow clicks / text selection
     for (const section of div.querySelectorAll("section.highlightAnnotation")) {

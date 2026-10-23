@@ -209,11 +209,14 @@ export function showCommentPopup({
   modified,
   onSave,
   onDelete,
+  allowEdit = true,
 }) {
   closeCommentPopup();
 
   const popup = document.createElement("div");
-  popup.className = "highlight-comment-popup";
+  popup.className = `highlight-comment-popup${
+    allowEdit ? "" : " is-delete-only"
+  }`;
   popup.tabIndex = -1;
 
   const header = document.createElement("div");
@@ -263,7 +266,10 @@ export function showCommentPopup({
 
   const editButton = makeIconButton("Edit comment", ICONS.edit, "");
   const deleteButton = makeIconButton("Delete comment", ICONS.trash, "danger");
-  tools.append(editButton, deleteButton);
+  if (allowEdit) {
+    tools.append(editButton);
+  }
+  tools.append(deleteButton);
   header.append(metadata, tools);
 
   const commentView = document.createElement("div");
