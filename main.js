@@ -10,6 +10,7 @@ const { registerPDFSaveIpc } = require("./ipc/pdf-save-ipc.js");
 const { registerCommentsIpc } = require("./ipc/comments-ipc.js");
 const { registerSignDocumentIpc } = require("./ipc/sign-document-ipc.js");
 const { registerSignatureInfoIpc } = require("./ipc/signature-info-ipc.js");
+const { registerSignatureImageIpc } = require("./ipc/signature-image-ipc.js");
 const path = require("node:path");
 const { existsSync } = require("node:fs");
 const { readPdfFromPath } = require("./services/pdf-open-service.js");
@@ -52,6 +53,7 @@ app.whenReady().then(async () => {
   registerCommentsIpc();
   registerSignDocumentIpc();
   registerSignatureInfoIpc();
+  registerSignatureImageIpc();
 
   Menu.setApplicationMenu(null);
   await loadLaunchPdf();

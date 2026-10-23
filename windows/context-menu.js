@@ -70,6 +70,12 @@ function showContextMenu(window, selectionText = "") {
         click: notImplementedYet,
       },
       {
+        label: "Insert Signature Image",
+        click: () => {
+          window.webContents.send("signature:insertImage");
+        },
+      },
+      {
         label: "Sign Document",
         click: () => {
           window.webContents.send("sign:openSignModal");

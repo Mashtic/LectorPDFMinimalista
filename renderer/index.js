@@ -2,6 +2,7 @@ import { appendPdf, openFile, openPdfFromFile } from "./open-file/open-file.js";
 import { openDeletePagesModal } from "./delete-pages/delete-pages-renderer.js";
 import { saveCurrentPdf, saveFile } from "./save-file/save-file.js";
 import { openSignDocumentModal } from "./sign-document/sign-document-renderer.js";
+import { insertSignatureImage } from "./signature-image/signature-image-renderer.js";
 import "./window/window.js";
 
 
@@ -29,6 +30,10 @@ window.electronAPI.openAppendDialog(() => {
 
 window.electronAPI.openSignModal(() => {
   openSignDocumentModal();
+});
+
+window.electronAPI.onInsertSignatureImage(() => {
+  insertSignatureImage();
 });
 
 document.addEventListener("dragover", (event) => {
