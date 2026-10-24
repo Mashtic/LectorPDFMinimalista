@@ -46,10 +46,6 @@ function showContextMenu(window, selectionText = "") {
         },
       },
       {
-        label: "Merge Files",
-        click: notImplementedYet,
-      },
-      {
         label: "Insert Signature Image",
         click: () => {
           window.webContents.send("signature:openImagePicker");
