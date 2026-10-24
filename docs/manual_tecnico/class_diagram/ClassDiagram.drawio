@@ -1,11 +1,11 @@
 <mxfile host="Electron">
   <diagram name="Page-1" id="DcI3IOyl4Wg8qxByQodu">
-    <mxGraphModel dx="1055" dy="1235" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1626" dy="838" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="Khclo8ThXNiqDmpRuYuS-1" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;recursiveResize=0;container=1;collapsible=0;width=160;" value="Class Diagram" vertex="1">
-          <mxGeometry height="720" width="610" as="geometry" />
+          <mxGeometry height="720" width="900" as="geometry" />
         </mxCell>
         <mxCell id="Khclo8ThXNiqDmpRuYuS-2" parent="Khclo8ThXNiqDmpRuYuS-1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" value="PdfPresentationViewer" vertex="1">
           <mxGeometry height="372" width="230" x="30" y="80" as="geometry" />
@@ -114,6 +114,73 @@
         </mxCell>
         <mxCell id="Khclo8ThXNiqDmpRuYuS-38" parent="Khclo8ThXNiqDmpRuYuS-24" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ fitWidth(maxWidth): void" vertex="1">
           <mxGeometry height="26" width="230" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="AnnoMgr-0" parent="Khclo8ThXNiqDmpRuYuS-1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" value="AnnotationManager" vertex="1">
+          <mxGeometry height="478" width="230" x="630" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="AnnoMgr-1" parent="AnnoMgr-0" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ host" vertex="1">
+          <mxGeometry height="26" width="230" y="26" as="geometry" />
+        </mxCell>
+        <mxCell id="AnnoMgr-2" parent="AnnoMgr-0" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ store: AnnotationStore" vertex="1">
+          <mxGeometry height="26" width="230" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="AnnoMgr-3" parent="AnnoMgr-0" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ highlights: Map" vertex="1">
+          <mxGeometry height="26" width="230" y="78" as="geometry" />
+        </mxCell>
+        <mxCell id="AnnoMgr-4" parent="AnnoMgr-0" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ nextHighlightId: Number" vertex="1">
+          <mxGeometry height="26" width="230" y="104" as="geometry" />
+        </mxCell>
+        <mxCell id="AnnoMgr-5" parent="AnnoMgr-0" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ onHighlightsChanged" vertex="1">
+          <mxGeometry height="26" width="230" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="AnnoMgr-6" parent="AnnoMgr-0" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ layers: Map" vertex="1">
+          <mxGeometry height="26" width="230" y="156" as="geometry" />
+        </mxCell>
+        <mxCell id="AnnoMgr-7" parent="AnnoMgr-0" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" value="" vertex="1">
+          <mxGeometry height="8" width="230" y="182" as="geometry" />
+        </mxCell>
+        <mxCell id="AnnoMgr-8" parent="AnnoMgr-0" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ get documentPDF(): Document" vertex="1">
+          <mxGeometry height="26" width="230" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="AnnoMgr-9" parent="AnnoMgr-0" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ addHighlightFromSelection(options): Array" vertex="1">
+          <mxGeometry height="42" width="230" y="216" as="geometry" />
+        </mxCell>
+        <mxCell id="AnnoMgr-10" parent="AnnoMgr-0" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ addHighlight(pageNumber, rects, options): String" vertex="1">
+          <mxGeometry height="42" width="230" y="258" as="geometry" />
+        </mxCell>
+        <mxCell id="AnnoMgr-11" parent="AnnoMgr-0" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ deleteHighlight(id, pageNumber): void" vertex="1">
+          <mxGeometry height="42" width="230" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="AnnoMgr-12" parent="AnnoMgr-0" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ refreshPage(pageNumber): void" vertex="1">
+          <mxGeometry height="26" width="230" y="342" as="geometry" />
+        </mxCell>
+        <mxCell id="AnnoMgr-13" parent="AnnoMgr-0" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ reset(): void" vertex="1">
+          <mxGeometry height="26" width="230" y="368" as="geometry" />
+        </mxCell>
+        <mxCell id="AnnoMgr-14" parent="AnnoMgr-0" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ destroyLayer(pageNumber): void" vertex="1">
+          <mxGeometry height="26" width="230" y="394" as="geometry" />
+        </mxCell>
+        <mxCell id="AnnoMgr-15" parent="AnnoMgr-0" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ async renderAnnotationLayer(pageNumber, entry, page, viewport): void" vertex="1">
+          <mxGeometry height="58" width="230" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="AnnoMgr-edge" edge="1" parent="Khclo8ThXNiqDmpRuYuS-1" source="Khclo8ThXNiqDmpRuYuS-24" style="endArrow=none;startArrow=diamondThin;startFill=1;startSize=16;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=11;" target="AnnoMgr-0">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="445" y="40" />
+              <mxPoint x="590" y="40" />
+              <mxPoint x="745" y="40" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="AnnoMgr-edge-label-start" connectable="0" parent="AnnoMgr-edge" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.85" as="geometry">
+            <mxPoint x="5" y="-11" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="AnnoMgr-edge-label-end" connectable="0" parent="AnnoMgr-edge" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;" value="1" vertex="1">
+          <mxGeometry relative="1" x="0.85" as="geometry">
+            <mxPoint x="-5" y="-12" as="offset" />
+          </mxGeometry>
         </mxCell>
       </root>
     </mxGraphModel>

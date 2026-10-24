@@ -1,13 +1,13 @@
 \chapter{Arquitectura del sistema}
 \section{Diseño general del sistema}
 
-La aplicación está construida sobre el framework Electron, lo que influencia en gran medida la arquitectura del sistema. Una aplicación en Electron tiene un proceso de ejecución principal que corre Node.js, este se encarga de la comunicación con el sistema operativo, la creación de ventanas, entre otras cosas; utilizando las bibliotecas que provee Electron. El proceso principal a su vez puede crear uno o más procesos renderizadores (renderer process), cada uno con una ventana asignada, estos procesos corren un navegador Chromium que se encarga de desplegar la interfaz de la aplicación (aunque también puede realizar más tareas con scripts de javascript). Esto provoca que la arquitectura este dividida en 2 partes: el proceso principal y el renderer. 
+La aplicación está construida sobre el framework Electron, lo que influencia en gran medida la arquitectura del sistema. Una aplicación en Electron\cite{electron_home} tiene un proceso de ejecución principal que corre Node.js, este se encarga de la comunicación con el sistema operativo, la creación de ventanas, entre otras cosas; utilizando las bibliotecas que provee Electron. El proceso principal a su vez puede crear uno o más procesos renderizadores (renderer process), cada uno con una ventana asignada, estos procesos corren un navegador Chromium que se encarga de desplegar la interfaz de la aplicación (aunque también puede realizar más tareas con scripts de javascript). Esto provoca que la arquitectura este dividida en 2 partes: el proceso principal y el renderer. \cite{electron_process_model} 
 
 En esta aplicación el renderer es el encargado de desplegar la interfaz de usuario principal donde se  visualizan los documentos pdf y los botones, y demás elementos, usados para las otras funcionalidades del sistema. El proceso principal se encarga de la creación de ventanas del sistema (como la ventana principal, diálogos del sistema, menú contextual, etc), la comunicación con el sistema operativo, las funcionalidades que modifican los documentos y cuenta con el estado de la aplicación.
 
 El código del proyecto tiene un diseño modular basado en los módulos de javascript. En cada módulo se encuentran funciones exportadas (públicas) y las funciones no exportadas (privadas) que solo se utilizan a lo interno del módulo. Cada módulo es responsable de una funcionalidad del sistema. Usualmente un módulo del proceso principal tiene una versión análoga en el renderer.
 
-Para comunicar el proceso principal con el proceso renderer Electron provee la biblioteca IPC (Inter-Process Comunication). En el proyecto la biblioteca se utiliza en el módulo "ipc" que trabaja como una capa de interfaz entre los servicios que provee el proceso principal y el proceso renderer. El proceso renderer se conecta con la interfaz del módulo ipc a través de un preload script que electron carga en el renderer cuando es invocado, este archivo se encuentra en la carpeta raíz del proyecto con el nombre preload.js. 
+Para comunicar el proceso principal con el proceso renderer Electron provee la biblioteca IPC (Inter-Process Comunication)\cite{electron_ipc}. En el proyecto la biblioteca se utiliza en el módulo "ipc" que trabaja como una capa de interfaz entre los servicios que provee el proceso principal y el proceso renderer. El proceso renderer se conecta con la interfaz del módulo ipc a través de un preload script que electron carga en el renderer cuando es invocado, este archivo se encuentra en la carpeta raíz del proyecto con el nombre preload.js.\cite{electron_ipc} 
 
 \subsection{Diagrama de dependencias}
 
@@ -51,7 +51,7 @@ El diagrama (Ver figura \ref{DiagramaBloques}) expone 2 bloques principales: pro
 
 \subsection{Diagrama de Clases}
 
-El diagrama de clases describe las clases que existen dentro de la aplicación. El diagrama (Ver figura \ref{DiagramaClases}) muestra 2 clases. La clase PdfViewer es la encargada de mostrar el pdf dentro de la aplicación, además muestra información como número de página actual y tiene herramientas como el zoom. La clase PresentationViewer se encarga de mostrar el pdf en modo presentación.
+El diagrama de clases describe las clases que existen dentro de la aplicación. El diagrama (Ver figura \ref{DiagramaClases}) muestra 3 clases. La clase PdfViewer es la encargada de mostrar el pdf dentro de la aplicación, además muestra información como número de página actual y tiene herramientas como el zoom. La clase AnnotationManager se encarga de gestionar y renderizar las anotaciones del documento, esta clase es instanciada por PdfViewer para delegar y modularizar esas responsabilidades. La clase PresentationViewer se encarga de mostrar el pdf en modo presentación.
 
 \begin{figure}[H]
 	\centering

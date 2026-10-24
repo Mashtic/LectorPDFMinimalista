@@ -3,22 +3,30 @@
 
 El producto es una aplicación de escritorio para el sistema operativo Windows. La aplicación funciona como un lector de documentos PDF, que también cuenta con funciones para hacer modificaciones. Sigue una filosofía minimalista que se refleja en la UX/UI del programa.
 
-El lector tiene funcionalidades básicas como zoom, scroll, búsqueda de texto, salto a una página específica y selección de texto con posibilidad de copiar. Además, renderiza las páginas aplicando Lazy Loading para mejorar el rendimiento. También, tiene una sección para mostrar el outline del documento y otra para mostrar la lista de paginas del documento. Por último, el lector tiene modo de presentación en pantalla completa.
+El lector tiene funcionalidades básicas como zoom, scroll, búsqueda de texto, salto a una página específica y selección de texto con posibilidad de copiar. Además, renderiza las páginas aplicando Lazy Loading para mejorar el rendimiento. El lector también tiene modo de presentación en pantalla completa.
 
-La aplicación también tiene un módulo de herramientas que modifican y editan el archivo pdf. Es posible eliminar páginas y concatenar páginas de otro archivo pdf. También se incluyen las funciones de guardar y guardar como, para conservar las modificaciones en los documentos.
+La aplicación tiene un módulo de herramientas que modifican el archivo pdf. Es posible eliminar, concatenar y reordenar páginas de un documento. También se incluyen las funciones de guardar y guardar como, para conservar las modificaciones en los documentos. Además, hay un módulo de edición de pdf que permite agregar, modificar y eliminar comentarios o highlights del documento.
+
+Existe una sección para mostrar información sobre el contenido del documento. Una pestaña muestra el outline del documento con información sobre los títulos de las secciones que son clickeables para navegar el documento. También, hay una pestaña con la lista de páginas, aquí es dónde se encuentran las herramientes de modificación de páginas. Por último, hay una pestaña con los comentarios del documento.
+
+El programa es capaz de firmar digitalmente los documentos pdf utilizando la tarjeta de firma digital física que tiene el usuario. La firma se hace criptográficamente para validar el documento. Además de esto, el programa puede añadir una imágen de firma en el documento, aunque esta no tiene ninguna validez. 
+
+La aplicación cuenta con un instalador para Windows que configura el programa en el sistema. También, existen versiones portables para Windows y Linux.
+
+
+\subsection{Historias de usuario}
 
 La codificación para las historias de usuario es US-XXX, donde X representa el número consecutivo de historias de usuario. 
 
-Durante el desarrollo se realizan más tareas que utilizan otro tipo de codificación. Estas tareas no se incluyen en este documento porque son de tipo  administrativo o de mantenimiento y no son relevantes para entender el producto final (así que tampoco son relevantes entre sprints).
-
-Para las tareas sobre documentación del código se usa la codificación: DC-XXX. Para las tareas de refactorización del código se usa la codificación: FX-XXX. 
-
-\subsection{Historias de usuario}
+Durante el desarrollo se realizan más tareas que utilizan otro tipo de codificación. Estas tareas no se incluyen en este documento, sino que se incluyen en el informe de avance del sprint respectivo, porque son de tipo  administrativo o de mantenimiento y no son relevantes para entender el producto final.
 
 % La pila del producto debe actualizarla cada iteración del proyecto. Divida las historias en épicas o MVPs, de forma que sea más fácil identificar cuáles historias corresponden a cada fase.
 % Añada a cada historia criterios de calidad, para esto pregúntese ¿cómo verifica el usuario que la funcionalidad está completa? ¿qué espera el usuario de 
 
 %% PILA DE PRODUCTO %%
+
+\subsubsection{Sprint 1: Lector PDF y modificaciones al documento}
+
 \begin{longtable}{|l||p{7cm}|p{4.5cm}|}
 
 \multicolumn{3}{c}{Lector PDF minimalista}\\
@@ -81,9 +89,61 @@ Para las tareas sobre documentación del código se usa la codificación: DC-XXX
 \hline
 \textbf{US-020} & \textbf{Saltar a Página}: El usuario puede ingresar un número de página en el mismo elemento que se usa para desplegar la página actual. Al hacerlo, el visualizador cambia su posición vertical para que dicha página quede centrada en la pantalla y se renderice. Esta funcionalidad es parte de la clase PdfViewer y proviene de la biblioteca PDF.js (ejecutado en el renderer). & Como usuario, quiero poder ingresar un número específico de página, para saltar a esta inmediatamente sin tener que scrollear.\\
 \hline
-\textbf{US-021} & \textbf{Mostrar Conteo de Páginas}: Un elemento de la interfaz muestra la página actual que está renderizada en el visualizador y la cantidad total de páginas del documento.  Esta funcionalidad es parte de la clase PdfViewer y proviene de la biblioteca PDF.js (ejecutado en el renderer). & Como usuario, quiero poder la página en la que estoy en relación a la cantidad total de páginas, para saber con certeza en que parte del documento me encuentro.\\
+\textbf{US-021} & \textbf{Mostrar Conteo de Páginas}: Un elemento de la interfaz muestra la página actual que está renderizada en el visualizador y la cantidad total de páginas del documento.  Esta funcionalidad es parte de la clase PdfViewer y proviene de la biblioteca PDF.js (ejecutado en el renderer). & Como usuario, quiero poder ver la página en la que estoy en relación a la cantidad total de páginas, para saber con certeza en que parte del documento me encuentro.\\
 \hline
 \textbf{US-022} & \textbf{Menú Click Derecho}: Al hacer click derecho en cualquier punto de la interfaz se abre un menú contextual que despliega botones para ejecutar las funcionalidades de la aplicación. El menú contextual es construido usando funciones de la biblioteca de electron y utiliza elementos de la interfaz del sistema. Las funciones que se activan en el menú son callbacks que se inyectan desde por medio la biblioteca IPC de electron. & Como usuario, quiero poder mostrar un menú con click derecho, para acceder a todas las funcionalidades del sistema sin que estas se entrometan en el lector.\\
 \hline
 \end{longtable}
 
+\subsubsection{Sprint 2: Comentarios, highlights y firma}
+
+\begin{longtable}{|l||p{7cm}|p{4.5cm}|}
+
+\multicolumn{3}{c}{Lector PDF minimalista}\\
+\hline
+\textbf{Código} & \textbf{Descripción} & \textbf{Criterios de Calidad}\\
+\hline\hline
+\endfirsthead
+\hline
+\textbf{Código} & \textbf{Descripción} & \textbf{Criterios de Calidad}\\
+\hline\hline
+\endhead
+
+% Omita las historias eliminadas
+% En esta tabla no coloree las historias, mantenga la última versión de la pila general del producto
+\textbf{US-023} & \textbf{Firmar el documento abierto con GAUDI:} Un documento abierto se firma digitalmente usando la tarjeta física de firma digital en la computadora e insertando el PIN de la misma. Internamente se utiliza la biblioteca signpdf para firmar el archivo. & Como persona usuaria con tarjeta de firma digital quiero firmar el PDF que tengo abierto sin salir de la aplicación para no tener que abrir otro programa para firmarlo.\\
+\hline
+\textbf{US-024} & \textbf{Ver el estado de firma del documento:} Un documento firmado muesrta un ícono en el visualizador que indica que está firmado, y aparece una etiqueta con el nombre del firmador. Esta información se obtiene del archivo pdf mediante las funciones en sign-info-service.js.& Como usuario que recibe un PDF quiero saber si el documento está firmado digitalmente y por quién para confiar de su procedencia.\\
+\hline
+\textbf{US-025} & \textbf{Resaltar texto seleccionado:} Cuando un usuario selecciona texto aparece una opción en el menú contextual para resaltarlo. El resaltado se hace creando una anotación con las dimensiones de la selección y un color con baja opacidad. Esto se hace a través de la clase AnnotationManager que internamente utiliza la API de la biblioteca PDF.js.& Como usuario que estudia un documento quiero resaltar fragmentos de texto para poder verlos claramente y diferenciarlos entre el texto.\\
+\hline
+\textbf{US-026} & \textbf{Elegir el color del resaltado:} El color de un elemento de anotación de resaltado puede cambiar de color a través de un menú. Internamente se utiliza la API de la biblioteca PDF.js para renderizar el resaltado.& Como persona usuaria quiero escoger entre varios colores de resaltado para clasificar lo que marco.\\
+\hline
+\textbf{US-027} & \textbf{Eliminar un resaltado:} Cuando un elemento de resaltado se renderiza en el DOM se agrega un evento al hacer click: desplegar un botón de borrado para ese elemento. Esta funcionalidad está en la clase AnnotationManager. & Como persona usuaria quiero quitar un resaltado que ya no necesito para mantener el documento limpio.\\
+\hline
+\textbf{US-028} & \textbf{Guardar los resaltados en el archivo:} Los resaltados se guardan en el archivo cuando el usuario ejecuta la función de guardar o guardar como. En ese momento la información de los resaltados en memoria se escribe en el archivo. & Como usuario quiero que los resaltados que hice se guarden cuando guardo el archivo para encontrarlos la próxima vez que lea el documento.\\
+\hline
+\textbf{US-029} & \textbf{Agregar un comentario a una selección:} El usuario selecciona una parte del documento y usa la función de comentar. Al hacer esto, se crea una anotación invisible sobre la selección, a esta anotación se le agrega un comentario con la información que suministro el usuario. Internamente se utiliza la API de PDF.js para realizar esta tarea. & Como usuario quiero agregar un comentario de texto a cualquier parte del documento que haya seleccionado, para poder hacer anotaciones sobre el documento en el mismo archivo y no tener que crear otro.\\
+\hline
+\textbf{US-030} & \textbf{Leer, editar y eliminar comentarios:} Al hacer click en el botón de un comentario sobre un resaltado se abre un panel popup con el texto del comentario, un botón de editar y uno de eliminar. La funcionalidad de los botones está implementado en highlight-comments.js y pdf-viewer.js, que utilizan el AnottationStore de PDF.js. & Como usuario quiero leer los comentarios que vengan en un documento, así como editarlos o eliminarlos, para poder leer los comentarios de otras personas y para modificarlos antes de enviar el documento a alguien más.\\
+\hline
+\textbf{US-031} & \textbf{Listar los comentarios en el panel lateral:} El panel de comentarios obtiene todos los comentarios del documento mediante el AnnotationStore de PDF.js y los despliega como una lista de tarjetas con la cita del texto seleccionado, el texto del comentario y la página donde se encuentra. Al hacer click en una tarjeta el visualizador se desplaza hasta esa ubicación y resalta el comentario. & Como persona que revisa un documento largo quiero ver todos los comentarios en una lista para recorrerlos sin buscarlos página por página\\
+\hline
+\textbf{US-032} & \textbf{Guardar los comentarios en el archivo:} Los comentarios creados, editados o eliminados en memoria se acumulan en el AnnotationStore. Estos se guardan en el archivo de forma inmediata cuando el usuario utiliza la función de guardar o guardar como. & Como usuario quiero que los comentarios que hice se guarden cuando guardo el archivo para encontrarlos la próxima vez que yo, o alguien más, lea el documento.\\
+\hline
+\textbf{US-033} & \textbf{Insertar una imagen de firma en el documento:} El usuario elige una imagen PNG o JPG mediante un dialog de archivos y la aplicación muestra una vista previa de la imagen en el visualizador. Al confirmar la colocación, el servicio inserta la imagen en el pdf usando pdf-lib en la posición y el tamaño elegidos. Esto se hace en signature-image-renderer.js y signature-image-service.js. & Como persona usuaria quiero colocar la imagen de mi firma en una página para dejar constancia visual en el documento de que se firmó.\\
+\hline
+\textbf{US-034} & \textbf{Mover y redimensionar la firma antes de fijarla:} Mientras la imagen de firma está en modo de colocación, el usuario puede arrastrarla para moverla, y también puede redimensionarla. Esto se implementa en signature-image-renderer.js. & Como persona usuaria quiero ajustar dónde y de qué tamaño queda mi firma para que caiga sobre la línea correcta del documento.\\
+\hline
+\textbf{US-035} & \textbf{Guardar la imagen de firma para reutilizarla:} La aplicación guarda localmente la última imagen de firma elegida la primera vez que el usuario la selecciona desde el dialog de archivos, para ofrecerla directamente la próxima vez que se inserte una firma en lugar de pedir de nuevo la ruta del archivo. El usuario puede reemplazar la imagen guardada escogiendo un archivo distinto en cualquier momento. & Como persona que firma documentos seguido quiero guardar mi imagen de firma en la aplicación para no buscar el archivo cada vez.\\
+\hline
+\textbf{US-036} & \textbf{Distinguir la firma gráfica de la firma digital:} La aplicación mantiene separados los dos mecanismos de firma: la imagen de firma (US-033) y la firma digital (US-023). Cuando se utiliza la firma gráfica aparece una advertencia indicando que la firma no tiene validez. & Como persona usuaria quiero entender que la imagen no da validez legal al documento para no confiarme de una firma que no está verificada.\\
+\hline
+\textbf{US-037} & \textbf{Instalador que configura extensiones en windows:} El instalador para Windows se genera con electron-builder usando NSIS (configurado en package.json), permite elegir la carpeta de instalación y crea accesos directos en el escritorio y en el menú de inicio con el nombre Folio. Al finalizar, un script personalizado (build/installer.nsh) ofrece abrir la configuración de aplicaciones predeterminadas de Windows para establecer Folio como lector de pdf por defecto. & Como usuario quiero poder instalar la aplicación en mi sistema para que se configure dentro del sistema operativo y sea más fácil utilizarla por medio del menú de inicio, en el escritorio, o simplemente abriendo un documento.\\
+\hline
+\textbf{US-038} & \textbf{Usar 'Abrir con' de windows para abrir la app:} El archivo package.json declara la extensión .pdf como asociación de archivo de la aplicación (role Viewer), por lo que Windows puede abrir Folio mediante 'Abrir con' o doble click sobre un pdf asociado. Al iniciar, main.js busca una ruta .pdf entre los argumentos de la línea de comandos, la lee con el servicio de apertura de pdf y la guarda como variable global antes de crear la ventana principal, para que el documento aparezca ya cargado. & Como usuario quiero que cuando selecciono un pdf en windows y uso la función de “abrir con”, la aplicación debería desplegarse con el pdf cargado para que me sea más fácil abrir cualquier documento.\\
+\hline
+\textbf{US-039} & \textbf{Mostrar anotaciones:} Cada página renderiza una capa de anotaciones construida con la clase AnnotationLayer de PDF.js, que dibuja las anotaciones ya presentes en el archivo, como resaltados, notas, enlaces o campos de formulario, sin importar si fueron creadas por Folio o por otro editor de pdf. & Como usuario, quiero poder ver las anotaciones que tiene un documento que fueron hechas con otro editor, para poder visualizar toda la información del documento.\\
+\hline
+
+\end{longtable}

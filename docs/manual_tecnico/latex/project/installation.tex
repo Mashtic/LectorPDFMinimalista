@@ -39,10 +39,12 @@ Lista de pasos para descargar el código fuente y configurar lo necesario para e
 \section{Entorno de Producción}
 
 \subsection{Instrucciones de compilación}
-Para compilar el proyecto se ejecuta el comando `npm run build`. Este comando usa la biblioteca electron-builder para compilar y empaquetar el proyecto para las plataformas: Windows y Linux.
+Para compilar el proyecto se ejecuta el comando `npm run build`. Este comando usa la biblioteca electron-builder para compilar y empaquetar el proyecto en un ejecutable portable para las plataformas: Windows y Linux. Esta biblioteca también genera un instalador del programa para la plataforma Windows. Es importante resaltar que la compilación cruzada no funciona debido a las bibliotecas criptográficas que se utilizan para la firma digital.
 
 \subsection{Dependencias}
 El proceso de compilación empaqueta todas las dependencias necesarias en el ejecutable, por lo tanto el entorno de producción solo necesita tener el binario.
 
 \subsection{Instrucciones de instalación}
-El ejecutable es portable, así que no requiere instalarse en el sistema. Para ejecutar la aplicación solo correr el ejecutable.
+El ejecutable es portable, así que no requiere instalarse en el sistema. Para ejecutar la aplicación solo debe correr el ejecutable.
+
+El instalador para Windows instala el programa en el sistema. Al ejecutarlo, se despliegan opciones sobre la ruta de instalación, entre otras, estas opciones dependen de las preferencias del usuario.

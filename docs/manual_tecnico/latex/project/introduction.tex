@@ -1,15 +1,23 @@
 \chapter{Introducción}
+\label{sec:intro}
 
 \section{Sobre este manual}
 
 Este manual está dirigido a nuevos desarrolladores que quieren trabajar en este proyecto. Su objetivo es familiarizar a los nuevos desarrolladores con el proyecto, y brindar tanto las herramientas como la información necesaria para que puedan desarrollar sobre el proyecto de manera rápida y efectiva.
 
-Este manual contiene el contexto del proyecto y los objetivos que quiere alcanzar (Capítulo 1), así como las funcionalidades necesarias para alcanzar dichos objetivos (Capítulo 2). También, se incluye la información sobre cómo se diseño el sistema, y cómo están implementadas las funcionalidades requeridas (Capítulo 3). Además, contiene guías para configurar el entorno de desarrollo y para desplegar el sistema (Capítulo 4). Finalmente, se incluyen reflexiones útiles sobre el proceso de desarrollo, las limitaciones del proyecto y las oportunidades de mejora que existen (Capítulo 5).
+Este manual contiene el contexto del proyecto y los objetivos que quiere alcanzar (Capítulo 1), así como las funcionalidades necesarias para alcanzar dichos objetivos (Capítulo 2). También, se incluye la información sobre cómo se diseñó el sistema, y cómo están implementadas las funcionalidades requeridas (Capítulo 3). Además, contiene guías para configurar el entorno de desarrollo y para desplegar e instalar el programa (Capítulo 4). Finalmente, se incluyen reflexiones útiles sobre el proceso de desarrollo, las limitaciones del proyecto y las oportunidades de mejora que existen (Capítulo 5).
 
 \section{Descripción y Alcance del proyecto}
 \subsection{Antecedentes}
+%¿Quién solicita el proyecto? ¿Cuál es el departamento, oficina o grupo que requiere el proyecto y a qué se dedican? - Respalde con citas bibliográficas.
 
-Este proyecto surge como respuesta a una necesidad directa expresada por el cliente, quien en la actualidad usa distintos lectores de PDF y manifiesta una insatisfacción con estas herramientas debido a sus interfaces sobrecargadas de utilidades, barras de herramientas y menús poco intuitivos. Además, también menciona experiencias negativas con lectores alternativos, que son más livianos, pero tienen algunos problemas de estabilidad, entre otras cosas.
+%¿Cuál es la necesidad que el grupo tiene por la que requieren desarrollar este proyecto? ¿Cómo el proyecto va a solventar esa necesidad? ¿Cuál va a ser el impacto del proyecto? ¿Qué beneficios traerá el proyecto y para quién? ¿Hay un sector de la población cuya calidad de vida mejorará gracias a la implementación de este proyecto? ¿Cuál es ese grupo?
+
+Este proyecto surge como respuesta a una necesidad directa expresada por el cliente Rodolfo Mora, quien en la actualidad usa distintos lectores de PDF y manifiesta una insatisfacción con estas herramientas debido a sus interfaces sobrecargadas de utilidades, barras de herramientas y menús poco intuitivos. Además, también menciona experiencias negativas con lectores alternativos, que son más livianos, pero tienen algunos problemas de estabilidad, entre otras cosas.
+
+Otro problema mencionado corresponde a la firma electrónica de documentos. El cliente utiliza actualmente un firmador que fue desarrollado en Java y presenta una limitación importante: esta firma utiliza siempre el tamaño original de la imagen sin posibilidad de re-posicionar o ajustarla en el espacio disponible en el documento, provocando superposiciones con el texto u otros elementos.
+
+Tomando en cuenta lo anterior, dentro de las funciones específicas mencionadas por el cliente está el manejo de archivos de presentaciones PPT que fueron transformadas a PDF, por lo que la aplicación debe contar con un modo presentación que le permita manipularlas para visualizarlas correctamente dispositiva por diapositiva. También debe permitir la edición de documentos de carácter legal que requieren ser firmados con validez legal utilizando el sistema de firmas digitales GAUDI del Banco Central de Costa Rica, pudiendo posteriormente verificar dicha firma en el propio sistema GAUDI. Y finalmente, se debe tomar en cuenta la posibilidad de editar documentos, ya sea con ediciones visuales o de contenido al mezclar o compaginar PDF's.
 
 Como referencia de estilo visual el cliente resaltó la interfaz que utiliza un lector desarrollado por Augmented Text Company (\url{https://www.augmentedtext.info/reader}), que corresponde a un visor sin barra de título, sin bordes intrusivos y con un estilo minimalista blanco sobre blanco agradable a la vista.
 
@@ -18,16 +26,20 @@ El beneficiario directo del proyecto es el cliente Rodolfo Mora, quien en su lab
 que combine una interfaz minimalista con las funcionalidades específicas que necesita.
 
 \subsubsection{Importancia}
-La importancia del proyecto radica en ofrecer una alternativa amigable a las aplicaciones de lectura y edición de PDF existentes en el mercado que, según lo expresado por el cliente, priorizan la cantidad de funcionalidades visibles por encima de la experiencia de lectura sobrecargando la interfaz y dificultando la concentración en el contenido. 
+La importancia del proyecto radica en ofrecer una alternativa amigable a las aplicaciones de lectura y edición de PDF existentes en el mercado que, según lo expresado por el cliente, priorizan la cantidad de funcionalidades visibles por encima de la experiencia de lectura sobrecargando la interfaz y dificultando la concentración en el contenido. Adicionalmente resuelve una necesidad concreta del cliente respecto a la firma electrónica de documentos, al integrar un mecanismo reposicionable y compatible con el sistema oficial de GAUDI del BCCR, de forma que se evitarían las limitaciones de las herramientas que utiliza actualmente.
 
 \subsubsection{Grupos o comunidades beneficiadas}
 
-El principal beneficiado es el cliente. Sin embargo, dado que se contempla como un proyecto de software libre, cualquier usuario de Windows (y eventualmente Linux) que busque un lector y editor de PDF minimalista podrá beneficiarse de la herramienta desarrollada.
+El principal beneficiado es el cliente. Sin embargo, dado que se contempla como un proyecto de software libre, cualquier usuario de Windows (y eventualmente Linux) que busque un lector y editor de PDF minimalista, con soporte a anotaciones, firma electrónica y manejo de formatos adicionales (EPUB, DVI Y Markdown), podrá beneficiarse de la herramienta desarrollada.
 
 \subsubsection{Necesidades solventadas}
 
-Interfaces sobrecargadas y poco intuitivas de los lectores de PDF actualmente disponibles (Adobe Acrobat, Foxit, entre otros), que dificultan una experiencia de lectura centrada en el contenido.
-	
+\begin{enumerate}
+	\item Interfaces sobrecargadas y poco intuitivas de los lectores de PDF actualmente disponibles (Adobe Acrobat, Foxit, entre otros), que dificultan una experiencia de lectura centrada en el contenido.
+	\item Ausencia de una solución de firma electrónica agil, compatible con el sistema GAUDI del Banco Central de Costa Rica, que permita ajustar el tamaño y la posición de la firma gráfica sobre el documento, a diferencia de las herramientas actuales utilizadas por el cliente.
+	\item Falta de un medio para anotar, resaltar y comentar documentos PDF de forma sencilla y, en la medida de lo posible, interoperable con otros lectores del mercado.
+	\item Necesidad de trabajar con múltiples formatos de documento (PDF, EPUB, DVI y Markdown) desde una única herramienta, incluyendo la conversión de carpetas completas de archivos Markdown en un único documento PDF.
+\end{enumerate}
 
 \subsection{Objetivos}
 
@@ -48,16 +60,15 @@ Interfaces sobrecargadas y poco intuitivas de los lectores de PDF actualmente di
 \begin{itemize}
     \item \textbf{Objetivo General}
     \begin{itemize}
-        \item Desarrollar una aplicación de escritorio para Windows que
-        permita visualizar y modificar documentos PDF mediante una interfaz minimalista, limpia y clara.
+        \item Desarrollar una aplicación de escritorio para Windows que permita visualizar, anotar, firmar electrónicamente y combinar documentos PDF, así como abrir y exportar documentos en otros formatos compatibles, mediante el uso de tecnologías como Electron, HTML, CSS, JavaScript, y PDF.js.
     \end{itemize}
     \item \textbf{Objetivos Específicos}
     \begin{itemize}
-        \item Construir un visualizador de documentos pdf que muestre las páginas del documento al usuario.
-        \item Desarrollar funcionalidades para hacer modificaciones simples al pdf, como eliminar, compaginar y mezclar páginas, y que se guarden en el mismo archivo o uno nuevo.
-        \item Implementar la búsqueda, selección y copiado de texto en un pdf que se está visualizando.
-        \item Desarrollar un modo presentación para el pdf que se está visualizando.
-        \item Diseñar una interfaz minimalista con color blanco que muestre las funcionalidades de la aplicación solo cuando sea necesario, intentando mantener poca información en la pantalla para no saturar al usuario.
+        \item Desarrollar un módulo de visualización y gestión de documentos PDF que permita abrir, renderizar, mezclar y presentar documentos.
+        \item Implementar un módulo de anotación de documentos PDF que permita resaltar texto y agregar comentarios.
+        \item Implementar un módulo de firma electrónica de documentos PDF que permita incorporar firmas digitales y verificar su validez mediante mecanismos de validación establecidos por el sistema GAUDI (Gestor de Autenticación Digital) del Banco Central de Costa Rica.
+        \item Desarrollar un módulo de gestión de documentos que permita editar documentos PDF e importar y exportar documentos en formatos PDF, EPUB, DVI, y Markdown.
+        
     \end{itemize}
 \end{itemize}
 
