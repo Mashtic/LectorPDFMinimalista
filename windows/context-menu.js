@@ -26,21 +26,7 @@ function showContextMenu(window, selectionText = "") {
         window.webContents.send("comments:open", "");
       },
     });
-    if (selectionText) {
-      template.push({
-        label: "Comment selection",
-        click: () => {
-          window.webContents.send("comments:open", selectionText);
-        },
-      });
-    }
     template.push(
-      {
-        label: "Highlight Selection",
-        click: () => {
-          window.webContents.send("addHighlight");
-        },
-      },
       {
         label: "Save As",
         click: () => {

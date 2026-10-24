@@ -10,6 +10,8 @@ const ANNOTATION_EDITOR_PREFIX = "pdfjs_internal_editor_";
 
 const DEFAULT_HIGHLIGHT_COLOR = [144, 238, 144]; // RGB, 0-255
 const DEFAULT_HIGHLIGHT_OPACITY = 0.4;
+
+// annotationStorage key for "recolor this highlight that lives in the file"
 const recolorStorageKey = (pageNumber, id) =>
   `${ANNOTATION_EDITOR_PREFIX}recolor_${pageNumber}_${id}`;
 
@@ -104,8 +106,12 @@ export class AnnotationManager {
 
     this.layers = new Map();
 
+    // "pageNumber:annotationId" -> [r, g, b] for highlights that come from
+    // the file / store (session highlights are updated in place instead)
     this.colorOverrides = new Map();
+    // "pageNumber:annotationId" for file highlights deleted by the user
     this.deletedFileHighlights = new Set();
+    // Set by the UI layer; falls back to host.onHighlightClick
     this.onHighlightClick = null;
   }
 
@@ -293,6 +299,8 @@ export class AnnotationManager {
     const created = this.highlights.get(id);
 
     if (created) {
+      // Created in this session: it only exists in annotationStorage, so it
+      // must be removed from there or it would still be saved into the PDF
       this.highlights.delete(id);
       this.documentPDF.annotationStorage.remove(created.storageKey);
       this.refreshPage(pageNumber);
@@ -300,12 +308,15 @@ export class AnnotationManager {
       return;
     }
 
+    // Comes from the file
     const key = `${pageNumber}:${id}`;
     this.deletedFileHighlights.add(key);
     this.colorOverrides.delete(key);
+    // Drop a pending recolor so it is not saved for a deleted highlight
     this.documentPDF.annotationStorage.remove(
       recolorStorageKey(pageNumber, id),
     );
+    // Writes the deletion into the PDF on the next flush
     this.store.deleteHighlight(pageNumber, id);
     this.refreshPage(pageNumber);
     this.onHighlightsChanged?.();
@@ -317,6 +328,7 @@ export class AnnotationManager {
     const highlight = this.highlights.get(id);
 
     if (highlight) {
+      // Created in this session: update the record and annotationStorage
       highlight.color = rgb;
       highlight.data.color = new Uint8ClampedArray(rgb);
       highlight.storageValue = { ...highlight.storageValue, color: rgb };
@@ -325,13 +337,19 @@ export class AnnotationManager {
         highlight.storageValue,
       );
     } else {
+      // Comes from the file
       const annotation = this.layers
         .get(pageNumber)
         ?.highlightAnnotations?.find((candidate) => candidate.id === id);
       if (!annotation?.quadPoints?.length) return;
 
+      // What is drawn on screen
       this.colorOverrides.set(`${pageNumber}:${id}`, rgb);
 
+      // What is saved: a storage entry carrying the annotation's id makes
+      // pdf.js edit that annotation in place when the document is saved.
+      // pdf.js quads are [left, top, right, top, left, bottom, right, bottom];
+      // outlines are the same rectangles as closed polygons.
       const quadPoints = Array.from(annotation.quadPoints);
       const outlines = [];
       for (let i = 0; i + 7 < quadPoints.length; i += 8) {
@@ -399,14 +417,6 @@ export class AnnotationManager {
     state.layer = null;
   }
 
-  /**
-   * Renders the pdf.js AnnotationLayer for a page: the highlight annotations
-   * stored in the PDF plus the ones created through addHighlight().
-   */
-  /**
-   * Renders the pdf.js AnnotationLayer for a page: the highlight annotations
-   * stored in the PDF plus the ones created through addHighlight().
-   */
   /**
    * Renders the pdf.js AnnotationLayer for a page: the highlight annotations
    * stored in the PDF plus the ones created through addHighlight().
@@ -515,12 +525,23 @@ export class AnnotationManager {
     );
     state.highlightOverlays = [];
 
+    // pdf.js builds its own hover popup for any highlight that carries comment
+    // text. The app shows comments through its own comment button, so the text
+    // is stripped before the annotation is handed to pdf.js.
+    const withoutPopup = (annotation) => ({
+      ...annotation,
+      contents: "",
+      contentsObj: { str: "", dir: annotation.contentsObj?.dir ?? "ltr" },
+      titleObj: { str: "", dir: annotation.titleObj?.dir ?? "ltr" },
+      richText: null,
+    });
+
     // Only comment highlights go through the pdf.js layer; everything else
     // is drawn by the overlays below
     await layer.render({
-      annotations: [...fromFile, ...created].filter((annotation) =>
-        commentIds.has(annotation.id),
-      ),
+      annotations: [...fromFile, ...created]
+        .filter((annotation) => commentIds.has(annotation.id))
+        .map(withoutPopup),
     });
 
     if (state.highlightClickHandler) {

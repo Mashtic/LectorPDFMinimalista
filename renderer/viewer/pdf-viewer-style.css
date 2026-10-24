@@ -119,35 +119,8 @@
   width: 8px;
 }
 
-/* Floating highlight button: a small white rounded rectangle */
-#floating-highlight-button {
-  position: fixed;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-
-  border: 1px solid var(--border-color, #ccc);
-  border-radius: 8px;
-  background: var(--background-color, #fff);
-  color: var(--text-color, #333);
-
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgb(0 0 0 / 15%);
-}
-
-#floating-highlight-button:hover {
-  background: var(--hover-background, #eee);
-}
-
-#floating-highlight-button[hidden] {
-  display: none;
-}
-
-/* Palette: one white rectangle holding all five buttons */
+/* White rectangles: the selection toolbar and the highlight palette */
+#selection-toolbar,
 #highlight-color-palette {
   position: fixed;
   z-index: 1000;
@@ -164,11 +137,12 @@
   box-shadow: 0 4px 16px rgb(0 0 0 / 15%);
 }
 
+#selection-toolbar[hidden],
 #highlight-color-palette[hidden] {
   display: none;
 }
 
-/* Buttons inside the rectangle: no border or shadow of their own */
+/* Buttons inside the rectangles: no border or shadow of their own */
 .highlight-action-button {
   display: flex;
   align-items: center;

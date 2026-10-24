@@ -12,6 +12,7 @@ let pendingQuote = "";
 let pendingQuads = [];
 let latestLoadId = 0;
 let annotationStore = null;
+let pendingReplaces = null;
 
 import("./annotation-store.js").then((module) => {
   annotationStore = module.annotationStore;
@@ -48,23 +49,42 @@ document.addEventListener(
   true,
 );
 
-window.electronAPI.onOpenComments(async (selectedText) => {
-  pendingQuote = selectedText.trim();
-  const selectedGeometry = pendingQuote ? captureSelectionGeometry() : null;
+async function openComments(
+  selectedText,
+  { page = null, quads = null, replaces = null } = {},
+) {
+  pendingQuote = (selectedText ?? "").trim();
+  pendingReplaces = replaces;
+
+  // Geometry comes from the live selection, unless the caller already has it
+  // (a click on an existing highlight)
+  const selectedGeometry =
+    pendingQuote && !quads ? captureSelectionGeometry() : null;
   window.getSelection()?.removeAllRanges();
-  pendingQuads = selectedGeometry
-    ? await convertSelectionToPdfQuads(selectedGeometry)
-    : [];
+  pendingQuads =
+    quads ??
+    (selectedGeometry
+      ? await convertSelectionToPdfQuads(selectedGeometry)
+      : []);
+
   panel.hidden = false;
   quote.hidden = !pendingQuote;
   quote.textContent = pendingQuote ? `“${pendingQuote}”` : "";
-  form.dataset.page = selectedGeometry?.pageNumber || contextPage || "";
+  form.dataset.page = page || selectedGeometry?.pageNumber || contextPage || "";
   input.focus();
-});
+}
+
+window.electronAPI.onOpenComments((selectedText) => openComments(selectedText));
+
+// Used by the floating selection button and the highlight palette
+document.addEventListener("open-comments", (event) =>
+  openComments(event.detail?.text, event.detail),
+);
 
 closeButton.addEventListener("click", () => {
   panel.hidden = true;
   pendingQuote = "";
+  pendingReplaces = null;
   quote.hidden = true;
 });
 
@@ -77,15 +97,26 @@ form.addEventListener("submit", (event) => {
     Number(form.dataset.page) ||
     Number(document.getElementById("pdf-page-count").value) ||
     1;
-  annotationStore.createComment({
+  const id = annotationStore.createComment({
     pageNumber: page,
     text: message,
     quote: pendingQuote,
     quads: pendingQuads,
   });
+
+  // A comment made from an existing highlight takes its place
+  if (id && pendingReplaces) {
+    document.dispatchEvent(
+      new CustomEvent("comment-replaced-highlight", {
+        detail: pendingReplaces,
+      }),
+    );
+  }
+
   input.value = "";
   pendingQuote = "";
   pendingQuads = [];
+  pendingReplaces = null;
   quote.hidden = true;
   form.dataset.page = "";
 });
