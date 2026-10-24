@@ -10,6 +10,8 @@ const ANNOTATION_EDITOR_PREFIX = "pdfjs_internal_editor_";
 
 const DEFAULT_HIGHLIGHT_COLOR = [144, 238, 144]; // RGB, 0-255
 const DEFAULT_HIGHLIGHT_OPACITY = 0.4;
+const recolorStorageKey = (pageNumber, id) =>
+  `${ANNOTATION_EDITOR_PREFIX}recolor_${pageNumber}_${id}`;
 
 /**
  * Turns arbitrary rects (PDF user space, `top > bottom`) into non-overlapping
@@ -101,6 +103,10 @@ export class AnnotationManager {
     this.onHighlightsChanged = () => this.store.noteExternalChange();
 
     this.layers = new Map();
+
+    this.colorOverrides = new Map();
+    this.deletedFileHighlights = new Set();
+    this.onHighlightClick = null;
   }
 
   get documentPDF() {
@@ -240,7 +246,8 @@ export class AnnotationManager {
     const storageKey = `${ANNOTATION_EDITOR_PREFIX}${id}`;
     const rect = [left, bottom, right, top];
 
-    this.documentPDF.annotationStorage.setValue(storageKey, {
+    // Kept on the record so setHighlightColor() can update it later
+    const storageValue = {
       annotationType: AnnotationEditorType.HIGHLIGHT,
       color,
       opacity,
@@ -250,12 +257,14 @@ export class AnnotationManager {
       rotation: 0,
       pageIndex: pageNumber - 1,
       structTreeParentId: null,
-    });
+    };
+    this.documentPDF.annotationStorage.setValue(storageKey, storageValue);
 
     this.highlights.set(id, {
       id,
       pageNumber,
       storageKey,
+      storageValue,
       color,
       opacity,
       rects: lineRects,
@@ -281,7 +290,80 @@ export class AnnotationManager {
   }
 
   deleteHighlight(id, pageNumber) {
-    if (!this.highlights.delete(id)) return;
+    const created = this.highlights.get(id);
+
+    if (created) {
+      this.highlights.delete(id);
+      this.documentPDF.annotationStorage.remove(created.storageKey);
+      this.refreshPage(pageNumber);
+      this.onHighlightsChanged?.();
+      return;
+    }
+
+    const key = `${pageNumber}:${id}`;
+    this.deletedFileHighlights.add(key);
+    this.colorOverrides.delete(key);
+    this.documentPDF.annotationStorage.remove(
+      recolorStorageKey(pageNumber, id),
+    );
+    this.store.deleteHighlight(pageNumber, id);
+    this.refreshPage(pageNumber);
+    this.onHighlightsChanged?.();
+  }
+
+  /** Changes the color of a highlight and redraws its page. */
+  setHighlightColor(id, pageNumber, color) {
+    const rgb = Array.from(color);
+    const highlight = this.highlights.get(id);
+
+    if (highlight) {
+      highlight.color = rgb;
+      highlight.data.color = new Uint8ClampedArray(rgb);
+      highlight.storageValue = { ...highlight.storageValue, color: rgb };
+      this.documentPDF.annotationStorage.setValue(
+        highlight.storageKey,
+        highlight.storageValue,
+      );
+    } else {
+      const annotation = this.layers
+        .get(pageNumber)
+        ?.highlightAnnotations?.find((candidate) => candidate.id === id);
+      if (!annotation?.quadPoints?.length) return;
+
+      this.colorOverrides.set(`${pageNumber}:${id}`, rgb);
+
+      const quadPoints = Array.from(annotation.quadPoints);
+      const outlines = [];
+      for (let i = 0; i + 7 < quadPoints.length; i += 8) {
+        outlines.push([
+          quadPoints[i],
+          quadPoints[i + 1],
+          quadPoints[i + 2],
+          quadPoints[i + 3],
+          quadPoints[i + 6],
+          quadPoints[i + 7],
+          quadPoints[i + 4],
+          quadPoints[i + 5],
+        ]);
+      }
+
+      this.documentPDF.annotationStorage.setValue(
+        recolorStorageKey(pageNumber, id),
+        {
+          id,
+          annotationType: AnnotationEditorType.HIGHLIGHT,
+          color: rgb,
+          opacity: annotation.opacity ?? DEFAULT_HIGHLIGHT_OPACITY,
+          quadPoints,
+          outlines,
+          rect: Array.from(annotation.rect),
+          rotation: 0,
+          pageIndex: pageNumber - 1,
+          structTreeParentId: null,
+        },
+      );
+    }
+
     this.refreshPage(pageNumber);
     this.onHighlightsChanged?.();
   }
@@ -304,6 +386,8 @@ export class AnnotationManager {
   reset() {
     this.highlights.clear();
     this.layers.clear();
+    this.colorOverrides.clear();
+    this.deletedFileHighlights.clear();
   }
 
   destroyLayer(pageNumber) {
@@ -315,6 +399,14 @@ export class AnnotationManager {
     state.layer = null;
   }
 
+  /**
+   * Renders the pdf.js AnnotationLayer for a page: the highlight annotations
+   * stored in the PDF plus the ones created through addHighlight().
+   */
+  /**
+   * Renders the pdf.js AnnotationLayer for a page: the highlight annotations
+   * stored in the PDF plus the ones created through addHighlight().
+   */
   /**
    * Renders the pdf.js AnnotationLayer for a page: the highlight annotations
    * stored in the PDF plus the ones created through addHighlight().
@@ -399,8 +491,21 @@ export class AnnotationManager {
     // The page was unloaded or refreshed while we were waiting
     if (token !== state.token) return;
 
+    const isDeleted = (annotation) =>
+      this.deletedFileHighlights.has(`${pageNumber}:${annotation.id}`);
+
+    // Applies a color chosen through setHighlightColor() to file highlights
+    const withColor = (annotation) => {
+      const color = this.colorOverrides.get(`${pageNumber}:${annotation.id}`);
+      return color
+        ? { ...annotation, color: new Uint8ClampedArray(color) }
+        : annotation;
+    };
+
     state.highlightAnnotations = [...fromFile, ...created]
-      .filter((annotation) => !commentIds.has(annotation.id));
+      .filter((annotation) => !commentIds.has(annotation.id))
+      .filter((annotation) => !isDeleted(annotation))
+      .map(withColor);
     state.overlayAnnotations = state.highlightAnnotations;
     state.highlightRects = state.highlightAnnotations.map((annotation) =>
       getHighlightRectangles(annotation, viewport),
@@ -410,9 +515,11 @@ export class AnnotationManager {
     );
     state.highlightOverlays = [];
 
+    // Only comment highlights go through the pdf.js layer; everything else
+    // is drawn by the overlays below
     await layer.render({
-      annotations: [...fromFile, ...created].filter(
-        (annotation) => !state.overlayAnnotations.includes(annotation),
+      annotations: [...fromFile, ...created].filter((annotation) =>
+        commentIds.has(annotation.id),
       ),
     });
 
@@ -437,7 +544,7 @@ export class AnnotationManager {
 
       if (selectedIndex !== -1) {
         event.stopPropagation();
-        this.host.onHighlightClick?.({
+        (this.onHighlightClick ?? this.host.onHighlightClick)?.({
           pageNumber,
           annotation: state.highlightAnnotations[selectedIndex],
           event,

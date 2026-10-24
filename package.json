@@ -37,7 +37,8 @@
     "pkcs11js": "^2.1.7"
   },
   "allowScripts": {
-    "electron-winstaller@5.4.0": true
+    "electron-winstaller@5.4.0": true,
+    "pkcs11js@2.1.7": true
   },
   "build": {
     "appId": "com.disin.folio",

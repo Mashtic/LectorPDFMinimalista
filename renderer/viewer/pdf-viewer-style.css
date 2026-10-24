@@ -119,6 +119,93 @@
   width: 8px;
 }
 
+/* Floating highlight button: a small white rounded rectangle */
+#floating-highlight-button {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 8px;
+  background: var(--background-color, #fff);
+  color: var(--text-color, #333);
+
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 15%);
+}
+
+#floating-highlight-button:hover {
+  background: var(--hover-background, #eee);
+}
+
+#floating-highlight-button[hidden] {
+  display: none;
+}
+
+/* Palette: one white rectangle holding all five buttons */
+#highlight-color-palette {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 8px;
+  background: var(--background-color, #fff);
+  color: var(--text-color, #333);
+
+  box-shadow: 0 4px 16px rgb(0 0 0 / 15%);
+}
+
+#highlight-color-palette[hidden] {
+  display: none;
+}
+
+/* Buttons inside the rectangle: no border or shadow of their own */
+.highlight-action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+
+  cursor: pointer;
+}
+
+.highlight-action-button:hover {
+  background: var(--hover-background, #eee);
+}
+
+.highlight-action-button.active {
+  border-color: var(--text-color, #333);
+}
+
+.highlight-action-button svg,
+.highlight-color-dot {
+  pointer-events: none;
+}
+
+.highlight-color-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  /* keeps the yellow dot visible on a white background */
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 15%);
+}
+
 #pdf-viewer-container::-webkit-scrollbar-track,
 #sidebar::-webkit-scrollbar-track {
   background: transparent;
