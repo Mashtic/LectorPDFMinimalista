@@ -137,69 +137,90 @@ export class SidebarThumbnails {
     reorderButton.className = "sidebar-reorder-button";
     reorderButton.textContent = "Edit File";
     reorderButton.setAttribute("aria-pressed", "false");
-    const deleteButton = document.createElement("button");
-    deleteButton.type = "button";
-    deleteButton.className = "sidebar-reorder-button";
-    deleteButton.textContent = "Delete Pages";
-    deleteButton.setAttribute("aria-pressed", "false");
     const saveChangesButton = document.createElement("button");
     saveChangesButton.type = "button";
     saveChangesButton.className =
       "sidebar-reorder-button sidebar-save-order";
-    saveChangesButton.textContent = "Save Changes";
+    saveChangesButton.textContent = "Accept";
     saveChangesButton.hidden = true;
-    reorderBar.append(reorderButton, deleteButton, saveChangesButton);
+    reorderBar.append(reorderButton, saveChangesButton);
     this.container.appendChild(reorderBar);
     this.list = list;
     this.order = [];
+    this.editStartOrder = null;
     this.deletedPages = new Set();
     this.reorderButton = reorderButton;
-    this.deleteButton = deleteButton;
     this.saveChangesButton = saveChangesButton;
 
     const setMode = (mode) => {
-      const isReordering = mode === "reordering";
-      const isDeleting = mode === "deleting";
-      reorderButton.setAttribute("aria-pressed", String(isReordering));
-      deleteButton.setAttribute("aria-pressed", String(isDeleting));
-      reorderButton.textContent = isReordering ? "Cancel" : "Edit File";
-      deleteButton.textContent = isDeleting ? "Cancel" : "Delete Pages";
+      const isEditing = mode === "editing";
+      reorderButton.setAttribute("aria-pressed", String(isEditing));
+      reorderButton.textContent = isEditing ? "Cancel" : "Edit File";
       saveChangesButton.hidden = !mode;
-      list.classList.toggle("is-reordering", isReordering);
-      list.classList.toggle("is-deleting", isDeleting);
+      list.classList.toggle("is-reordering", isEditing);
+      list.classList.toggle("is-deleting", isEditing);
       if (!mode) {
         hideDropIndicator();
+        if (this.editStartOrder) {
+          for (const pageNumber of this.editStartOrder) {
+            const item = this.items.get(pageNumber);
+            if (item) list.appendChild(item.button);
+          }
+          list.insertBefore(dropIndicator, list.firstChild);
+          this.order = [...this.editStartOrder];
+          this.editStartOrder = null;
+        }
         this.deletedPages.clear();
         this.items.forEach(({ button }) => {
           button.classList.remove("is-deleted");
         });
       }
       this.items.forEach(({ deleteControl }) => {
-        deleteControl.hidden = !isDeleting;
+        deleteControl.hidden = !isEditing;
       });
     };
 
     reorderButton.addEventListener("click", () => {
       const enabled = reorderButton.getAttribute("aria-pressed") !== "true";
-      setMode(enabled ? "reordering" : null);
-    });
-    deleteButton.addEventListener("click", () => {
-      const enabled = deleteButton.getAttribute("aria-pressed") !== "true";
-      setMode(enabled ? "deleting" : null);
+      if (enabled) {
+        this.editStartOrder = [...this.order];
+      }
+      setMode(enabled ? "editing" : null);
     });
     saveChangesButton.addEventListener("click", async () => {
       saveChangesButton.disabled = true;
-      saveChangesButton.textContent = "Saving…";
+      saveChangesButton.textContent = "Accepting…";
       try {
         if (this.deletedPages.size > 0) {
           await window.electronAPI.deletePages([...this.deletedPages]);
-        } else {
+
+          const remainingPages = this.order.filter(
+            (pageNumber) => !this.deletedPages.has(pageNumber),
+          );
+          const deletedBefore = (pageNumber) =>
+            [...this.deletedPages].filter(
+              (deletedPage) => deletedPage < pageNumber,
+            ).length;
+          const reorderedRemainingPages = remainingPages.map(
+            (pageNumber) => pageNumber - deletedBefore(pageNumber),
+          );
+
+          if (
+            reorderedRemainingPages.some(
+              (pageNumber, index) => pageNumber !== index + 1,
+            )
+          ) {
+            await window.electronAPI.reorderPages(reorderedRemainingPages);
+          }
+        } else if (
+          this.order.some((pageNumber, index) => pageNumber !== index + 1)
+        ) {
           await window.electronAPI.reorderPages(this.order);
         }
         window.location.reload();
       } catch (error) {
         saveChangesButton.disabled = false;
-        saveChangesButton.textContent = "Save Changes";
+        saveChangesButton.textContent = "Accept";
         console.error("Could not save PDF page changes", error);
       }
     });
