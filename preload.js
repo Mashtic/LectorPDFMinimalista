@@ -2,6 +2,15 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("electronAPI", {
   openFile: () => ipcRenderer.invoke("dialog:openFile"),
+  openDocument: () => ipcRenderer.invoke("dialog:openDocument"),
+  openMarkdown: () => ipcRenderer.invoke("markdown:open"),
+  onOpenMarkdownDialog: (callback) => ipcRenderer.on("markdown:openDialog", callback),
+  onSaveMarkdownDialog: (callback) => ipcRenderer.on("markdown:saveDialog", callback),
+  onSaveMarkdownAsDialog: (callback) => ipcRenderer.on("markdown:saveAsDialog", callback),
+  onEditMarkdown: (callback) => ipcRenderer.on("markdown:edit", callback),
+  onPreviewMarkdown: (callback) => ipcRenderer.on("markdown:preview", callback),
+  saveMarkdown: (content) => ipcRenderer.invoke("markdown:save", content),
+  saveMarkdownAs: (content) => ipcRenderer.invoke("markdown:saveAs", content),
   openPdfDialog: (callback) => {
     ipcRenderer.on("dialog:openPdfDialog", callback);
   },

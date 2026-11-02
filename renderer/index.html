@@ -18,6 +18,7 @@
     <link rel="stylesheet" type="text/css" href="./search/search-bar.css" />
     <link rel="stylesheet" type="text/css" href="./sidebar/sidebar.css" />
     <link rel="stylesheet" type="text/css" href="./comments/comments.css" />
+    <link rel="stylesheet" type="text/css" href="./markdown/markdown.css" />
     <link
       rel="stylesheet"
       type="text/css"
@@ -80,7 +81,7 @@
           <line x1="12" y1="18" x2="12" y2="12"></line>
           <line x1="9" y1="15" x2="15" y2="15"></line>
         </svg>
-        <span>Open PDF Document...</span>
+        <span>Open Document</span>
       </button>
     </div>
 
@@ -151,7 +152,7 @@
     <!-- VIEWER -->
     <main id="pdf-viewer-container">
       <div id="viewer-actions" hidden>
-        <!-- <button id="OpenAnotherFileBtn" type="button">Añadir PDF</button> -->
+        <!-- <button id="OpenAnotherFileBtn" type="button">Add PDF</button> -->
       </div>
       <div id="pdf-viewer-list"></div>
       <div id="pdf-page-counter">
@@ -160,6 +161,11 @@
         </span>
         <span id="pdf-total-pages"></span>
       </div>
+    </main>
+
+    <main id="markdown-container" hidden>
+      <article id="markdown-preview" class="markdown-paper"></article>
+      <textarea id="markdown-editor" spellcheck="false" aria-label="Markdown source" hidden></textarea>
     </main>
 
     <div id="save-status" role="status" aria-live="polite"></div>
@@ -206,6 +212,7 @@
 
     <!-- TODO: Import scripts once they are placed properly -->
     <script src="./index.js" type="module"></script>
+    <script src="./markdown/markdown.js" type="module"></script>
     <script type="module" src="./viewer/pdf-viewer-renderer.js"></script>
     <script type="module" src="./comments/comments.js"></script>
   </body>

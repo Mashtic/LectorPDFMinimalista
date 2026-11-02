@@ -12,10 +12,14 @@ function notImplementedYet() {
 function showContextMenu(window, selectionText = "") {
   const template = [
     {
-      label: "Open New File",
+      label: "Open PDF",
       click: () => {
         window.webContents.send("dialog:openPdfDialog");
       },
+    },
+    {
+      label: "Open Markdown File",
+      click: () => window.webContents.send("markdown:openDialog"),
     },
   ];
 
@@ -62,6 +66,27 @@ function showContextMenu(window, selectionText = "") {
         click: () => {
           openPresentationWindow();
         },
+      },
+    );
+  }
+
+  if (typeof getGlobalVar("currentMarkdown") === "string") {
+    template.push(
+      {
+        label: "Edit Markdown",
+        click: () => window.webContents.send("markdown:edit"),
+      },
+      {
+        label: "Preview Markdown",
+        click: () => window.webContents.send("markdown:preview"),
+      },
+      {
+        label: "Save As",
+        click: () => window.webContents.send("markdown:saveAsDialog"),
+      },
+      {
+        label: "Save",
+        click: () => window.webContents.send("markdown:saveDialog"),
       },
     );
   }

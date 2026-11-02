@@ -2,6 +2,8 @@ const globalVars = {
   pdfPath: null,
   currentPDF: null,
   currentPage: 1,
+  markdownPath: null,
+  currentMarkdown: null,
 };
 
 function getGlobalVar(key) {

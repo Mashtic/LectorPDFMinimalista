@@ -15,6 +15,7 @@ const path = require("node:path");
 const { existsSync } = require("node:fs");
 const { readPdfFromPath } = require("./services/pdf-open-service.js");
 const { setGlobalVar } = require("./services/global-var-service.js");
+const { registerMarkdownIpc } = require("./ipc/markdown-ipc.js");
 
 // const {
 //   createPresentationWindow,
@@ -54,6 +55,7 @@ app.whenReady().then(async () => {
   registerSignDocumentIpc();
   registerSignatureInfoIpc();
   registerSignatureImageIpc();
+  registerMarkdownIpc();
 
   Menu.setApplicationMenu(null);
   await loadLaunchPdf();

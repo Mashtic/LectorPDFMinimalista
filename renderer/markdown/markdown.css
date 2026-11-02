@@ -1,0 +1,74 @@
+#welcome-screen[hidden], #markdown-container[hidden], #markdown-preview[hidden], #markdown-editor[hidden] { display: none; }
+
+#markdown-container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-color, #fafafa);
+  color: #252525;
+}
+
+.markdown-paper {
+  width: min(850px, calc(100% - 40px));
+  min-height: calc(100vh - 14px);
+  margin: 7px auto 7px;
+  padding: 64px 76px;
+  overflow: auto;
+  background: #fff;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  color: #292929;
+  font: 16px/1.65 Arial, sans-serif;
+}
+.markdown-paper h1, .markdown-paper h2, .markdown-paper h3,
+.markdown-paper h4, .markdown-paper h5, .markdown-paper h6 {
+  color: #202020;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.3;
+  margin: 1.5em 0 .55em;
+}
+.markdown-paper h1 { font-size: 2em; }
+.markdown-paper h2 { font-size: 1.5em; }
+.markdown-paper p { margin: 0 0 1.2em; }
+.markdown-paper a { color: #496d88; }
+.markdown-paper blockquote { margin: 1em 0; padding-left: 1em; border-left: 2px solid #d8d8d8; color: #777; }
+.markdown-paper pre { overflow: auto; padding: 16px; background: #f0f0f0; border-radius: 5px; font: 13px/1.6 ui-monospace, monospace; }
+.markdown-paper code { padding: .12em .3em; background: #eee; border-radius: 3px; font: .88em ui-monospace, monospace; }
+.markdown-paper pre code { padding: 0; background: transparent; }
+.markdown-paper img { max-width: 100%; }
+.markdown-paper hr { border: 0; border-top: 1px solid #ddd; margin: 2em 0; }
+.markdown-paper table { border-collapse: collapse; }
+.markdown-paper td, .markdown-paper th { padding: 6px 10px; border: 1px solid #ddd; }
+
+#markdown-editor {
+  width: min(850px, calc(100% - 40px));
+  flex: 1;
+  align-self: center;
+  margin: 7px auto;
+  padding: 64px 40px 32px;
+  resize: none;
+  border: 0;
+  outline: none;
+  color: #333;
+  background: #fff;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  font: 14px/1.7 ui-monospace, SFMono-Regular, Consolas, monospace;
+  tab-size: 2;
+}
+#markdown-editor:focus { border-color: #c8c8c8; }
+
+body.is-markdown #pdf-viewer-container,
+body.is-markdown #floating-toggle,
+body.is-markdown #comments-panel,
+body.is-markdown #pdf-search-bar { display: none !important; }
+
+#markdown-container { transition: padding-left 0.2s ease; }
+body.sidebar-open #markdown-container { padding-left: var(--sidebar-width, 240px); }
+
+@media (max-width: 600px) {
+  .markdown-paper, #markdown-editor { width: calc(100% - 20px); padding: 56px 22px 28px; }
+}
+
+@media (max-width: 900px) {
+  body.sidebar-open #markdown-container { padding-left: 0; }
+}

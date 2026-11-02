@@ -1,11 +1,14 @@
-import { appendPdf, openFile, openPdfFromFile } from "./open-file/open-file.js";
+import { appendPdf, openFile, openDocument, openPdfFromFile } from "./open-file/open-file.js";
 import { saveCurrentPdf, saveFile } from "./save-file/save-file.js";
 import { openSignDocumentModal } from "./sign-document/sign-document-renderer.js";
 import { insertSignatureImage } from "./signature-image/signature-image-renderer.js";
 import "./window/window.js";
 
 
-document.getElementById("OpenFileBtn").addEventListener("click", openFile);
+document.getElementById("OpenFileBtn").addEventListener("click", openDocument);
+window.electronAPI.onOpenMarkdownDialog(async () => {
+  if (await window.electronAPI.openMarkdown()) window.location.reload();
+});
 
 window.electronAPI.openPdfDialog(() => {
   openFile();
