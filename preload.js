@@ -15,6 +15,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on("dialog:openSaveCurrentPdfDialog", callback);
   },
 
+  showContextMenu: () => ipcRenderer.send("context-menu:show"),
+
   setFloatingMode: (isFloating, documentSize) =>
     ipcRenderer.send("set-floating-mode", isFloating, documentSize),
   onFloatingWindowSized: (callback) => {

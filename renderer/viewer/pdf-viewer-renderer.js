@@ -3,6 +3,7 @@ import { PdfSearchController } from "../search/pdf-search.js";
 import { initializeSearchBar } from "../search/search-bar.js";
 import { initializeSidebar } from "../sidebar/sidebar.js";
 import { showSignatureStatus } from "../signature-status/signature-status-renderer.js";
+import { isTextEntryTarget } from "../keyboard/keyboard-shortcuts.js";
 
 const welcomeScreen = document.getElementById("welcome-screen");
 const viewContainer = document.getElementById("pdf-viewer-container");
@@ -325,6 +326,8 @@ if (currentPDF) {
   showSignatureStatus();
 
   document.addEventListener("keydown", (event) => {
+    if (isTextEntryTarget(event.target)) return;
+
     if (event.key.toLowerCase() === "j") {
       viewer.skipDown();
     } else if (event.key.toLowerCase() === "k") {
@@ -372,6 +375,8 @@ if (currentPDF) {
 }
 
 document.addEventListener("keydown", (event) => {
+  if (isTextEntryTarget(event.target)) return;
+
   if (event.key.toLowerCase() === "c") {
     const selection = window.getSelection();
     const text = selection?.toString();
