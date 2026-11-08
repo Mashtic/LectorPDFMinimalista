@@ -3,6 +3,7 @@ import { PdfSearchController } from "../search/pdf-search.js";
 import { initializeSearchBar } from "../search/search-bar.js";
 import { initializeSidebar } from "../sidebar/sidebar.js";
 import { showSignatureStatus } from "../signature-status/signature-status-renderer.js";
+import { showUnsavedChangesDialog } from "./unsaved-changes-dialog.js";
 
 const welcomeScreen = document.getElementById("welcome-screen");
 const viewContainer = document.getElementById("pdf-viewer-container");
@@ -11,6 +12,8 @@ const currentPDF = await window.electronAPI.getGlobalVar("currentPDF");
 
 let viewer;
 let ticking = false;
+
+let hasUnsavedChanges = false;
 
 const pageInput = document.getElementById("pdf-page-count");
 
@@ -365,6 +368,7 @@ if (currentPDF) {
   );
 
   viewer.onDocumentModified = (dataPDF) => {
+    hasUnsavedChanges = true;
     document.dispatchEvent(
       new CustomEvent("pdf-modified", { detail: dataPDF }),
     );
@@ -406,4 +410,34 @@ pageInput.addEventListener("keydown", (event) => {
 
     viewer.jumpToPage(pageNumber);
   }
+});
+
+async function confirmLeaveDocument() {
+  if (!viewer || !hasUnsavedChanges) return true;
+
+  const choice = await showUnsavedChangesDialog();
+
+  if (choice === "cancel") return false;
+  if (choice === "discard") return true;
+
+  try {
+    const bytes = await viewer.getCurrentPDF();
+    await window.electronAPI.setGlobalVar("currentPDF", bytes);
+
+    const saved =
+      (await window.electronAPI.saveCurrentPdf()) ||
+      (await window.electronAPI.saveFile());
+    if (saved) {
+      hasUnsavedChanges = false;
+      return true;
+    }
+  } catch (error) {
+    console.error("Failed to save PDF:", error);
+  }
+  return false;
+}
+
+window.electronAPI.onCheckUnsavedChanges(async (requestId) => {
+  const canContinue = await confirmLeaveDocument();
+  window.electronAPI.respondUnsavedChanges(requestId, canContinue);
 });

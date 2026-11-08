@@ -12,7 +12,7 @@ function createMainWindow() {
       contextIsolation: true,
       preload: path.join(__dirname, "../preload.js"),
     },
-    icon: path.join(__dirname, '../build/icon.png'),
+    icon: path.join(__dirname, "../build/icon.png"),
   });
 
   win.loadFile(path.join(__dirname, "../renderer/index.html"));
@@ -25,8 +25,13 @@ function createMainWindow() {
     if (input.type === "keyDown" && input.key === "m") {
       showContextMenu(win);
     }
-    if (input.type === "keyDown" && input.control && input.shift && input.key.toLowerCase() == "i") {
-      win.webContents.openDevTools(); 
+    if (
+      input.type === "keyDown" &&
+      input.control &&
+      input.shift &&
+      input.key.toLowerCase() == "i"
+    ) {
+      win.webContents.openDevTools();
     }
   });
 

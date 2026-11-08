@@ -11,6 +11,7 @@ const { registerCommentsIpc } = require("./ipc/comments-ipc.js");
 const { registerSignDocumentIpc } = require("./ipc/sign-document-ipc.js");
 const { registerSignatureInfoIpc } = require("./ipc/signature-info-ipc.js");
 const { registerSignatureImageIpc } = require("./ipc/signature-image-ipc.js");
+const { registerUnsavedChangesIpc } = require("./ipc/unsaved-changes-ipc.js");
 const path = require("node:path");
 const { existsSync } = require("node:fs");
 const { readPdfFromPath } = require("./services/pdf-open-service.js");
@@ -40,7 +41,6 @@ async function loadLaunchPdf() {
   } catch (error) {
     console.error("Failed to open launch PDF:", error);
   }
-
 }
 
 app.whenReady().then(async () => {
@@ -54,6 +54,7 @@ app.whenReady().then(async () => {
   registerSignDocumentIpc();
   registerSignatureInfoIpc();
   registerSignatureImageIpc();
+  registerUnsavedChangesIpc();
 
   Menu.setApplicationMenu(null);
   await loadLaunchPdf();

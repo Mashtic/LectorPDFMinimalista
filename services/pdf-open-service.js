@@ -1,13 +1,13 @@
-const { dialog } = require('electron');
-const { readFile } = require('node:fs/promises');
+const { dialog } = require("electron");
+const { readFile } = require("node:fs/promises");
 
 async function readPdfFile() {
   const { canceled, filePaths } = await dialog.showOpenDialog({
-    properties: ['openFile'],
+    properties: ["openFile"],
     filters: [
       {
-        name: 'PDF Files',
-        extensions: ['pdf'],
+        name: "PDF Files",
+        extensions: ["pdf"],
       },
     ],
   });
@@ -18,14 +18,13 @@ async function readPdfFile() {
 
   const fileContent = await readFile(filePaths[0]);
 
-  return {path: filePaths[0], content: fileContent};
+  return { path: filePaths[0], content: fileContent };
 }
-
 
 async function readPdfFromPath(filePath) {
   const content = await readFile(filePath);
 
-  return { path: filePath, content};
+  return { path: filePath, content };
 }
 
 module.exports = { readPdfFile, readPdfFromPath };

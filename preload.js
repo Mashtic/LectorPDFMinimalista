@@ -64,4 +64,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.invoke("pdf:setAnnotationBase", bytes),
   applyAnnotationOps: (ops) =>
     ipcRenderer.invoke("pdf:applyAnnotationOps", ops),
+
+  onCheckUnsavedChanges: (cb) =>
+    ipcRenderer.on("check-unsaved-changes", (_e, requestId) => cb(requestId)),
+  respondUnsavedChanges: (requestId, ok) =>
+    ipcRenderer.send("unsaved-changes-response", requestId, ok),
 });
