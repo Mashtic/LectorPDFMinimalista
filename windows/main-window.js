@@ -1,4 +1,4 @@
-const { BrowserWindow, globalShortcut } = require("electron");
+const { BrowserWindow, globalShortcut, ipcMain } = require("electron");
 const path = require("path");
 const { showContextMenu } = require("./context-menu.js");
 
@@ -15,6 +15,15 @@ function createMainWindow() {
     icon: path.join(__dirname, "../build/icon.png"),
   });
 
+  let textInputFocused = false;
+  const onTextInputFocus = (event, focused) => {
+    if (event.sender === win.webContents) textInputFocused = Boolean(focused);
+  };
+  ipcMain.on("text-input-focus", onTextInputFocus);
+  win.on("closed", () =>
+    ipcMain.removeListener("text-input-focus", onTextInputFocus),
+  );
+
   win.loadFile(path.join(__dirname, "../renderer/index.html"));
 
   win.webContents.on("context-menu", (_event, params) => {
@@ -22,7 +31,7 @@ function createMainWindow() {
   });
 
   win.webContents.on("before-input-event", (event, input) => {
-    if (input.type === "keyDown" && input.key === "m") {
+    if (input.type === "keyDown" && input.key === "m" && !textInputFocused) {
       showContextMenu(win);
     }
     if (

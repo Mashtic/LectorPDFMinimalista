@@ -10,9 +10,17 @@ const viewContainer = document.getElementById("pdf-viewer-container");
 const viewerActions = document.getElementById("viewer-actions");
 const currentPDF = await window.electronAPI.getGlobalVar("currentPDF");
 
+function isTypingTarget(event) {
+  const element = event.target;
+  return (
+    element instanceof HTMLElement &&
+    (element.isContentEditable ||
+      ["INPUT", "TEXTAREA", "SELECT"].includes(element.tagName))
+  );
+}
+
 let viewer;
 let ticking = false;
-
 let hasUnsavedChanges = false;
 
 const pageInput = document.getElementById("pdf-page-count");
@@ -328,6 +336,7 @@ if (currentPDF) {
   showSignatureStatus();
 
   document.addEventListener("keydown", (event) => {
+    if (isTypingTarget(event)) return;
     if (event.key.toLowerCase() === "j") {
       viewer.skipDown();
     } else if (event.key.toLowerCase() === "k") {
@@ -376,6 +385,7 @@ if (currentPDF) {
 }
 
 document.addEventListener("keydown", (event) => {
+  if (isTypingTarget(event)) return;
   if (event.key.toLowerCase() === "c") {
     const selection = window.getSelection();
     const text = selection?.toString();
@@ -412,6 +422,13 @@ pageInput.addEventListener("keydown", (event) => {
   }
 });
 
+document.addEventListener("focusin", (event) => {
+  window.electronAPI.setTextInputFocus(isTypingTarget(event));
+});
+document.addEventListener("focusout", () => {
+  window.electronAPI.setTextInputFocus(false);
+});
+
 async function confirmLeaveDocument() {
   if (!viewer || !hasUnsavedChanges) return true;
 
@@ -436,6 +453,22 @@ async function confirmLeaveDocument() {
   }
   return false;
 }
+
+window.electronAPI.onFlushPdf(async (requestId) => {
+  try {
+    if (viewer && hasUnsavedChanges) {
+      const bytes = await viewer.getCurrentPDF();
+      await window.electronAPI.setGlobalVar("currentPDF", bytes);
+    }
+  } catch (error) {
+    console.error("Failed to prepare the PDF for saving:", error);
+  }
+  window.electronAPI.respondFlushPdf(requestId);
+});
+
+window.electronAPI.onPdfSaved(() => {
+  hasUnsavedChanges = false;
+});
 
 window.electronAPI.onCheckUnsavedChanges(async (requestId) => {
   const canContinue = await confirmLeaveDocument();

@@ -4,6 +4,7 @@ import {
   getDocument,
   TextLayer,
   AnnotationLayer,
+  AnnotationType,
 } from "../../node_modules/pdfjs-dist/build/pdf.mjs";
 import { SimpleLinkService } from "../../node_modules/pdfjs-dist/web/pdf_viewer.mjs";
 import { createZoomState, setZoom, zoomIn, zoomOut } from "../zoom/zoom.js";
@@ -21,6 +22,8 @@ import { AnnotationManager } from "./annotation-manager.js";
 import { annotationStore } from "../comments/annotation-store.js";
 
 GlobalWorkerOptions.workerSrc = "./pdf.worker.mjs";
+
+const ANNOTATION_EDITOR_PREFIX = "pdfjs_internal_editor_";
 
 // Space kept above an outline target so it is not hidden by the page counter
 const JUMP_TOP_MARGIN = 56;
@@ -187,9 +190,9 @@ export class PdfViewer {
   }
 
   async showHighlightPopup({ pageNumber, annotation, event }) {
-    const comment = (await this.annotationStore.getPageComments(pageNumber)).find(
-      (entry) => entry.id === annotation.id,
-    );
+    const comment = (
+      await this.annotationStore.getPageComments(pageNumber)
+    ).find((entry) => entry.id === annotation.id);
 
     showCommentPopup({
       x: event.clientX,
@@ -201,13 +204,38 @@ export class PdfViewer {
       allowEdit: Boolean(comment?.text),
       onSave: (newText) =>
         this.editHighlightComment(pageNumber, annotation.id, newText),
-      onDelete: () =>
-        this.deleteHighlightComment(pageNumber, annotation.id),
+      onDelete: () => this.deleteHighlightComment(pageNumber, annotation.id),
     });
   }
 
-  getCurrentPDF() {
-    return this.annotationStore.getBytes();
+  async getCurrentPDF() {
+    const bytes = await this.annotationStore.getBytes();
+    return this.applyFormValues(bytes);
+  }
+
+  getFormValues() {
+    const map = this.documentPDF?.annotationStorage.serializable.map;
+    if (!map) return [];
+    return [...map]
+      .filter(([key]) => !key.startsWith(ANNOTATION_EDITOR_PREFIX))
+      .map(([key, value]) => [key, { ...value }]);
+  }
+
+  async applyFormValues(bytes) {
+    const entries = this.getFormValues();
+    if (entries.length === 0) return bytes;
+
+    const base = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+    const task = getDocument({ data: base.slice() });
+    try {
+      const doc = await task.promise;
+      for (const [key, value] of entries) {
+        doc.annotationStorage.setValue(key, value);
+      }
+      return await doc.saveDocument();
+    } finally {
+      task.destroy();
+    }
   }
 
   async refreshPageLayers(pageNumber) {
@@ -230,6 +258,7 @@ export class PdfViewer {
     const scrollLeft = container.scrollLeft;
 
     closeCommentPopup();
+    const formValues = this.getFormValues();
     this.observers.forEach((observer) => observer.disconnect());
     this.observers = [];
 
@@ -245,6 +274,9 @@ export class PdfViewer {
     this.linkService.setDocument(this.documentPDF);
     this.annotationManager.reset();
     this.annotationStore.attach(this.documentPDF, this.dataPDF);
+    for (const [key, value] of formValues) {
+      this.documentPDF.annotationStorage.setValue(key, value);
+    }
 
     document.querySelector("#pdf-viewer-list").replaceChildren();
     this.pages.clear();
@@ -413,6 +445,8 @@ export class PdfViewer {
       entry.wrapper.style.width = `${viewport.width}px`;
       entry.wrapper.style.height = `${viewport.height}px`;
     }
+
+    this.setFormLayerScale(entry, viewport);
   }
 
   rerenderVisiblePages() {
@@ -459,14 +493,128 @@ export class PdfViewer {
     this.onTextLayerRendered?.(pageNumber);
   }
 
-  async renderAnnotationLayer(page, viewport, entry) {
+  async renderFormAppearances(page, viewport) {
+    const annotationCanvasMap = new Map();
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.ceil(viewport.width);
+    canvas.height = Math.ceil(viewport.height);
+
+    try {
+      await page.render({
+        canvasContext: canvas.getContext("2d"),
+        viewport,
+        annotationMode: AnnotationMode.ENABLE_FORMS,
+        annotationCanvasMap,
+      }).promise;
+      return annotationCanvasMap;
+    } catch (error) {
+      // The CSS fallback marks are used instead
+      console.warn("Could not render form field appearances:", error);
+      return null;
+    } finally {
+      canvas.width = 0;
+      canvas.height = 0;
+    }
+  }
+
+  setFormLayerScale(entry, viewport) {
+    const layer = entry.wrapper?.annotationLayer;
+    if (!layer || !entry.page) return;
+
+    layer.style.setProperty("--scale-factor", viewport.scale);
+    layer.style.setProperty("--user-unit", entry.page.userUnit);
+    layer.style.setProperty(
+      "--total-scale-factor",
+      viewport.scale * entry.page.userUnit,
+    );
+    layer.style.setProperty("--scale-round-x", "1px");
+    layer.style.setProperty("--scale-round-y", "1px");
+  }
+
+  swapFormAppearances(layerDiv, annotationCanvasMap) {
+    for (const [id, value] of annotationCanvasMap) {
+      const element = layerDiv.querySelector(`[data-annotation-id="${id}"]`);
+      if (!element) continue;
+
+      for (const canvas of Array.isArray(value) ? value : [value]) {
+        canvas.className = "annotationContent";
+        canvas.ariaHidden = true;
+        const name = canvas.getAttribute("data-canvas-name");
+        const previous = name
+          ? element.querySelector(`canvas[data-canvas-name="${name}"]`)
+          : element.querySelector("canvas.annotationContent");
+        previous?.replaceWith(canvas);
+      }
+    }
+  }
+
+  renderAnnotationLayer(page, viewport, entry) {
+    if (!entry.wrapper?.annotationLayer) return Promise.resolve();
+
+    const token = (entry.formLayerToken ?? 0) + 1;
+    entry.formLayerToken = token;
+
+    const job = (entry.formLayerJob ?? Promise.resolve())
+      .catch(() => {})
+      .then(() => this.#renderFormLayer(page, viewport, entry, token));
+    entry.formLayerJob = job;
+    return job;
+  }
+
+  async #renderFormLayer(page, viewport, entry, token) {
     const annotationLayer = entry.wrapper.annotationLayer;
+    const isStale = () => token !== entry.formLayerToken;
 
-    if (!annotationLayer) return;
+    if (isStale() || entry.noFormFields) return;
 
-    const annotations = await page.getAnnotations({ intent: "display" });
+    if (entry.annotationLayerInstance) {
+      this.setFormLayerScale(entry, viewport);
+
+      if (entry.hasFormAppearances) {
+        const annotationCanvasMap = await this.renderFormAppearances(
+          page,
+          viewport,
+        );
+        if (annotationCanvasMap && !isStale()) {
+          this.swapFormAppearances(annotationLayer, annotationCanvasMap);
+        }
+      }
+      return;
+    }
+
+    const annotations = (
+      await page.getAnnotations({ intent: "display" })
+    ).filter(
+      (annotation) => annotation.annotationType === AnnotationType.WIDGET,
+    );
+
+    if (isStale()) return;
+
+    if (annotations.length === 0) {
+      entry.noFormFields = true;
+      return;
+    }
+
+    entry.hasFormAppearances = annotations.some(
+      (annotation) => annotation.checkBox || annotation.radioButton,
+    );
+    const annotationCanvasMap = entry.hasFormAppearances
+      ? await this.renderFormAppearances(page, viewport)
+      : null;
+
+    if (isStale()) return;
 
     annotationLayer.replaceChildren();
+
+    annotationLayer.style.zIndex = "4";
+    this.setFormLayerScale(entry, viewport);
+
+    if (!annotationLayer.dataset.formListeners) {
+      annotationLayer.dataset.formListeners = "true";
+      const markModified = () => this.onDocumentModified?.();
+      annotationLayer.addEventListener("input", markModified);
+      annotationLayer.addEventListener("change", markModified);
+    }
 
     const annotationViewport = viewport.clone({ dontFlip: true });
 
@@ -475,17 +623,27 @@ export class PdfViewer {
       page,
       viewport: annotationViewport,
       accessibilityManager: null,
-      annotationCanvasMap: null,
+      annotationCanvasMap,
+      linkService: this.linkService,
+      annotationStorage: this.documentPDF.annotationStorage,
     });
 
     await layer.render({
       annotations,
-      page,
       viewport: annotationViewport,
       renderForms: true,
       annotationStorage: this.documentPDF.annotationStorage,
       linkService: this.linkService,
     });
+
+    if (isStale()) {
+      layer.destroy?.();
+      return;
+    }
+
+    for (const section of annotationLayer.querySelectorAll("section")) {
+      section.style.pointerEvents = "auto";
+    }
 
     entry.annotationLayerInstance = layer;
   }
@@ -541,6 +699,12 @@ export class PdfViewer {
             page,
             viewport,
           );
+          this.renderAnnotationLayer(page, viewport, entry).catch((error) =>
+            console.error(
+              `Failed to render form fields of page ${pageNumber}:`,
+              error,
+            ),
+          );
           await this.renderTextLayer(page, viewport, entry, pageNumber);
           await this.renderHighlightCommentLayer(
             page,
@@ -585,6 +749,10 @@ export class PdfViewer {
     }
 
     entry.wrapper?.highlightCommentLayer?.replaceChildren();
+    entry.formLayerToken = (entry.formLayerToken ?? 0) + 1;
+    entry.wrapper?.annotationLayer?.replaceChildren();
+    entry.annotationLayerInstance = null;
+    entry.noFormFields = false;
 
     entry.textDivs = null;
     entry.textLayerInstance = null;

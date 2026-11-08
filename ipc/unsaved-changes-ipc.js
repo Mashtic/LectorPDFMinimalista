@@ -28,6 +28,33 @@ function askRendererCanLeave(win) {
   });
 }
 
+function flushRendererPdf(webContents, timeoutMs = 10000) {
+  return new Promise((resolve) => {
+    if (!webContents || webContents.isDestroyed()) {
+      resolve();
+      return;
+    }
+
+    const requestId = ++nextRequestId;
+    let timer;
+
+    const onResponse = (_event, responseId) => {
+      if (responseId !== requestId) return;
+      clearTimeout(timer);
+      ipcMain.removeListener("flush-pdf-response", onResponse);
+      resolve();
+    };
+
+    timer = setTimeout(() => {
+      ipcMain.removeListener("flush-pdf-response", onResponse);
+      resolve();
+    }, timeoutMs);
+
+    ipcMain.on("flush-pdf-response", onResponse);
+    webContents.send("flush-pdf", requestId);
+  });
+}
+
 function registerUnsavedChangesIpc() {
   app.on("browser-window-created", (_event, win) => {
     win.on("close", async (event) => {
@@ -42,4 +69,8 @@ function registerUnsavedChangesIpc() {
   });
 }
 
-module.exports = { registerUnsavedChangesIpc, askRendererCanLeave };
+module.exports = {
+  registerUnsavedChangesIpc,
+  askRendererCanLeave,
+  flushRendererPdf,
+};

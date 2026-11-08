@@ -892,3 +892,47 @@ body {
     z-index: -1;
   }
 }
+
+.annotationLayer .buttonWidgetAnnotation:is(.checkBox, .radioButton) input {
+  cursor: pointer;
+}
+
+.annotationLayer
+  .buttonWidgetAnnotation:is(.checkBox, .radioButton):not(
+    :has([data-canvas-name])
+  )
+  input {
+  position: relative;
+}
+
+.annotationLayer
+  .buttonWidgetAnnotation.radioButton:not(:has([data-canvas-name]))
+  input {
+  border-radius: 50%;
+}
+
+.annotationLayer
+  .buttonWidgetAnnotation.radioButton:not(:has([data-canvas-name]))
+  input:checked::before {
+  content: "";
+  position: absolute;
+  inset: 22%;
+  border-radius: 50%;
+  background: #111;
+}
+
+.annotationLayer
+  .buttonWidgetAnnotation.checkBox:not(:has([data-canvas-name]))
+  input:checked::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 28%;
+  height: 56%;
+  box-sizing: border-box;
+  border: solid #111;
+  border-width: 0 max(1.5px, calc(1.5px * var(--total-scale-factor, 1)))
+    max(1.5px, calc(1.5px * var(--total-scale-factor, 1))) 0;
+  transform: translate(-50%, -55%) rotate(45deg);
+}

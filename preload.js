@@ -65,6 +65,14 @@ contextBridge.exposeInMainWorld("electronAPI", {
   applyAnnotationOps: (ops) =>
     ipcRenderer.invoke("pdf:applyAnnotationOps", ops),
 
+  setTextInputFocus: (focused) => ipcRenderer.send("text-input-focus", focused),
+
+  onFlushPdf: (cb) =>
+    ipcRenderer.on("flush-pdf", (_e, requestId) => cb(requestId)),
+  respondFlushPdf: (requestId) =>
+    ipcRenderer.send("flush-pdf-response", requestId),
+  onPdfSaved: (cb) => ipcRenderer.on("pdf-saved", () => cb()),
+
   onCheckUnsavedChanges: (cb) =>
     ipcRenderer.on("check-unsaved-changes", (_e, requestId) => cb(requestId)),
   respondUnsavedChanges: (requestId, ok) =>
