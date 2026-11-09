@@ -381,18 +381,33 @@ export class PdfViewer {
   }
 
   zoomInPages() {
-    zoomIn(this.zoomState);
-    this.rerenderVisiblePages();
+    this.zoomKeepingCenter(() => zoomIn(this.zoomState));
   }
 
   zoomOutPages() {
-    zoomOut(this.zoomState);
-    this.rerenderVisiblePages();
+    this.zoomKeepingCenter(() => zoomOut(this.zoomState));
   }
 
   resetZoom() {
-    setZoom(this.zoomState, 1);
+    this.zoomKeepingCenter(() => setZoom(this.zoomState, 1));
+  }
+
+  zoomKeepingCenter(applyZoom) {
+    const container = document.getElementById("pdf-viewer-container");
+    const centerX =
+      (container.scrollLeft + container.clientWidth / 2) /
+      container.scrollWidth;
+    const centerY =
+      (container.scrollTop + container.clientHeight / 2) /
+      container.scrollHeight;
+
+    applyZoom();
     this.rerenderVisiblePages();
+
+    container.scrollLeft =
+      centerX * container.scrollWidth - container.clientWidth / 2;
+    container.scrollTop =
+      centerY * container.scrollHeight - container.clientHeight / 2;
   }
 
   fitWidth(maxWidth) {
