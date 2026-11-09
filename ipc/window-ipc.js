@@ -1,4 +1,5 @@
 const { BrowserWindow, ipcMain, screen } = require("electron");
+const { showContextMenu } = require("../windows/context-menu.js");
 
 const WINDOW_TOP_BAR_HEIGHT = 32;
 const WINDOW_MARGIN = 20;
@@ -35,6 +36,13 @@ function getWorkAreaPosition(win) {
 }
 
 function registerWindowIpc() {
+  ipcMain.on("context-menu:show", (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (win) {
+      showContextMenu(win);
+    }
+  });
+
   ipcMain.on("toggle-fullscreen", (event) => {
     const win = BrowserWindow.fromWebContents(event.sender);
     if (!win) {

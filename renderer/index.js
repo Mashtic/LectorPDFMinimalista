@@ -3,9 +3,17 @@ import { saveCurrentPdf, saveFile } from "./save-file/save-file.js";
 import { startSigning } from "./sign-document/sign-document-renderer.js";
 import { openSignatureAppearanceModal } from "./signature-appearance/signature-appearance-renderer.js";
 import "./window/window.js";
+import { isTextEntryTarget } from "./keyboard/keyboard-shortcuts.js";
 
 
 document.getElementById("OpenFileBtn").addEventListener("click", openFile);
+
+// KEYBOARD SHORTCUTS
+document.addEventListener("keydown", (event) => {
+  if (event.key === "m" && !isTextEntryTarget(event.target)) {
+    window.electronAPI.showContextMenu();
+  }
+});
 
 window.electronAPI.openPdfDialog(() => {
   openFile();

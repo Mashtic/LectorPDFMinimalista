@@ -4,20 +4,12 @@ import { initializeSearchBar } from "../search/search-bar.js";
 import { initializeSidebar } from "../sidebar/sidebar.js";
 import { showSignatureStatus } from "../signature-status/signature-status-renderer.js";
 import { showUnsavedChangesDialog } from "./unsaved-changes-dialog.js";
+import { isTextEntryTarget } from "../keyboard/keyboard-shortcuts.js";
 
 const welcomeScreen = document.getElementById("welcome-screen");
 const viewContainer = document.getElementById("pdf-viewer-container");
 const viewerActions = document.getElementById("viewer-actions");
 const currentPDF = await window.electronAPI.getGlobalVar("currentPDF");
-
-function isTypingTarget(event) {
-  const element = event.target;
-  return (
-    element instanceof HTMLElement &&
-    (element.isContentEditable ||
-      ["INPUT", "TEXTAREA", "SELECT"].includes(element.tagName))
-  );
-}
 
 let viewer;
 let ticking = false;
@@ -336,7 +328,8 @@ if (currentPDF) {
   showSignatureStatus();
 
   document.addEventListener("keydown", (event) => {
-    if (isTypingTarget(event)) return;
+    if (isTextEntryTarget(event.target)) return;
+
     if (event.key.toLowerCase() === "j") {
       viewer.skipDown();
     } else if (event.key.toLowerCase() === "k") {
@@ -385,7 +378,8 @@ if (currentPDF) {
 }
 
 document.addEventListener("keydown", (event) => {
-  if (isTypingTarget(event)) return;
+  if (isTextEntryTarget(event.target)) return;
+
   if (event.key.toLowerCase() === "c") {
     const selection = window.getSelection();
     const text = selection?.toString();
