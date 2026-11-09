@@ -34,10 +34,12 @@ html {
 /* Electron Drag Bar */
 #title-bar {
   height: 32px;
-  width: 100%;
   position: fixed;
   top: 0;
   left: 0;
+  /* Leaves the 8px scrollbar gutter (see viewer/pdf-viewer-style.css) out of
+     the drag region so the vertical scrollbar stays clickable at the top */
+  right: 8px;
   -webkit-app-region: drag;
   z-index: 9999;
 }
