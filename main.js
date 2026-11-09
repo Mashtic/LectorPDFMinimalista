@@ -10,7 +10,9 @@ const { registerPDFSaveIpc } = require("./ipc/pdf-save-ipc.js");
 const { registerCommentsIpc } = require("./ipc/comments-ipc.js");
 const { registerSignDocumentIpc } = require("./ipc/sign-document-ipc.js");
 const { registerSignatureInfoIpc } = require("./ipc/signature-info-ipc.js");
-const { registerSignatureImageIpc } = require("./ipc/signature-image-ipc.js");
+const {
+  registerSignatureAppearanceIpc,
+} = require("./ipc/signature-appearance-ipc.js");
 const { registerUnsavedChangesIpc } = require("./ipc/unsaved-changes-ipc.js");
 const path = require("node:path");
 const { existsSync } = require("node:fs");
@@ -53,7 +55,7 @@ app.whenReady().then(async () => {
   registerCommentsIpc();
   registerSignDocumentIpc();
   registerSignatureInfoIpc();
-  registerSignatureImageIpc();
+  registerSignatureAppearanceIpc();
   registerUnsavedChangesIpc();
 
   Menu.setApplicationMenu(null);

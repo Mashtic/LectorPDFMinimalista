@@ -31,14 +31,17 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on("dialog:openAppendDialog", callback);
   },
 
-  signDocument: (pin) => ipcRenderer.invoke("sign:document", pin),
+  signDocument: (pin, options) =>
+    ipcRenderer.invoke("sign:document", pin, options),
   readSignatureInfo: () => ipcRenderer.invoke("signature:read"),
-  pickSignatureImage: () => ipcRenderer.invoke("signature:pickImage"),
-  insertSignatureImage: (options) =>
-    ipcRenderer.invoke("signature:insertImage", options),
-  cancelSignatureImage: () => ipcRenderer.invoke("signature:cancelImage"),
-  onInsertSignatureImage: (callback) => {
-    ipcRenderer.on("signature:openImagePicker", callback);
+  getSignatureAppearance: () => ipcRenderer.invoke("appearance:get"),
+  saveSignatureAppearance: (values) =>
+    ipcRenderer.invoke("appearance:save", values),
+  chooseSignatureAppearanceImage: () =>
+    ipcRenderer.invoke("appearance:chooseImage"),
+  clearSignatureAppearance: () => ipcRenderer.invoke("appearance:clear"),
+  onOpenSignatureAppearance: (callback) => {
+    ipcRenderer.on("signature:openAppearance", callback);
   },
   openSignModal: (callback) => {
     ipcRenderer.on("sign:openSignModal", callback);

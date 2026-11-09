@@ -4,6 +4,10 @@ const signpdf = require("@signpdf/signpdf").default;
 const { Signer } = require("@signpdf/utils");
 const { plainAddPlaceholder } = require("@signpdf/placeholder-plain");
 const { openCardSession } = require("./card-sign-service.js");
+const { stampAppearance } = require("./signature-stamp-service.js");
+const {
+  getAppearanceForStamping,
+} = require("./signature-appearance-service.js");
 const { getGlobalVar, setGlobalVar } = require("./global-var-service.js");
 
 const SIGNATURE_LENGTH = 16384;
@@ -74,7 +78,7 @@ function readSignerName(certificateDer) {
   }
 }
 
-async function signCurrentPdfWithCard(pin) {
+async function signCurrentPdfWithCard(pin, options = {}) {
   const currentPDF = getGlobalVar("currentPDF");
   if (!currentPDF) {
     throw Object.assign(new Error("No document"), { code: "NO_DOCUMENT" });
@@ -87,12 +91,37 @@ async function signCurrentPdfWithCard(pin) {
   const cardSession = openCardSession(pin);
 
   try {
-    const normalizedPdf = await normalizePdf(Buffer.from(currentPDF));
+    const signerName = readSignerName(cardSession.certificateDer);
+    let documentToSign = Buffer.from(currentPDF);
+
+    /*
+     * The graphic expression is stamped first and signed afterwards, so the
+     * signature covers it. Stamping after signing would break the signature.
+     */
+    if (options.placement) {
+      const appearance = await getAppearanceForStamping();
+
+      if (!appearance) {
+        throw Object.assign(new Error("No appearance"), {
+          code: "NO_APPEARANCE",
+        });
+      }
+
+      documentToSign = await stampAppearance({
+        pdfBuffer: documentToSign,
+        appearance,
+        placement: options.placement,
+        pageNumber: options.pageNumber,
+        signerName,
+      });
+    }
+
+    const normalizedPdf = await normalizePdf(documentToSign);
 
     const pdfWithPlaceholder = plainAddPlaceholder({
       pdfBuffer: normalizedPdf,
       reason: SIGN_REASON,
-      name: readSignerName(cardSession.certificateDer) || "",
+      name: signerName || "",
       signatureLength: SIGNATURE_LENGTH,
     });
 
@@ -101,10 +130,12 @@ async function signCurrentPdfWithCard(pin) {
       new CardSigner(cardSession),
     );
 
+    // The document is only replaced once everything succeeded, so a failed
+    // signature never leaves a stamp behind
     setGlobalVar("currentPDF", signedPdf);
 
     return {
-      signerName: readSignerName(cardSession.certificateDer),
+      signerName,
       signedAt: new Date().toISOString(),
     };
   } finally {

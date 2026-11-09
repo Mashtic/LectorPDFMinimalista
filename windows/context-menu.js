@@ -45,10 +45,11 @@ function showContextMenu(window, selectionText = "") {
           window.webContents.send("dialog:openAppendDialog");
         },
       },
+      },
       {
-        label: "Insert Signature Image",
+        label: "Signature Appearance",
         click: () => {
-          window.webContents.send("signature:openImagePicker");
+          window.webContents.send("signature:openAppearance");
         },
       },
       {

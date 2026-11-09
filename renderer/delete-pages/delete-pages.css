@@ -10,7 +10,24 @@
 }
 
 .delete-input {
-    background: var(--bg-color);
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0.4rem 0 0.2rem;
+  padding: 0.5rem 0.7rem;
+
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.95rem;
+  /* Masked characters need spacing to be readable one by one */
+  letter-spacing: 0.08em;
+}
+
+.delete-input:focus {
+  outline: none;
+  border-color: var(--accent);
 }
 
 .open-trigger {

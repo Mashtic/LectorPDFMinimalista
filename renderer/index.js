@@ -1,7 +1,7 @@
 import { appendPdf, openFile, openPdfFromFile } from "./open-file/open-file.js";
 import { saveCurrentPdf, saveFile } from "./save-file/save-file.js";
-import { openSignDocumentModal } from "./sign-document/sign-document-renderer.js";
-import { insertSignatureImage } from "./signature-image/signature-image-renderer.js";
+import { startSigning } from "./sign-document/sign-document-renderer.js";
+import { openSignatureAppearanceModal } from "./signature-appearance/signature-appearance-renderer.js";
 import "./window/window.js";
 
 
@@ -24,11 +24,11 @@ window.electronAPI.openAppendDialog(() => {
 });
 
 window.electronAPI.openSignModal(() => {
-  openSignDocumentModal();
+  startSigning();
 });
 
-window.electronAPI.onInsertSignatureImage(() => {
-  insertSignatureImage();
+window.electronAPI.onOpenSignatureAppearance(() => {
+  openSignatureAppearanceModal();
 });
 
 document.addEventListener("dragover", (event) => {

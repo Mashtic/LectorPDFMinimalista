@@ -2,9 +2,9 @@ const { ipcMain } = require("electron");
 const { signCurrentPdfWithCard } = require("../services/pdf-sign-service.js");
 
 function registerSignDocumentIpc() {
-  ipcMain.handle("sign:document", async (_event, pin) => {
+  ipcMain.handle("sign:document", async (_event, pin, options) => {
     try {
-      const result = await signCurrentPdfWithCard(pin);
+      const result = await signCurrentPdfWithCard(pin, options);
       return { ok: true, ...result };
     } catch (error) {
       // The PIN is never logged, only the failure code

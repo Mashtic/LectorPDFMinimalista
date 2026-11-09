@@ -1,93 +1,65 @@
-const ERROR_MESSAGES = {
-  NO_DOCUMENT: "Open a PDF before inserting a signature image.",
-  INVALID_IMAGE: "That file is not a valid PNG or JPG image.",
-  UNREADABLE_FILE: "The image file could not be read.",
-  INVALID_PAGE: "The page is no longer available.",
-  NO_IMAGE: "Choose the image again.",
-  INSERT_ERROR: "The signature image could not be inserted.",
-};
+/*
+ * Lets the person place a box on the current page by dragging and resizing it.
+ * The result is expressed as fractions of the page (0 to 1) measured from the
+ * top left corner, so it stays correct at any zoom level and the viewer never
+ * needs to know the page size in points.
+ */
 
-// Fractions of the page, so the placement survives any zoom level
 const DEFAULT_WIDTH_RATIO = 0.3;
 const DEFAULT_BOTTOM_RATIO = 0.12;
 const MIN_WIDTH_RATIO = 0.05;
 
 let placementSession = null;
 
-export async function insertSignatureImage() {
+export function startSignaturePlacement({
+  previewHtml,
+  aspectRatio,
+  onConfirm,
+  onCancel,
+}) {
   if (placementSession) {
-    return;
+    return false;
   }
 
-  const result = await window.electronAPI.pickSignatureImage();
-
-  // Closing the file picker is not an error
-  if (!result.ok) {
-    if (result.code !== "CANCELLED") {
-      showStatus(ERROR_MESSAGES[result.code] || ERROR_MESSAGES.INSERT_ERROR);
-    }
-
-    return;
-  }
-
-  startPlacement(result.dataUrl);
-}
-
-function getCurrentPageWrapper() {
   const pageNumber =
     Number(document.getElementById("pdf-page-count")?.value) || 1;
   const canvas = document.querySelector(
     `canvas[data-page-number="${pageNumber}"]`,
   );
-
-  return { pageNumber, wrapper: canvas?.parentElement || null };
-}
-
-function startPlacement(dataUrl) {
-  const { pageNumber, wrapper } = getCurrentPageWrapper();
+  const wrapper = canvas?.parentElement;
 
   if (!wrapper) {
-    showStatus(ERROR_MESSAGES.INVALID_PAGE);
-    return;
+    return false;
   }
 
-  const image = new Image();
+  const pageAspectRatio = wrapper.offsetHeight / wrapper.offsetWidth;
+  const height = (DEFAULT_WIDTH_RATIO * aspectRatio) / pageAspectRatio;
 
-  image.onload = () => {
-    const aspectRatio = image.naturalHeight / image.naturalWidth;
-    const pageAspectRatio = wrapper.offsetHeight / wrapper.offsetWidth;
-
-    placementSession = {
-      pageNumber,
-      wrapper,
-      // Height is expressed against the page height, so the image keeps its
-      // real proportions whatever the page shape is
-      placement: {
-        x: (1 - DEFAULT_WIDTH_RATIO) / 2,
-        y: 0,
-        width: DEFAULT_WIDTH_RATIO,
-        height: (DEFAULT_WIDTH_RATIO * aspectRatio) / pageAspectRatio,
-      },
-      aspectRatio,
-      pageAspectRatio,
-    };
-
-    placementSession.placement.y =
-      1 - DEFAULT_BOTTOM_RATIO - placementSession.placement.height;
-
-    buildOverlay(dataUrl);
-    applyPlacement();
+  placementSession = {
+    pageNumber,
+    wrapper,
+    aspectRatio,
+    pageAspectRatio,
+    onConfirm,
+    onCancel,
+    placement: {
+      x: (1 - DEFAULT_WIDTH_RATIO) / 2,
+      y: 1 - DEFAULT_BOTTOM_RATIO - height,
+      width: DEFAULT_WIDTH_RATIO,
+      height,
+    },
   };
 
-  image.onerror = () => showStatus(ERROR_MESSAGES.INVALID_IMAGE);
-  image.src = dataUrl;
+  buildOverlay(previewHtml);
+  applyPlacement();
+  return true;
 }
 
-function buildOverlay(dataUrl) {
+function buildOverlay(previewHtml) {
   const overlay = document.createElement("div");
   overlay.id = "signature-placement";
   overlay.innerHTML = `
-    <img src="${dataUrl}" alt="Signature preview" draggable="false" />
+    ${previewHtml}
     <span class="signature-placement-handle" aria-hidden="true"></span>
   `;
 
@@ -96,7 +68,7 @@ function buildOverlay(dataUrl) {
   toolbar.innerHTML = `
     <span>Drag to move, pull the corner to resize</span>
     <button id="signature-placement-cancel" class="btn btn-cancel">Cancel</button>
-    <button id="signature-placement-accept" class="btn btn-accept">Insert</button>
+    <button id="signature-placement-accept" class="btn btn-accept">Continue</button>
   `;
 
   placementSession.wrapper.appendChild(overlay);
@@ -153,33 +125,33 @@ function startDrag(event) {
   const originX = placement.x;
   const originY = placement.y;
 
-  const onMove = (moveEvent) => {
+  trackPointer(event, (moveEvent) => {
     const deltaX = (moveEvent.clientX - startX) / wrapper.offsetWidth;
     const deltaY = (moveEvent.clientY - startY) / wrapper.offsetHeight;
 
     placement.x = clamp(originX + deltaX, 0, 1 - placement.width);
     placement.y = clamp(originY + deltaY, 0, 1 - placement.height);
     applyPlacement();
-  };
-
-  trackPointer(event, onMove);
+  });
 }
 
 function startResize(event) {
   event.preventDefault();
   event.stopPropagation();
 
-  const { wrapper, placement, aspectRatio, pageAspectRatio } =
-    placementSession;
+  const { wrapper, placement, aspectRatio, pageAspectRatio } = placementSession;
   const startX = event.clientX;
   const originWidth = placement.width;
 
-  const onMove = (moveEvent) => {
+  trackPointer(event, (moveEvent) => {
     const deltaX = (moveEvent.clientX - startX) / wrapper.offsetWidth;
-    const maxWidth = 1 - placement.x;
 
-    placement.width = clamp(originWidth + deltaX, MIN_WIDTH_RATIO, maxWidth);
-    // Height follows the width so the image never deforms
+    placement.width = clamp(
+      originWidth + deltaX,
+      MIN_WIDTH_RATIO,
+      1 - placement.x,
+    );
+    // Height follows the width so the stamp never deforms
     placement.height = (placement.width * aspectRatio) / pageAspectRatio;
 
     if (placement.y + placement.height > 1) {
@@ -187,9 +159,7 @@ function startResize(event) {
     }
 
     applyPlacement();
-  };
-
-  trackPointer(event, onMove);
+  });
 }
 
 function trackPointer(event, onMove) {
@@ -204,26 +174,16 @@ function trackPointer(event, onMove) {
   document.addEventListener("pointerup", onUp);
 }
 
-async function confirmPlacement() {
-  const { pageNumber, placement } = placementSession;
-  const result = await window.electronAPI.insertSignatureImage({
-    pageNumber,
-    placement: { ...placement },
-  });
-
-  if (!result.ok) {
-    showStatus(ERROR_MESSAGES[result.code] || ERROR_MESSAGES.INSERT_ERROR);
-    endPlacement();
-    return;
-  }
-
+function confirmPlacement() {
+  const { pageNumber, placement, onConfirm } = placementSession;
   endPlacement();
-  location.reload();
+  onConfirm?.({ pageNumber, placement: { ...placement } });
 }
 
 function cancelPlacement() {
-  window.electronAPI.cancelSignatureImage();
+  const { onCancel } = placementSession;
   endPlacement();
+  onCancel?.();
 }
 
 function endPlacement() {
@@ -247,19 +207,4 @@ function handleEscape(event) {
 
 function clamp(value, minimum, maximum) {
   return Math.min(Math.max(value, minimum), Math.max(minimum, maximum));
-}
-
-function showStatus(message) {
-  const status = document.getElementById("save-status");
-  if (!status) {
-    return;
-  }
-
-  status.textContent = message;
-  status.classList.add("is-visible");
-
-  setTimeout(() => {
-    status.classList.remove("is-visible");
-    status.textContent = "";
-  }, 4000);
 }
