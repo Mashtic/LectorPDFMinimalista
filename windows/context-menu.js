@@ -45,7 +45,6 @@ function showContextMenu(window, selectionText = "") {
           window.webContents.send("dialog:openAppendDialog");
         },
       },
-      },
       {
         label: "Signature Appearance",
         click: () => {
