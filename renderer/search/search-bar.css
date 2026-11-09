@@ -1,6 +1,7 @@
 #pdf-search-bar {
   position: fixed;
-  top: 16px;
+  /* Sits below the floating toggle (top 12px + 32px tall in window.css) */
+  top: 52px;
   right: 16px;
 
   display: flex;
