@@ -71,14 +71,22 @@
 .markdown-folder-preview .document-section p { margin: 0 0 1.2em; }
 .markdown-folder-preview .document-section a { color: #496d88; }
 .markdown-folder-preview .document-section blockquote { margin: 1em 0; padding-left: 1em; border-left: 2px solid #d8d8d8; color: #777; }
-.markdown-folder-preview .document-section pre { overflow: auto; padding: 16px; background: #f0f0f0; border-radius: 5px; font: 13px/1.6 ui-monospace, monospace; }
+.markdown-folder-preview .document-section pre { overflow: auto; padding: 12px 14px; background: #f5f6f8; border: 1px solid #e1e3e8; border-radius: 6px; color: #292929; font: 13px/1.55 ui-monospace, monospace; }
 .markdown-folder-preview .document-section code { padding: .12em .3em; background: #eee; border-radius: 3px; font: .88em ui-monospace, monospace; }
 .markdown-folder-preview .document-section pre code { padding: 0; background: transparent; }
+.markdown-folder-preview .document-section .token-comment { color: #747b87; }
+.markdown-folder-preview .document-section .token-string { color: #287a36; }
+.markdown-folder-preview .document-section .token-variable { color: #365fc7; }
+.markdown-folder-preview .document-section .token-number { color: #c4551a; }
+.markdown-folder-preview .document-section .token-command { color: #365fc7; }
 .markdown-folder-preview .document-section img { max-width: 100%; }
 .markdown-folder-preview .document-section hr { border: 0; border-top: 1px solid #ddd; margin: 2em 0; }
-.markdown-folder-preview .document-section table { border-collapse: collapse; }
+.markdown-folder-preview .document-section .markdown-table-wrapper { max-width: 100%; overflow-x: auto; margin: 1em 0 1.5em; }
+.markdown-folder-preview .document-section table { width: 100%; border-collapse: collapse; }
 .markdown-folder-preview .document-section td,
-.markdown-folder-preview .document-section th { padding: 6px 10px; border: 1px solid #ddd; }
+.markdown-folder-preview .document-section th { padding: 8px 10px; border: 1px solid #d8dce2; text-align: left; }
+.markdown-folder-preview .document-section th { background: #f2f4f7; font-weight: 700; }
+.markdown-folder-preview .document-section td { vertical-align: top; }
 .markdown-paper h1, .markdown-paper h2, .markdown-paper h3,
 .markdown-paper h4, .markdown-paper h5, .markdown-paper h6 {
   color: #202020;
@@ -91,13 +99,21 @@
 .markdown-paper p { margin: 0 0 1.2em; }
 .markdown-paper a { color: #496d88; }
 .markdown-paper blockquote { margin: 1em 0; padding-left: 1em; border-left: 2px solid #d8d8d8; color: #777; }
-.markdown-paper pre { overflow: auto; padding: 16px; background: #f0f0f0; border-radius: 5px; font: 13px/1.6 ui-monospace, monospace; }
+.markdown-paper pre { overflow: auto; padding: 12px 14px; background: #f5f6f8; border: 1px solid #e1e3e8; border-radius: 6px; color: #292929; font: 13px/1.55 ui-monospace, monospace; }
 .markdown-paper code { padding: .12em .3em; background: #eee; border-radius: 3px; font: .88em ui-monospace, monospace; }
 .markdown-paper pre code { padding: 0; background: transparent; }
+.markdown-paper .token-comment { color: #747b87; }
+.markdown-paper .token-string { color: #287a36; }
+.markdown-paper .token-variable { color: #365fc7; }
+.markdown-paper .token-number { color: #c4551a; }
+.markdown-paper .token-command { color: #365fc7; }
 .markdown-paper img { max-width: 100%; }
 .markdown-paper hr { border: 0; border-top: 1px solid #ddd; margin: 2em 0; }
-.markdown-paper table { border-collapse: collapse; }
-.markdown-paper td, .markdown-paper th { padding: 6px 10px; border: 1px solid #ddd; }
+.markdown-paper .markdown-table-wrapper { max-width: 100%; overflow-x: auto; margin: 1em 0 1.5em; }
+.markdown-paper table { width: 100%; border-collapse: collapse; }
+.markdown-paper td, .markdown-paper th { padding: 8px 10px; border: 1px solid #d8dce2; text-align: left; vertical-align: top; }
+.markdown-paper th { background: #f2f4f7; font-weight: 700; }
+.markdown-paper li + li { margin-top: .25em; }
 
 #markdown-editor {
   width: min(850px, calc(100% - 40px));

@@ -184,15 +184,63 @@ function renderPreview() {
   while (index < lines.length) {
     const line = lines[index];
     if (!line.trim()) { index++; continue; }
-    if (line.startsWith("```")) {
+    const fence = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(line);
+    if (fence) {
       const code = [];
+      const fenceCharacter = fence[1][0];
+      const fenceLength = fence[1].length;
+      const language = fence[2].trim().split(/\s+/, 1)[0].toLowerCase();
       index++;
-      while (index < lines.length && !lines[index].startsWith("```")) code.push(lines[index++]);
-      index++;
+      const closingFence = new RegExp(`^ {0,3}${fenceCharacter}{${fenceLength},}\\s*$`);
+      while (index < lines.length && !closingFence.test(lines[index])) {
+        code.push(lines[index].replace(/^ {1,3}/, ""));
+        index++;
+      }
+      if (index < lines.length) index++;
       const pre = document.createElement("pre");
       const codeNode = document.createElement("code");
-      codeNode.textContent = code.join("\n");
+      if (language) codeNode.classList.add(`language-${language}`);
+      if (["powershell", "pwsh", "ps1"].includes(language)) appendPowerShellCode(codeNode, code.join("\n"));
+      else codeNode.textContent = code.join("\n");
       pre.append(codeNode); preview.append(pre); continue;
+    }
+    if (index + 1 < lines.length && isTableDelimiter(lines[index + 1]) && line.includes("|")) {
+      const headers = parseTableRow(line);
+      const alignments = parseTableRow(lines[index + 1]).map((cell) => {
+        const value = cell.trim();
+        return value.startsWith(":") && value.endsWith(":") ? "center" : value.endsWith(":") ? "right" : value.startsWith(":") ? "left" : "";
+      });
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      const headerRow = document.createElement("tr");
+      headers.forEach((label, column) => {
+        const cell = document.createElement("th");
+        cell.scope = "col";
+        if (alignments[column]) cell.style.textAlign = alignments[column];
+        appendInline(cell, label.trim());
+        headerRow.append(cell);
+      });
+      thead.append(headerRow);
+      table.append(thead);
+      index += 2;
+      const tbody = document.createElement("tbody");
+      while (index < lines.length && lines[index].trim() && lines[index].includes("|")) {
+        const values = parseTableRow(lines[index++]);
+        const row = document.createElement("tr");
+        headers.forEach((_, column) => {
+          const cell = document.createElement("td");
+          if (alignments[column]) cell.style.textAlign = alignments[column];
+          appendInline(cell, (values[column] || "").trim());
+          row.append(cell);
+        });
+        tbody.append(row);
+      }
+      table.append(tbody);
+      const wrapper = document.createElement("div");
+      wrapper.className = "markdown-table-wrapper";
+      wrapper.append(table);
+      preview.append(wrapper);
+      continue;
     }
     const heading = /^(#{1,6})\s+(.+)$/.exec(line);
     if (heading) {
@@ -217,9 +265,38 @@ function renderPreview() {
     }
     const paragraph = document.createElement("p");
     const paragraphLines = [line]; index++;
-    while (index < lines.length && lines[index].trim() && !/^(#{1,6}\s|```|>|\s*[-*+]\s|\s*\d+\.\s|[-*_]{3,}\s*$)/.test(lines[index])) paragraphLines.push(lines[index++]);
+    while (index < lines.length && lines[index].trim() && !/^( {0,3}(?:`{3,}|~{3,})|#{1,6}\s|>|\s*[-*+]\s|\s*\d+\.\s|[-*_]{3,}\s*$)/.test(lines[index])) paragraphLines.push(lines[index++]);
     appendInline(paragraph, paragraphLines.join(" ")); preview.append(paragraph);
   }
+}
+
+function parseTableRow(line) {
+  let row = line.trim();
+  if (row.startsWith("|")) row = row.slice(1);
+  if (row.endsWith("|") && !row.endsWith("\\|")) row = row.slice(0, -1);
+  return row.split(/(?<!\\)\|/).map((cell) => cell.replace(/\\\|/g, "|").trim());
+}
+
+function isTableDelimiter(line) {
+  const cells = parseTableRow(line);
+  return cells.length > 0 && cells.every((cell) => /^:?-{3,}:?$/.test(cell.trim()));
+}
+
+function appendPowerShellCode(parent, source) {
+  const token = /(#.*$|'(?:''|[^'])*'|\$[\w:]+|\b(?:Set-Clipboard|Get-Clipboard)\b|\b\d+\b)/gim;
+  let offset = 0;
+  for (const match of source.matchAll(token)) {
+    parent.append(document.createTextNode(source.slice(offset, match.index)));
+    const span = document.createElement("span");
+    span.className = match[0].startsWith("#") ? "token-comment"
+      : match[0].startsWith("'") ? "token-string"
+        : match[0].startsWith("$") ? "token-variable"
+          : /^\d+$/.test(match[0]) ? "token-number" : "token-command";
+    span.textContent = match[0];
+    parent.append(span);
+    offset = match.index + match[0].length;
+  }
+  parent.append(document.createTextNode(source.slice(offset)));
 }
 
 function initializeMarkdownOutline() {
