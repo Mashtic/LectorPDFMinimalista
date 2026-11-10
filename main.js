@@ -1,4 +1,4 @@
-const { app, Menu } = require("electron");
+const { app, Menu, ipcMain, BrowserWindow } = require("electron");
 const { createMainWindow } = require("./windows/main-window.js");
 const { registerWindowIpc } = require("./ipc/window-ipc.js");
 const { registerDeletePageIpc } = require("./ipc/delete-pages-ipc.js");
@@ -56,6 +56,11 @@ app.whenReady().then(async () => {
   registerSignatureInfoIpc();
   registerSignatureImageIpc();
   registerMarkdownIpc();
+
+  ipcMain.on("context-menu:show", (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender);
+    if (window) require("./windows/context-menu.js").showContextMenu(window);
+  });
 
   Menu.setApplicationMenu(null);
   await loadLaunchPdf();

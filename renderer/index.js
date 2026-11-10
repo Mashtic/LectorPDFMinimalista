@@ -6,6 +6,14 @@ import "./window/window.js";
 
 
 document.getElementById("OpenFileBtn").addEventListener("click", openDocument);
+document.addEventListener("keydown", (event) => {
+  const target = event.target;
+  const typing = target?.isContentEditable || ["INPUT", "TEXTAREA"].includes(target?.tagName);
+  if (!typing && event.key.toLowerCase() === "m" && !event.ctrlKey && !event.metaKey && !event.altKey) {
+    event.preventDefault();
+    window.electronAPI.showContextMenu();
+  }
+});
 window.electronAPI.onOpenMarkdownDialog(async () => {
   if (await window.electronAPI.openMarkdown()) window.location.reload();
 });

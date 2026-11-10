@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("electronAPI", {
   openFile: () => ipcRenderer.invoke("dialog:openFile"),
   openDocument: () => ipcRenderer.invoke("dialog:openDocument"),
+  showContextMenu: () => ipcRenderer.send("context-menu:show"),
   openMarkdown: () => ipcRenderer.invoke("markdown:open"),
   openMarkdownFolder: () => ipcRenderer.invoke("markdown:folder"),
   exportMarkdownPdf: (document) => ipcRenderer.invoke("markdown:exportPdf", document),

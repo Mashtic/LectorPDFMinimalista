@@ -1,6 +1,7 @@
 export async function openFile() {
   const file = await window.electronAPI.openFile();
   if (file) {
+    await window.electronAPI.setGlobalVar("markdownFolderPreviewActive", false);
     window.electronAPI.setGlobalVar("pdfPath", file.path);
     window.electronAPI.setGlobalVar("currentPDF", file.content);
     window.electronAPI.setGlobalVar("markdownPath", null);
@@ -13,11 +14,13 @@ export async function openDocument() {
   const file = await window.electronAPI.openDocument();
   if (!file) return;
   if (file.type === "markdown") {
+    await window.electronAPI.setGlobalVar("markdownFolderPreviewActive", false);
     await window.electronAPI.setGlobalVar("markdownPath", file.path);
     await window.electronAPI.setGlobalVar("currentMarkdown", file.content);
     await window.electronAPI.setGlobalVar("pdfPath", null);
     await window.electronAPI.setGlobalVar("currentPDF", null);
   } else {
+    await window.electronAPI.setGlobalVar("markdownFolderPreviewActive", false);
     await window.electronAPI.setGlobalVar("pdfPath", file.path);
     await window.electronAPI.setGlobalVar("currentPDF", file.content);
     await window.electronAPI.setGlobalVar("markdownPath", null);
@@ -45,6 +48,7 @@ export async function openPdfFromFile(file) {
   }
 
   await window.electronAPI.setGlobalVar("pdfPath", null);
+  await window.electronAPI.setGlobalVar("markdownFolderPreviewActive", false);
   await window.electronAPI.setGlobalVar("currentPDF", content);
   await window.electronAPI.setGlobalVar("markdownPath", null);
   await window.electronAPI.setGlobalVar("currentMarkdown", null);

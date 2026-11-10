@@ -22,7 +22,8 @@ function createMainWindow() {
   });
 
   win.webContents.on("before-input-event", (event, input) => {
-    if (input.type === "keyDown" && input.key === "m") {
+    if (input.type === "keyDown" && input.control && input.shift && input.key.toLowerCase() === "m") {
+      event.preventDefault();
       showContextMenu(win);
     }
     if (input.type === "keyDown" && input.control && input.shift && input.key.toLowerCase() == "i") {

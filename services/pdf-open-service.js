@@ -1,4 +1,4 @@
-const { dialog } = require('electron');
+const { dialog, BrowserWindow } = require('electron');
 const { readFile } = require('node:fs/promises');
 
 async function readPdfFile() {
@@ -21,11 +21,15 @@ async function readPdfFile() {
   return {path: filePaths[0], content: fileContent};
 }
 
-async function readDocumentFile() {
-  const { canceled, filePaths } = await dialog.showOpenDialog({
+async function readDocumentFile(event) {
+  const owner = event?.sender ? BrowserWindow.fromWebContents(event.sender) : undefined;
+  const options = {
     properties: ['openFile'],
     filters: [{ name: 'Documents', extensions: ['pdf', 'md', 'markdown', 'mdown'] }],
-  });
+  };
+  const { canceled, filePaths } = owner
+    ? await dialog.showOpenDialog(owner, options)
+    : await dialog.showOpenDialog(options);
   if (canceled || filePaths.length === 0) return null;
   const filePath = filePaths[0];
   const isMarkdown = /\.(md|markdown|mdown)$/i.test(filePath);

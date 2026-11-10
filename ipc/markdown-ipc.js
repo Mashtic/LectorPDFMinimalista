@@ -4,8 +4,9 @@ const path = require("node:path");
 const { getGlobalVar, setGlobalVar } = require("../services/global-var-service.js");
 
 function registerMarkdownIpc() {
-  ipcMain.handle("markdown:folder", async () => {
-    const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ["openDirectory"] });
+  ipcMain.handle("markdown:folder", async (event) => {
+    const owner = BrowserWindow.fromWebContents(event.sender);
+    const { canceled, filePaths } = await dialog.showOpenDialog(owner, { properties: ["openDirectory"] });
     if (canceled || !filePaths[0]) return null;
 
     const root = filePaths[0];
@@ -26,7 +27,8 @@ function registerMarkdownIpc() {
   });
 
   ipcMain.handle("markdown:exportPdf", async (event, { html, title }) => {
-    const { canceled, filePath } = await dialog.showSaveDialog({
+    const owner = BrowserWindow.fromWebContents(event.sender);
+    const { canceled, filePath } = await dialog.showSaveDialog(owner, {
       defaultPath: `${String(title || "markdown").replace(/[\\/:*?"<>|]/g, "_")}.pdf`,
       filters: [{ name: "PDF", extensions: ["pdf"] }],
     });
@@ -54,14 +56,16 @@ function registerMarkdownIpc() {
     }
   });
 
-  ipcMain.handle("markdown:open", async () => {
-    const { canceled, filePaths } = await dialog.showOpenDialog({
+  ipcMain.handle("markdown:open", async (event) => {
+    const owner = BrowserWindow.fromWebContents(event.sender);
+    const { canceled, filePaths } = await dialog.showOpenDialog(owner, {
       properties: ["openFile"],
       filters: [{ name: "Markdown", extensions: ["md", "markdown", "mdown"] }],
     });
     if (canceled || !filePaths[0]) return null;
     const path = filePaths[0];
     const content = await readFile(path, "utf8");
+    setGlobalVar("markdownFolderPreviewActive", false);
     setGlobalVar("markdownPath", path);
     setGlobalVar("currentMarkdown", content);
     setGlobalVar("currentPDF", null);
@@ -77,12 +81,14 @@ function registerMarkdownIpc() {
     return { path };
   });
 
-  ipcMain.handle("markdown:saveAs", async (_event, content) => {
-    const { canceled, filePath } = await dialog.showSaveDialog({
+  ipcMain.handle("markdown:saveAs", async (event, content) => {
+    const owner = BrowserWindow.fromWebContents(event.sender);
+    const { canceled, filePath: selectedPath } = await dialog.showSaveDialog(owner, {
       defaultPath: getGlobalVar("markdownPath") || "document.md",
       filters: [{ name: "Markdown", extensions: ["md"] }],
     });
-    if (canceled || !filePath) return null;
+    if (canceled || !selectedPath) return null;
+    const filePath = /\.(md|markdown|mdown)$/i.test(selectedPath) ? selectedPath : `${selectedPath}.md`;
     await writeFile(filePath, String(content), "utf8");
     setGlobalVar("markdownPath", filePath);
     setGlobalVar("currentMarkdown", String(content));

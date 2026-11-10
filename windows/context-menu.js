@@ -84,7 +84,7 @@ function showContextMenu(window, selectionText = "") {
     );
   }
 
-  if (typeof getGlobalVar("currentMarkdown") === "string") {
+  if (typeof getGlobalVar("currentMarkdown") === "string" && !getGlobalVar("markdownFolderPreviewActive")) {
     template.push(
       {
         label: "Edit Markdown",

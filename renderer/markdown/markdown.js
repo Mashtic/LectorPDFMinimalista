@@ -3,6 +3,11 @@ const preview = document.getElementById("markdown-preview");
 const editor = document.getElementById("markdown-editor");
 const status = document.getElementById("save-status");
 
+let folderPreviewOpen = false;
+let folderPreviewOriginalContent = "";
+let folderPreviewTitle = "";
+let markdownOutlineInitialized = false;
+
 let filePath = await window.electronAPI.getGlobalVar("markdownPath");
 let content = await window.electronAPI.getGlobalVar("currentMarkdown");
 
@@ -20,7 +25,17 @@ editor.addEventListener("input", () => {
   renderMarkdownOutline(document.getElementById("sidebar-outline"));
 });
 document.addEventListener("keydown", (event) => {
-  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s" && !container.hidden) {
+  if (container.hidden || folderPreviewOpen) return;
+  const modifier = event.ctrlKey || event.metaKey;
+  const key = event.key.toLowerCase();
+  if (modifier && event.shiftKey && key === "s") {
+    event.preventDefault();
+    saveAs();
+  } else if (modifier && key === "e") {
+    event.preventDefault();
+    if (editor.hidden) showSource();
+    else showPreview();
+  } else if (modifier && key === "s") {
     event.preventDefault();
     save();
   }
@@ -33,11 +48,6 @@ window.electronAPI.onPreviewMarkdown(showPreview);
 window.electronAPI.onMarkdownFolderDialog(convertFolderToPdf);
 window.electronAPI.onMarkdownFolderSaveDialog(saveFolderPdf);
 window.electronAPI.onMarkdownFolderCancelDialog(cancelFolderPreview);
-
-let folderPreviewOpen = false;
-let folderPreviewOriginalContent = "";
-let folderPreviewTitle = "";
-let markdownOutlineInitialized = false;
 
 async function convertFolderToPdf() {
   const folder = await window.electronAPI.openMarkdownFolder();
@@ -136,15 +146,28 @@ function showPreview() {
 }
 
 async function saveAs() {
-  const result = await window.electronAPI.saveMarkdownAs(editor.value);
-  if (!result) return;
-  filePath = result.path;
-  showStatus("Markdown saved successfully");
+  try {
+    const result = await window.electronAPI.saveMarkdownAs(editor.value);
+    if (!result) return;
+    filePath = result.path;
+    content = editor.value;
+    showStatus(`Markdown saved to: ${result.path}`, 5000);
+  } catch (error) {
+    showStatus(`Could not save Markdown: ${error.message}`, 6000);
+  }
 }
 
 async function save() {
-  const result = await window.electronAPI.saveMarkdown(editor.value);
-  if (result) showStatus("Markdown saved successfully");
+  if (!filePath) return saveAs();
+  try {
+    const result = await window.electronAPI.saveMarkdown(editor.value);
+    if (result) {
+      content = editor.value;
+      showStatus(`Markdown saved to: ${result.path}`, 5000);
+    }
+  } catch (error) {
+    showStatus(`Could not save Markdown: ${error.message}`, 6000);
+  }
 }
 
 function showStatus(message, duration = 1600) {
