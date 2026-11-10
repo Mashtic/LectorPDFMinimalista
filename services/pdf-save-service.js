@@ -5,7 +5,10 @@ const { getGlobalVar } = require("./global-var-service.js");
 async function writePdfFile() {
   const sourcePath = getGlobalVar("pdfPath");
   const { canceled, filePath } = await dialog.showSaveDialog({
-    defaultPath: sourcePath || "documento-combinado.pdf",
+    defaultPath:
+      sourcePath ||
+      getGlobalVar("suggestedSavePath") ||
+      "documento-combinado.pdf",
     filters: [
       {
         name: "PDF Files",
