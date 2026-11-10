@@ -16,6 +16,8 @@ const ERROR_MESSAGES = {
   NO_APPEARANCE: "Configure the signature appearance before signing.",
   INVALID_PAGE: "The page is no longer available.",
   CARD_ERROR: "The card could not be read. Try reconnecting the reader.",
+  CERTIFICATE_REVOKED:
+    "The certificate of this card has been revoked, so it cannot sign.",
   SIGN_ERROR: "The document could not be signed. Try again.",
 };
 
@@ -157,7 +159,57 @@ async function submitSignature(placement) {
     return;
   }
 
+  if (result.code === "TIMESTAMP_UNAVAILABLE") {
+    renderTimestampChoice(placement);
+    return;
+  }
+
   renderError(result.code, placement);
+}
+
+/*
+ * The card already signed, but the timestamp authority did not answer. The
+ * person decides whether the signature is kept without the certified date.
+ */
+function renderTimestampChoice(placement) {
+  const body = document.getElementById("sign-modal-body");
+  if (!body) {
+    return;
+  }
+
+  body.innerHTML = `
+    <p class="sign-error">The timestamp service did not respond.</p>
+    <p>Without a timestamp the signature is valid, but its date is not
+    certified by an authority and it cannot be proven once your certificate
+    expires.</p>
+    <div class="modal-actions">
+      <button id="sign-cancel-btn" class="btn btn-cancel">Cancel</button>
+      <button id="sign-keep-btn" class="btn btn-accept">
+        Sign without timestamp
+      </button>
+    </div>
+  `;
+
+  document.getElementById("sign-cancel-btn").addEventListener("click", () => {
+    window.electronAPI.discardSignatureWithoutTimestamp();
+    closeModal();
+  });
+
+  document
+    .getElementById("sign-keep-btn")
+    .addEventListener("click", async () => {
+      const result = await window.electronAPI.keepSignatureWithoutTimestamp();
+
+      if (!document.getElementById("sign-overlay")) {
+        return;
+      }
+
+      if (result.ok) {
+        renderSuccess(result);
+      } else {
+        renderError(result.code, placement);
+      }
+    });
 }
 
 function renderWaiting() {
@@ -182,8 +234,34 @@ function renderSuccess(result) {
 
   const signer = result.signerName ? ` by ${result.signerName}` : "";
 
+  const notes = [];
+
+  if (!result.hasFullChain) {
+    notes.push(
+      "The certificates of the national hierarchy could not be obtained, so " +
+        "a validator may warn about the trust hierarchy.",
+    );
+  }
+
+  if (!result.hasRevocationInfo) {
+    notes.push(
+      "The revocation status of the certificates could not be obtained, so " +
+        "a validator may warn about revocation.",
+    );
+  }
+
+  if (!result.hasTimestamp) {
+    notes.push("The signature has no certified timestamp.");
+  }
+
+  const notesHtml = notes.length
+    ? `<p class="sign-error">${notes.join(" ")} Check your internet
+       connection and sign again to include what is missing.</p>`
+    : "";
+
   body.innerHTML = `
     <p>Document signed${signer}. Save it to keep the signature.</p>
+    ${notesHtml}
     <div class="modal-actions">
       <button id="sign-done-btn" class="btn btn-accept">Accept</button>
     </div>

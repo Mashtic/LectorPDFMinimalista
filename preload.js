@@ -35,6 +35,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   signDocument: (pin, options) =>
     ipcRenderer.invoke("sign:document", pin, options),
+  keepSignatureWithoutTimestamp: () =>
+    ipcRenderer.invoke("sign:keepWithoutTimestamp"),
+  discardSignatureWithoutTimestamp: () =>
+    ipcRenderer.invoke("sign:discardWithoutTimestamp"),
   readSignatureInfo: () => ipcRenderer.invoke("signature:read"),
   getSignatureAppearance: () => ipcRenderer.invoke("appearance:get"),
   saveSignatureAppearance: (values) =>

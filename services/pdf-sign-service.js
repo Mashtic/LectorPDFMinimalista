@@ -1,17 +1,36 @@
 const forge = require("node-forge");
 const { PDFDocument } = require("pdf-lib");
 const signpdf = require("@signpdf/signpdf").default;
-const { Signer } = require("@signpdf/utils");
+const { Signer, SUBFILTER_ETSI_CADES_DETACHED } = require("@signpdf/utils");
 const { plainAddPlaceholder } = require("@signpdf/placeholder-plain");
 const { openCardSession } = require("./card-sign-service.js");
+const {
+  resolveCertificateChain,
+} = require("./certificate-chain-service.js");
+const { collectRevocationInfo } = require("./revocation-service.js");
+const { requestTimestamp } = require("./timestamp-service.js");
+const {
+  buildSignatureContainer,
+  estimateContainerSize,
+} = require("./signature-container-service.js");
 const { stampAppearance } = require("./signature-stamp-service.js");
 const {
   getAppearanceForStamping,
 } = require("./signature-appearance-service.js");
 const { getGlobalVar, setGlobalVar } = require("./global-var-service.js");
 
-const SIGNATURE_LENGTH = 16384;
 const SIGN_REASON = "Signed with the Costa Rican digital signature card";
+
+/*
+ * A document that was signed but could not be timestamped. It is kept aside,
+ * not applied, until the person decides whether to keep it as it is. That way
+ * the decision does not require entering the PIN a second time.
+ */
+let pendingSignature = null;
+
+function createSignError(code) {
+  return Object.assign(new Error(`Signature failed: ${code}`), { code });
+}
 
 /*
  * The signature placeholder can only be added to documents that use a classic
@@ -28,41 +47,34 @@ async function normalizePdf(pdfBuffer) {
 }
 
 /*
- * Builds the PAdES signature container. The card only computes the RSA
- * signature over the authenticated attributes; everything else is assembled
- * here.
+ * Hands the bytes to sign to the container builder and remembers whether the
+ * timestamp could be added.
  */
 class CardSigner extends Signer {
-  constructor(cardSession) {
+  constructor({ key, certificatesDer, revocation }) {
     super();
-    this.cardSession = cardSession;
+    this.key = key;
+    this.certificatesDer = certificatesDer;
+    this.revocation = revocation;
+    this.hasTimestamp = false;
   }
 
-  async sign(pdfBuffer, signingTime = new Date()) {
-    const certificate = forge.pki.certificateFromAsn1(
-      forge.asn1.fromDer(this.cardSession.certificateDer.toString("binary")),
-    );
+  async sign(pdfBuffer) {
+    const { container, hasTimestamp, timestampError } =
+      await buildSignatureContainer({
+        content: pdfBuffer,
+        certificatesDer: this.certificatesDer,
+        revocation: this.revocation,
+        key: this.key,
+        requestTimestamp,
+      });
 
-    const container = forge.pkcs7.createSignedData();
-    container.content = forge.util.createBuffer(pdfBuffer.toString("binary"));
-    container.addCertificate(certificate);
-    container.addSigner({
-      key: this.cardSession.key,
-      certificate,
-      digestAlgorithm: forge.pki.oids.sha256,
-      authenticatedAttributes: [
-        { type: forge.pki.oids.contentType, value: forge.pki.oids.data },
-        { type: forge.pki.oids.messageDigest },
-        { type: forge.pki.oids.signingTime, value: signingTime },
-      ],
-    });
+    if (timestampError) {
+      console.error("Could not get a timestamp:", timestampError.message);
+    }
 
-    container.sign({ detached: true });
-
-    return Buffer.from(
-      forge.asn1.toDer(container.toAsn1()).getBytes(),
-      "binary",
-    );
+    this.hasTimestamp = hasTimestamp;
+    return container;
   }
 }
 
@@ -79,19 +91,39 @@ function readSignerName(certificateDer) {
 }
 
 async function signCurrentPdfWithCard(pin, options = {}) {
+  pendingSignature = null;
+
   const currentPDF = getGlobalVar("currentPDF");
   if (!currentPDF) {
-    throw Object.assign(new Error("No document"), { code: "NO_DOCUMENT" });
+    throw createSignError("NO_DOCUMENT");
   }
 
   if (!pin) {
-    throw Object.assign(new Error("No PIN"), { code: "PIN_REQUIRED" });
+    throw createSignError("PIN_REQUIRED");
   }
 
   const cardSession = openCardSession(pin);
 
   try {
     const signerName = readSignerName(cardSession.certificateDer);
+    const chain = await resolveCertificateChain(
+      cardSession.certificateDer,
+      cardSession.cardCertificatesDer,
+    );
+
+    /*
+     * The revocation proof is gathered before signing because it is part of
+     * what the card signs. A certificate known to be revoked is not used.
+     */
+    const revocation = await collectRevocationInfo(
+      cardSession.certificateDer,
+      chain.certificates,
+    );
+
+    if (revocation.isRevoked) {
+      throw createSignError("CERTIFICATE_REVOKED");
+    }
+
     let documentToSign = Buffer.from(currentPDF);
 
     /*
@@ -102,9 +134,7 @@ async function signCurrentPdfWithCard(pin, options = {}) {
       const appearance = await getAppearanceForStamping();
 
       if (!appearance) {
-        throw Object.assign(new Error("No appearance"), {
-          code: "NO_APPEARANCE",
-        });
+        throw createSignError("NO_APPEARANCE");
       }
 
       documentToSign = await stampAppearance({
@@ -117,30 +147,69 @@ async function signCurrentPdfWithCard(pin, options = {}) {
     }
 
     const normalizedPdf = await normalizePdf(documentToSign);
+    const certificatesDer = [cardSession.certificateDer, ...chain.certificates];
 
     const pdfWithPlaceholder = plainAddPlaceholder({
       pdfBuffer: normalizedPdf,
       reason: SIGN_REASON,
       name: signerName || "",
-      signatureLength: SIGNATURE_LENGTH,
+      subFilter: SUBFILTER_ETSI_CADES_DETACHED,
+      // The space is reserved before signing, so it is sized for everything
+      // the container will carry
+      signatureLength: estimateContainerSize({ certificatesDer, revocation }),
     });
 
-    const signedPdf = await signpdf.sign(
-      pdfWithPlaceholder,
-      new CardSigner(cardSession),
-    );
+    const signer = new CardSigner({
+      key: cardSession.key,
+      certificatesDer,
+      revocation,
+    });
+    const signedPdf = await signpdf.sign(pdfWithPlaceholder, signer);
+
+    const result = {
+      signerName,
+      signedAt: new Date().toISOString(),
+      // Without these the signature is still valid, but a validator may warn
+      // about the trust hierarchy or about the revocation status
+      hasFullChain: chain.isComplete,
+      hasRevocationInfo: revocation.isComplete,
+      hasTimestamp: signer.hasTimestamp,
+    };
+
+    if (!signer.hasTimestamp) {
+      pendingSignature = { signedPdf, result };
+      throw createSignError("TIMESTAMP_UNAVAILABLE");
+    }
 
     // The document is only replaced once everything succeeded, so a failed
     // signature never leaves a stamp behind
     setGlobalVar("currentPDF", signedPdf);
 
-    return {
-      signerName,
-      signedAt: new Date().toISOString(),
-    };
+    return result;
   } finally {
     cardSession.close();
   }
 }
 
-module.exports = { signCurrentPdfWithCard };
+// The person chose to keep the signature that could not be timestamped
+function applyPendingSignature() {
+  if (!pendingSignature) {
+    throw createSignError("SIGN_ERROR");
+  }
+
+  const { signedPdf, result } = pendingSignature;
+  pendingSignature = null;
+  setGlobalVar("currentPDF", signedPdf);
+
+  return result;
+}
+
+function discardPendingSignature() {
+  pendingSignature = null;
+}
+
+module.exports = {
+  signCurrentPdfWithCard,
+  applyPendingSignature,
+  discardPendingSignature,
+};
