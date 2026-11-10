@@ -21,7 +21,21 @@ function showContextMenu(window, selectionText = "") {
       label: "Open Markdown File",
       click: () => window.webContents.send("markdown:openDialog"),
     },
+    {
+      label: "Preview Markdown Folder as PDF",
+      click: () => window.webContents.send("markdown:folderDialog"),
+    },
   ];
+
+  if (getGlobalVar("markdownFolderPreviewActive")) {
+    template.push({
+      label: "Save Folder Preview as PDF…",
+      click: () => window.webContents.send("markdown:folderSaveDialog"),
+    }, {
+      label: "Close Folder Preview",
+      click: () => window.webContents.send("markdown:folderCancelDialog"),
+    });
+  }
 
   if (getGlobalVar("currentPDF")) {
     template.push({

@@ -30,6 +30,93 @@ window.electronAPI.onSaveMarkdownDialog(save);
 window.electronAPI.onSaveMarkdownAsDialog(saveAs);
 window.electronAPI.onEditMarkdown(showSource);
 window.electronAPI.onPreviewMarkdown(showPreview);
+window.electronAPI.onMarkdownFolderDialog(convertFolderToPdf);
+window.electronAPI.onMarkdownFolderSaveDialog(saveFolderPdf);
+window.electronAPI.onMarkdownFolderCancelDialog(cancelFolderPreview);
+
+let folderPreviewOpen = false;
+let folderPreviewOriginalContent = "";
+let folderPreviewTitle = "";
+let markdownOutlineInitialized = false;
+
+async function convertFolderToPdf() {
+  const folder = await window.electronAPI.openMarkdownFolder();
+  if (!folder) return;
+  if (!folder.files.length) {
+    showStatus("No Markdown files found in this folder");
+    return;
+  }
+
+  folderPreviewOriginalContent = editor.value;
+  folderPreviewTitle = folder.folderName;
+  const sections = document.createDocumentFragment();
+  for (const file of folder.files) {
+    editor.value = file.content;
+    renderPreview();
+    const section = document.createElement("section");
+    section.className = "document-section";
+    const heading = document.createElement("h1");
+    heading.textContent = file.name;
+    section.append(heading, ...preview.cloneNode(true).childNodes);
+    sections.append(section);
+  }
+  preview.replaceChildren(sections);
+  preview.classList.add("markdown-folder-preview");
+  const folderHeadings = [...preview.querySelectorAll("h1, h2, h3, h4, h5, h6")];
+  folderHeadings.forEach((heading, index) => { heading.id = `folder-preview-heading-${index}`; });
+  editor.value = folderPreviewOriginalContent;
+  editor.hidden = true;
+  preview.hidden = false;
+  container.hidden = false;
+  document.getElementById("welcome-screen").hidden = true;
+  document.body.classList.add("is-markdown");
+  folderPreviewOpen = true;
+  await window.electronAPI.setGlobalVar("markdownFolderPreviewActive", true);
+  initializeMarkdownOutline();
+  renderMarkdownOutline(document.getElementById("sidebar-outline"), folderHeadings);
+}
+
+async function saveFolderPdf() {
+  if (!folderPreviewOpen) return;
+  let result;
+  try {
+    result = await window.electronAPI.exportMarkdownPdf({ html: preview.innerHTML, title: folderPreviewTitle });
+  } catch (error) {
+    showStatus(`Could not create PDF: ${error.message}`, 6000);
+    return;
+  }
+  if (!result) return;
+  folderPreviewOpen = false;
+  await window.electronAPI.setGlobalVar("markdownFolderPreviewActive", false);
+  if (filePath) {
+    editor.value = folderPreviewOriginalContent;
+    preview.classList.remove("markdown-folder-preview");
+    renderPreview();
+    renderMarkdownOutline(document.getElementById("sidebar-outline"));
+  } else {
+    container.hidden = true;
+    preview.classList.remove("markdown-folder-preview");
+    document.body.classList.remove("is-markdown");
+    document.getElementById("welcome-screen").hidden = false;
+  }
+  showStatus(`PDF saved to: ${result.path}`, 8000);
+}
+
+function cancelFolderPreview() {
+  if (!folderPreviewOpen) return;
+  folderPreviewOpen = false;
+  window.electronAPI.setGlobalVar("markdownFolderPreviewActive", false);
+  if (filePath) {
+    editor.value = folderPreviewOriginalContent;
+    preview.classList.remove("markdown-folder-preview");
+    renderPreview();
+  } else {
+    container.hidden = true;
+    preview.classList.remove("markdown-folder-preview");
+    document.body.classList.remove("is-markdown");
+    document.getElementById("welcome-screen").hidden = false;
+  }
+}
 
 function showSource() {
   editor.hidden = false;
@@ -55,11 +142,11 @@ async function save() {
   if (result) showStatus("Markdown saved successfully");
 }
 
-function showStatus(message) {
+function showStatus(message, duration = 1600) {
   status.textContent = message;
   status.classList.add("is-visible");
   clearTimeout(showStatus.timer);
-  showStatus.timer = setTimeout(() => status.classList.remove("is-visible"), 1600);
+  showStatus.timer = setTimeout(() => status.classList.remove("is-visible"), duration);
 }
 
 function renderPreview() {
@@ -108,6 +195,8 @@ function renderPreview() {
 }
 
 function initializeMarkdownOutline() {
+  if (markdownOutlineInitialized) return;
+  markdownOutlineInitialized = true;
   const sidebar = document.getElementById("sidebar");
   const toggle = document.getElementById("sidebar-toggle");
   const pagesTab = document.getElementById("sidebar-tab-pages");
@@ -128,9 +217,19 @@ function initializeMarkdownOutline() {
   renderMarkdownOutline(outlinePanel);
 }
 
-function renderMarkdownOutline(panel) {
+function renderMarkdownOutline(panel, headingNodes = null) {
   panel.replaceChildren();
-  const headings = [...editor.value.matchAll(/^(#{1,6})\s+(.+)$/gm)];
+  const headings = headingNodes
+    ? headingNodes.map((node) => ({
+        title: node.textContent.trim(),
+        depth: Number(node.tagName.slice(1)) - 1,
+        id: node.id,
+      }))
+    : [...editor.value.matchAll(/^(#{1,6})\s+(.+)$/gm)].map((match) => ({
+        title: match[2].replace(/\s+#+\s*$/, ""),
+        depth: match[1].length - 1,
+        id: `markdown-heading-${editor.value.slice(0, match.index).split("\n").length - 1}`,
+      }));
   if (!headings.length) {
     const empty = document.createElement("p");
     empty.className = "sidebar-empty";
@@ -138,33 +237,61 @@ function renderMarkdownOutline(panel) {
     panel.append(empty);
     return;
   }
-  const list = document.createElement("ul");
-  list.className = "sidebar-outline-list";
-  for (const match of headings) {
-    const lineIndex = editor.value.slice(0, match.index).split("\n").length - 1;
+  const root = { children: [] };
+  const stack = [{ depth: -1, children: root.children }];
+  for (const heading of headings) {
+    while (stack.length > 1 && stack.at(-1).depth >= heading.depth) stack.pop();
+    const item = { ...heading, children: [] };
+    stack.at(-1).children.push(item);
+    stack.push(item);
+  }
+
+  function buildList(items) {
+    const list = document.createElement("ul");
+    list.className = "sidebar-outline-list";
+    for (const heading of items) {
     const item = document.createElement("li");
     item.className = "sidebar-outline-item";
     const row = document.createElement("div");
     row.className = "sidebar-outline-row";
-    row.style.setProperty("--outline-depth", match[1].length - 1);
-    const spacer = document.createElement("span");
-    spacer.className = "sidebar-outline-spacer";
+    row.style.setProperty("--outline-depth", heading.depth);
+    if (heading.children.length) {
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "sidebar-outline-toggle";
+      toggle.setAttribute("aria-expanded", "true");
+      toggle.setAttribute("aria-label", `Collapse ${heading.title}`);
+      toggle.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 2 7 5 3 8"></polyline></svg>';
+      toggle.addEventListener("click", () => {
+        const collapsed = item.classList.toggle("is-collapsed");
+        toggle.setAttribute("aria-expanded", String(!collapsed));
+        toggle.setAttribute("aria-label", `${collapsed ? "Expand" : "Collapse"} ${heading.title}`);
+      });
+      row.append(toggle);
+    } else {
+      const spacer = document.createElement("span");
+      spacer.className = "sidebar-outline-spacer";
+      row.append(spacer);
+    }
     const link = document.createElement("button");
     link.type = "button";
     link.className = "sidebar-outline-link";
-    link.textContent = match[2].replace(/\s+#+\s*$/, "");
+    link.textContent = heading.title;
     link.title = link.textContent;
     link.addEventListener("click", () => {
       if (!editor.hidden) {
         showPreview();
       }
-      document.getElementById(`markdown-heading-${lineIndex}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      document.getElementById(heading.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
-    row.append(spacer, link);
+    row.append(link);
     item.append(row);
+    if (heading.children.length) item.append(buildList(heading.children));
     list.append(item);
+    }
+    return list;
   }
-  panel.append(list);
+  panel.append(buildList(root.children));
 }
 
 function appendInline(parent, text) {
