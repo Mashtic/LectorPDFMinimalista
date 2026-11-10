@@ -28,6 +28,7 @@
   margin: 7px auto 7px;
   padding: 64px 76px;
   overflow: visible;
+  flex-shrink: 0;
   background: #fff;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
   color: #292929;
@@ -39,6 +40,7 @@
   margin: 0;
   padding: 0;
   overflow: visible;
+  flex-shrink: 0;
   background: transparent;
   box-shadow: none;
 }

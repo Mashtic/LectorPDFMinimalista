@@ -68,6 +68,7 @@ async function convertFolderToPdf() {
   editor.hidden = true;
   preview.hidden = false;
   container.hidden = false;
+  container.classList.add("is-folder-preview");
   document.getElementById("welcome-screen").hidden = true;
   document.body.classList.add("is-markdown");
   folderPreviewOpen = true;
@@ -90,11 +91,13 @@ async function saveFolderPdf() {
   await window.electronAPI.setGlobalVar("markdownFolderPreviewActive", false);
   if (filePath) {
     editor.value = folderPreviewOriginalContent;
+    container.classList.remove("is-folder-preview");
     preview.classList.remove("markdown-folder-preview");
     renderPreview();
     renderMarkdownOutline(document.getElementById("sidebar-outline"));
   } else {
     container.hidden = true;
+    container.classList.remove("is-folder-preview");
     preview.classList.remove("markdown-folder-preview");
     document.body.classList.remove("is-markdown");
     document.getElementById("welcome-screen").hidden = false;
@@ -108,10 +111,12 @@ function cancelFolderPreview() {
   window.electronAPI.setGlobalVar("markdownFolderPreviewActive", false);
   if (filePath) {
     editor.value = folderPreviewOriginalContent;
+    container.classList.remove("is-folder-preview");
     preview.classList.remove("markdown-folder-preview");
     renderPreview();
   } else {
     container.hidden = true;
+    container.classList.remove("is-folder-preview");
     preview.classList.remove("markdown-folder-preview");
     document.body.classList.remove("is-markdown");
     document.getElementById("welcome-screen").hidden = false;
