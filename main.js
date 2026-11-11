@@ -16,32 +16,36 @@ const {
 const { registerUnsavedChangesIpc } = require("./ipc/unsaved-changes-ipc.js");
 const path = require("node:path");
 const { existsSync } = require("node:fs");
-const { readPdfFromPath } = require("./services/pdf-open-service.js");
+const {
+  readDocumentFromPath,
+  showOpenError,
+} = require("./services/pdf-open-service.js");
 const { setGlobalVar } = require("./services/global-var-service.js");
 
 // const {
 //   createPresentationWindow,
 // } = require("./windows/presentation-window.js");
 
-function findLaunchPdfPath(argv) {
+function findLaunchDocumentPath(argv) {
   return argv
-    .filter((argument) => /\.pdf$/i.test(argument))
+    .filter((argument) => /\.(pdf|dvi)$/i.test(argument))
     .map((argument) => path.resolve(argument))
-    .find((pdfPath) => existsSync(pdfPath));
+    .find((documentPath) => existsSync(documentPath));
 }
 
-async function loadLaunchPdf() {
-  const pdfPath = findLaunchPdfPath(process.argv);
-  if (!pdfPath) {
+async function loadLaunchDocument() {
+  const documentPath = findLaunchDocumentPath(process.argv);
+  if (!documentPath) {
     return;
   }
 
   try {
-    const file = await readPdfFromPath(pdfPath);
+    const file = await readDocumentFromPath(documentPath);
     setGlobalVar("pdfPath", file.path);
+    setGlobalVar("suggestedSavePath", file.suggestedSavePath);
     setGlobalVar("currentPDF", file.content);
   } catch (error) {
-    console.error("Failed to open launch PDF:", error);
+    showOpenError(error);
   }
 }
 
@@ -59,7 +63,7 @@ app.whenReady().then(async () => {
   registerUnsavedChangesIpc();
 
   Menu.setApplicationMenu(null);
-  await loadLaunchPdf();
+  await loadLaunchDocument();
   createMainWindow();
   // createPresentationWindow();
 });

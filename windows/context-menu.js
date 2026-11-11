@@ -34,7 +34,8 @@ function showContextMenu(window, selectionText = "") {
         },
       },
       {
-        label: "Save",
+        label: "Save",        
+        visible: Boolean(getGlobalVar("pdfPath")),
         click: () => {
           window.webContents.send("dialog:openSaveCurrentPdfDialog");
         },

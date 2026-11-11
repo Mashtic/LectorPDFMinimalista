@@ -46,7 +46,21 @@
     "linux": {
       "target": "AppImage",
       "category": "Utility",
-      "icon": "build/icon.png"
+      "icon": "build/icon.png",
+      "fileAssociations": [
+        {
+          "ext": "pdf",
+          "name": "PDF Document",
+          "mimeType": "application/pdf",
+          "role": "Viewer"
+        },
+        {
+          "ext": "dvi",
+          "name": "DVI Document",
+          "mimeType": "application/x-dvi",
+          "role": "Viewer"
+        }
+      ]
     },
     "win": {
       "target": [
@@ -58,6 +72,12 @@
           "ext": "pdf",
           "name": "PDF Document",
           "description": "PDF Document",
+          "role": "Viewer"
+        },
+        {
+          "ext": "dvi",
+          "name": "DVI Document",
+          "description": "DVI Document",
           "role": "Viewer"
         }
       ]

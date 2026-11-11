@@ -1,5 +1,6 @@
 const globalVars = {
   pdfPath: null,
+  suggestedSavePath: null,
   currentPDF: null,
   currentPage: 1,
 };

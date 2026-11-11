@@ -2,6 +2,7 @@ export async function openFile() {
   const file = await window.electronAPI.openFile();
   if (file) {
     window.electronAPI.setGlobalVar("pdfPath", file.path);
+    window.electronAPI.setGlobalVar("suggestedSavePath", file.suggestedSavePath);
     window.electronAPI.setGlobalVar("currentPDF", file.content);
     window.location.reload();
   }
@@ -26,6 +27,7 @@ export async function openPdfFromFile(file) {
   }
 
   await window.electronAPI.setGlobalVar("pdfPath", null);
+  await window.electronAPI.setGlobalVar("suggestedSavePath", null);
   await window.electronAPI.setGlobalVar("currentPDF", content);
   window.location.reload();
   return true;
