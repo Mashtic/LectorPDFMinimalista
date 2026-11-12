@@ -243,7 +243,7 @@ if (currentPDF) {
   `;
   paletteCommentButton.addEventListener("click", () => {
     if (!paletteTarget) return;
-    const { id, pageNumber, annotation } = paletteTarget;
+    const { pageNumber, annotation } = paletteTarget;
     hidePalette();
     document.dispatchEvent(
       new CustomEvent("open-comments", {
@@ -251,18 +251,11 @@ if (currentPDF) {
           text: "",
           page: pageNumber,
           quads: highlightToQuads(annotation),
-          replaces: { id, pageNumber },
         },
       }),
     );
   });
   palette.appendChild(paletteCommentButton);
-
-  // The comment replaces the highlight it was created from
-  document.addEventListener("comment-replaced-highlight", (event) => {
-    const { id, pageNumber } = event.detail;
-    viewer.annotationManager.deleteHighlight(id, pageNumber);
-  });
 
   const deleteButton = document.createElement("button");
   deleteButton.type = "button";
