@@ -244,6 +244,7 @@ export class PdfViewer {
 
     const viewport = entry.page.getViewport({ scale: this.scale });
     await this.annotationManager.refreshPage(pageNumber);
+    this.annotationManager.renderTextBoxLayer(pageNumber, entry, viewport);
     await this.renderHighlightCommentLayer(
       entry.page,
       viewport,
@@ -794,6 +795,12 @@ export class PdfViewer {
             entry,
             page,
             viewport,
+          ).then(() =>
+            this.annotationManager.renderTextBoxLayer(
+              pageNumber,
+              entry,
+              viewport,
+            ),
           );
           this.renderAnnotationLayer(page, viewport, entry).catch((error) =>
             console.error(
@@ -941,6 +948,7 @@ export class PdfViewer {
     for (const { number, page, viewport } of pages) {
       const wrapper = document.createElement("div");
       wrapper.className = "pdf-page";
+      wrapper.dataset.pageNumber = number;
 
       wrapper.style.width = `${viewport.width}px`;
       wrapper.style.height = `${viewport.height}px`;
@@ -987,6 +995,15 @@ export class PdfViewer {
       wrapper.appendChild(annotationLayer);
       wrapper.appendChild(annotationEditorLayer);
 
+      const textBoxLayer = document.createElement("div");
+      textBoxLayer.className = "text-box-layer";
+      textBoxLayer.id = `text-box-layer-${number}`;
+      textBoxLayer.style.width = `${viewport.width}px`;
+      textBoxLayer.style.height = `${viewport.height}px`;
+      textBoxLayer.style.zIndex = "6";
+      textBoxLayer.style.pointerEvents = "none";
+      wrapper.appendChild(textBoxLayer);
+
       const highlightCommentLayer = document.createElement("div");
       highlightCommentLayer.className = "highlight-comment-layer";
       highlightCommentLayer.id = `highlight-comment-layer-${number}`;
@@ -1001,6 +1018,8 @@ export class PdfViewer {
       wrapper.appendChild(highlightCommentLayer);
 
       wrapper.annotationLayer = annotationLayer;
+      wrapper.annotationEditorLayer = annotationEditorLayer;
+      wrapper.textBoxLayer = textBoxLayer;
       wrapper.highlightCommentLayer = highlightCommentLayer;
 
       canvasDiv.appendChild(wrapper);

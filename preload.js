@@ -65,6 +65,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
       callback(selectedText),
     );
   },
+  onStartTextBox: (callback) => {
+    ipcRenderer.on("text-box:start", callback);
+  },
   addPdfComment: (comment) => ipcRenderer.invoke("pdf:addComment", comment),
   setHighlightComment: (data) =>
     ipcRenderer.invoke("set-highlight-comment", data),

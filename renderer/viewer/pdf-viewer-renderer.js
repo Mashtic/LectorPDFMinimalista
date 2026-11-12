@@ -53,6 +53,93 @@ if (currentPDF) {
   initializeSearchBar(searchController);
   initializeSidebar(viewer);
 
+  let isAddingTextBox = false;
+  let textBoxStart = null;
+  let textBoxDraft = null;
+
+  const toggleTextBoxMode = () => {
+    isAddingTextBox = !isAddingTextBox;
+    viewContainer.classList.toggle("adding-text-box", isAddingTextBox);
+  };
+
+  window.electronAPI.onStartTextBox(toggleTextBoxMode);
+
+  viewContainer.addEventListener("pointerdown", (event) => {
+    if (!isAddingTextBox || event.button !== 0) return;
+
+    const page = event.target.closest?.(".pdf-page");
+    if (!page) return;
+
+    event.preventDefault();
+    const bounds = page.getBoundingClientRect();
+    const canvas = page.querySelector("canvas[data-page-number]");
+    if (!canvas) return;
+
+    textBoxStart = {
+      page,
+      pageNumber: Number(canvas.dataset.pageNumber),
+      left: Math.max(0, event.clientX - bounds.left),
+      top: Math.max(0, event.clientY - bounds.top),
+    };
+    textBoxDraft = document.createElement("div");
+    textBoxDraft.className = "text-box-draft";
+    textBoxStart.page
+      .querySelector(".text-box-layer")
+      ?.appendChild(textBoxDraft);
+  }, true);
+
+  document.addEventListener("pointermove", (event) => {
+    if (!textBoxStart || !textBoxDraft) return;
+
+    const { page, left, top } = textBoxStart;
+    const bounds = page.getBoundingClientRect();
+    const right = Math.min(
+      bounds.width,
+      Math.max(left + 40, event.clientX - bounds.left),
+    );
+    const bottom = Math.min(
+      bounds.height,
+      Math.max(top + 24, event.clientY - bounds.top),
+    );
+    Object.assign(textBoxDraft.style, {
+      left: `${left}px`,
+      top: `${top}px`,
+      width: `${right - left}px`,
+      height: `${bottom - top}px`,
+    });
+  }, true);
+
+  document.addEventListener("pointerup", (event) => {
+    if (!textBoxStart) return;
+
+    const { page, pageNumber, left, top } = textBoxStart;
+    const bounds = page.getBoundingClientRect();
+    const right = Math.min(bounds.width, Math.max(left + 40, event.clientX - bounds.left));
+    const bottom = Math.min(
+      bounds.height,
+      Math.max(top + 24, event.clientY - bounds.top),
+    );
+    const viewport = viewer.pages.get(pageNumber)?.page.getViewport({
+      scale: viewer.scale,
+    });
+
+    if (viewport) {
+      const [x1, y1] = viewport.convertToPdfPoint(left, top);
+      const [x2, y2] = viewport.convertToPdfPoint(right, bottom);
+      viewer.annotationManager.addTextBox(pageNumber, {
+        left: Math.min(x1, x2),
+        right: Math.max(x1, x2),
+        top: Math.max(y1, y2),
+        bottom: Math.min(y1, y2),
+      });
+    }
+
+    textBoxDraft?.remove();
+    textBoxDraft = null;
+    textBoxStart = null;
+    toggleTextBoxMode();
+  }, true);
+
   // --- Floating selection toolbar (highlight + comment) ----------------
   const selectionToolbar = document.createElement("div");
   selectionToolbar.id = "selection-toolbar";
