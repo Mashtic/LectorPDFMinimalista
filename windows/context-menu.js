@@ -34,7 +34,8 @@ function showContextMenu(window, selectionText = "") {
         },
       },
       {
-        label: "Save",
+        label: "Save",        
+        visible: Boolean(getGlobalVar("pdfPath")),
         click: () => {
           window.webContents.send("dialog:openSaveCurrentPdfDialog");
         },
@@ -46,9 +47,9 @@ function showContextMenu(window, selectionText = "") {
         },
       },
       {
-        label: "Insert Signature Image",
+        label: "Signature Appearance",
         click: () => {
-          window.webContents.send("signature:openImagePicker");
+          window.webContents.send("signature:openAppearance");
         },
       },
       {

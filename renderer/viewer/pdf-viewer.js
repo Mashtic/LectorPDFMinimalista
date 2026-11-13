@@ -381,18 +381,33 @@ export class PdfViewer {
   }
 
   zoomInPages() {
-    zoomIn(this.zoomState);
-    this.rerenderVisiblePages();
+    this.zoomKeepingCenter(() => zoomIn(this.zoomState));
   }
 
   zoomOutPages() {
-    zoomOut(this.zoomState);
-    this.rerenderVisiblePages();
+    this.zoomKeepingCenter(() => zoomOut(this.zoomState));
   }
 
   resetZoom() {
-    setZoom(this.zoomState, 1);
+    this.zoomKeepingCenter(() => setZoom(this.zoomState, 1));
+  }
+
+  zoomKeepingCenter(applyZoom) {
+    const container = document.getElementById("pdf-viewer-container");
+    const centerX =
+      (container.scrollLeft + container.clientWidth / 2) /
+      container.scrollWidth;
+    const centerY =
+      (container.scrollTop + container.clientHeight / 2) /
+      container.scrollHeight;
+
+    applyZoom();
     this.rerenderVisiblePages();
+
+    container.scrollLeft =
+      centerX * container.scrollWidth - container.clientWidth / 2;
+    container.scrollTop =
+      centerY * container.scrollHeight - container.clientHeight / 2;
   }
 
   fitWidth(maxWidth) {
@@ -514,6 +529,76 @@ export class PdfViewer {
     } finally {
       canvas.width = 0;
       canvas.height = 0;
+    }
+  }
+
+  /*
+   * The page canvas is drawn without annotations, because highlights and form
+   * fields live in their own layers. A visible signature is an annotation too,
+   * but pdf.js only ever paints it on a canvas, so it would never show. The
+   * page is drawn once more off screen with annotations on, and only the
+   * rectangles of the signatures are copied over the page.
+   */
+  async paintSignatureAppearances(page, viewport, canvas, entry) {
+    if (!entry.signatureWidgets) {
+      entry.signatureWidgets = (
+        await page.getAnnotations({ intent: "display" })
+      ).filter(
+        (annotation) =>
+          annotation.annotationType === AnnotationType.WIDGET &&
+          annotation.fieldType === "Sig" &&
+          annotation.hasAppearance &&
+          annotation.rect[0] !== annotation.rect[2] &&
+          annotation.rect[1] !== annotation.rect[3],
+      );
+    }
+
+    if (entry.signatureWidgets.length === 0) return;
+
+    const offscreen = document.createElement("canvas");
+    offscreen.width = canvas.width;
+    offscreen.height = canvas.height;
+
+    try {
+      await page.render({
+        canvasContext: offscreen.getContext("2d"),
+        viewport,
+        annotationMode: AnnotationMode.ENABLE_FORMS,
+      }).promise;
+
+      // A newer render of this page may have resized the canvas meanwhile
+      if (offscreen.width !== canvas.width) return;
+
+      const context = canvas.getContext("2d");
+
+      for (const { rect } of entry.signatureWidgets) {
+        const [x1, y1] = viewport.convertToViewportPoint(rect[0], rect[1]);
+        const [x2, y2] = viewport.convertToViewportPoint(rect[2], rect[3]);
+        const left = Math.max(Math.floor(Math.min(x1, x2)), 0);
+        const top = Math.max(Math.floor(Math.min(y1, y2)), 0);
+        const width = Math.min(Math.ceil(Math.abs(x2 - x1)) + 1, canvas.width - left);
+        const height = Math.min(Math.ceil(Math.abs(y2 - y1)) + 1, canvas.height - top);
+
+        if (width <= 0 || height <= 0) continue;
+
+        context.save();
+        context.setTransform(1, 0, 0, 1, 0, 0);
+        context.drawImage(
+          offscreen,
+          left,
+          top,
+          width,
+          height,
+          left,
+          top,
+          width,
+          height,
+        );
+        context.restore();
+      }
+    } finally {
+      offscreen.width = 0;
+      offscreen.height = 0;
     }
   }
 
@@ -693,6 +778,17 @@ export class PdfViewer {
 
       entry.renderTask.promise
         .then(async () => {
+          await this.paintSignatureAppearances(
+            page,
+            viewport,
+            canvas,
+            entry,
+          ).catch((error) =>
+            console.error(
+              `Failed to draw the signatures of page ${pageNumber}:`,
+              error,
+            ),
+          );
           this.annotationManager.renderAnnotationLayer(
             pageNumber,
             entry,

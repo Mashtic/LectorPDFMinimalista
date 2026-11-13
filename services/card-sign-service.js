@@ -169,10 +169,17 @@ function findSigningCertificate(pkcs11, session) {
 
   // The card holds an authentication certificate and a signing one. Only the
   // signing certificate carries the nonRepudiation key usage.
-  return (
+  const signing =
     certificates.find((certificate) => isSigningCertificate(certificate.der)) ||
-    certificates[0]
-  );
+    certificates[0];
+
+  // Some cards also carry the certificates of their authorities
+  return {
+    ...signing,
+    others: certificates
+      .filter((certificate) => certificate !== signing)
+      .map((certificate) => certificate.der),
+  };
 }
 
 function findPrivateKey(pkcs11, session, certificateId) {
@@ -273,6 +280,7 @@ function openCardSession(pin) {
 
     return {
       certificateDer: certificate.der,
+      cardCertificatesDer: certificate.others,
       key: createCardKey(pkcs11, session, keyHandle),
       close: () => closeCardSession(pkcs11, session),
     };
