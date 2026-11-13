@@ -31,6 +31,8 @@
   "dependencies": {
     "@signpdf/placeholder-plain": "^4.0.0",
     "@signpdf/signpdf": "^4.0.0",
+    "@xmldom/xmldom": "^0.9.12",
+    "jszip": "^3.10.2",
     "node-forge": "^1.4.0",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^6.3.289",
@@ -59,6 +61,12 @@
           "name": "DVI Document",
           "mimeType": "application/x-dvi",
           "role": "Viewer"
+        },
+        {
+          "ext": "epub",
+          "name": "EPUB Book",
+          "mimeType": "application/epub+zip",
+          "role": "Viewer"
         }
       ]
     },
@@ -78,6 +86,12 @@
           "ext": "dvi",
           "name": "DVI Document",
           "description": "DVI Document",
+          "role": "Viewer"
+        },
+        {
+          "ext": "epub",
+          "name": "EPUB Book",
+          "description": "EPUB Book",
           "role": "Viewer"
         }
       ]
