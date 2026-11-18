@@ -2,7 +2,6 @@ const { BrowserWindow } = require("electron");
 const path = require("node:path");
 const { fileURLToPath } = require("node:url");
 
-// The book page is untrusted, so it runs no scripts and loads nothing else
 function createEpubRenderWindow(pagePath) {
   const win = new BrowserWindow({
     show: false,

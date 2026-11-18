@@ -5,12 +5,6 @@ const os = require("node:os");
 const path = require("node:path");
 const { printPageToPdf } = require("../windows/epub-render-window.js");
 
-/*
- * An EPUB is a ZIP of XHTML chapters. The chapters are joined into one page
- * that is printed to PDF, so the viewer, the outline and the search work the
- * same way they do with any PDF.
- */
-
 const IMAGE_TYPES = {
   ".png": "image/png",
   ".jpg": "image/jpeg",
@@ -40,7 +34,6 @@ function parseXml(text) {
   );
 }
 
-// Paths inside an EPUB are relative to the file that mentions them
 function resolvePath(fromFile, href) {
   return path.posix.join(
     path.posix.dirname(fromFile),
@@ -57,7 +50,6 @@ async function readText(archive, filePath) {
   return file.async("string");
 }
 
-// container.xml points to the package file, which lists the chapters in order
 async function listChapterPaths(archive) {
   const container = parseXml(await readText(archive, "META-INF/container.xml"));
   const rootFile = container.getElementsByTagNameNS("*", "rootfile")[0];
@@ -76,20 +68,33 @@ async function listChapterPaths(archive) {
     .map((href) => resolvePath(packagePath, href));
 }
 
-// Images are embedded so the page does not need any file from the EPUB
-async function embedImages(archive, chapter, chapterPath) {
-  for (const image of Array.from(chapter.getElementsByTagNameNS("*", "img"))) {
-    const imagePath = resolvePath(chapterPath, image.getAttribute("src") || "");
-    const file = archive.file(imagePath);
-    const type = IMAGE_TYPES[path.posix.extname(imagePath).toLowerCase()];
+const IMAGE_SOURCES = [
+  ["img", "src"],
+  ["image", "xlink:href"],
+  ["image", "href"],
+];
 
-    if (file && type) {
-      image.setAttribute(
-        "src",
-        `data:${type};base64,${await file.async("base64")}`,
-      );
-    } else {
-      image.parentNode.removeChild(image);
+async function embedImages(archive, chapter, chapterPath) {
+  for (const [tagName, attribute] of IMAGE_SOURCES) {
+    const images = chapter.getElementsByTagNameNS("*", tagName);
+
+    for (const image of Array.from(images)) {
+      if (!image.hasAttribute(attribute)) {
+        continue;
+      }
+
+      const imagePath = resolvePath(chapterPath, image.getAttribute(attribute));
+      const file = archive.file(imagePath);
+      const type = IMAGE_TYPES[path.posix.extname(imagePath).toLowerCase()];
+
+      if (file && type) {
+        image.setAttribute(
+          attribute,
+          `data:${type};base64,${await file.async("base64")}`,
+        );
+      } else {
+        image.parentNode.removeChild(image);
+      }
     }
   }
 }
@@ -129,7 +134,6 @@ async function createBookPage(archive) {
       continue;
     }
 
-    // The book may contain scripts, the page must not run them
     for (const script of Array.from(
       chapter.getElementsByTagNameNS("*", "script"),
     )) {
@@ -175,7 +179,6 @@ async function convertEpubToPdf(epubPath) {
   const pagePath = path.join(outputFolder, "book.xhtml");
 
   try {
-    // The page is XHTML, so the chapters do not need to be valid HTML
     await writeFile(pagePath, page, "utf8");
     return Buffer.from(await printPageToPdf(pagePath));
   } finally {
