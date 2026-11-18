@@ -4,29 +4,13 @@ const path = require("node:path");
 const { convertDviToPdf } = require("./dvi-convert-service.js");
 const { convertEpubToPdf } = require("./epub-convert-service.js");
 
-const OPEN_ERRORS = {
-  NO_CONVERTER: {
-    title: "Cannot open DVI file",
-    message:
-      "Opening DVI files requires dvipdfmx. Install TeX Live or MiKTeX and try again.",
-  },
-  CONVERSION_FAILED: {
-    title: "Cannot open DVI file",
-    message:
-      "The DVI file could not be converted to PDF. Fonts or images it references may be missing.",
-  },
-  INVALID_EPUB: {
-    title: "Cannot open EPUB file",
-    message: "The file is damaged or is not a valid EPUB book.",
-  },
-  ENCRYPTED_EPUB: {
-    title: "Cannot open EPUB file",
-    message: "This EPUB book is protected with DRM and cannot be opened.",
-  },
-  EPUB_RENDER_FAILED: {
-    title: "Cannot open EPUB file",
-    message: "The EPUB book could not be displayed.",
-  },
+const OPEN_ERROR_MESSAGES = {
+  NO_CONVERTER:
+    "Opening DVI files requires dvipdfmx. Install TeX Live or MiKTeX and try again.",
+  CONVERSION_FAILED:
+    "The DVI file could not be converted to PDF. Fonts or images it references may be missing.",
+  INVALID_EPUB: "The file is damaged or is not a valid EPUB book.",
+  ENCRYPTED_EPUB: "This EPUB book is protected with DRM and cannot be opened.",
 };
 
 async function readPdfFile() {
@@ -60,12 +44,13 @@ async function readPdfFromPath(filePath) {
 
 //A converted DVI or EPUB has no PDF on disk yet, so its path stays empty
 async function readDocumentFromPath(filePath) {
-  const convertToPdf = getConverter(filePath);
-  if (!convertToPdf) {
+  if (!isDvi(filePath) && !isEpub(filePath)) {
     return { ...(await readPdfFromPath(filePath)), suggestedSavePath: null };
   }
 
-  const content = await convertToPdf(filePath);
+  const content = isDvi(filePath)
+    ? await convertDviToPdf(filePath)
+    : await convertEpubToPdf(filePath);
   const parsed = path.parse(filePath);
 
   return {
@@ -75,28 +60,24 @@ async function readDocumentFromPath(filePath) {
   };
 }
 
-function getConverter(filePath) {
-  if (/\.dvi$/i.test(filePath)) {
-    return convertDviToPdf;
-  }
+function isDvi(filePath) {
+  return /\.dvi$/i.test(filePath);
+}
 
-  if (/\.epub$/i.test(filePath)) {
-    return convertEpubToPdf;
-  }
-
-  return null;
+function isEpub(filePath) {
+  return /\.epub$/i.test(filePath);
 }
 
 function showOpenError(error) {
-  const openError = OPEN_ERRORS[error.code];
-  if (!openError) {
+  const message = OPEN_ERROR_MESSAGES[error.code];
+  if (!message) {
     console.error("Failed to open document:", error);
     dialog.showErrorBox("Cannot open file", "The file could not be opened.");
     return;
   }
 
-  console.error(`${openError.title}:`, error.cause || error);
-  dialog.showErrorBox(openError.title, openError.message);
+  console.error("Failed to open document:", error.cause || error);
+  dialog.showErrorBox("Cannot open file", message);
 }
 
 module.exports = {
