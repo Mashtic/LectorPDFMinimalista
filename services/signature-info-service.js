@@ -126,10 +126,13 @@ function readDictionaryDate(dictionary) {
 
   const [, year, month, day, hour, minute, second, sign, offsetHour, offsetMinute] =
     match;
-  const offset =
-    sign && sign !== "Z"
-      ? `${sign}${offsetHour || "00"}:${offsetMinute || "00"}`
-      : "Z";
+  // A date without a zone is local time; reading it as UTC would shift it
+  // by six hours in Costa Rica
+  const offset = !sign
+    ? ""
+    : sign === "Z"
+      ? "Z"
+      : `${sign}${offsetHour || "00"}:${offsetMinute || "00"}`;
   const date = new Date(
     `${year}-${month}-${day}T${hour || "00"}:${minute || "00"}:${second || "00"}${offset}`,
   );

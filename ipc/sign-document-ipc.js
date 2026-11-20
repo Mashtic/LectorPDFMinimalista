@@ -11,8 +11,13 @@ function registerSignDocumentIpc() {
       const result = await signCurrentPdfWithCard(pin, options);
       return { ok: true, ...result };
     } catch (error) {
-      // The PIN is never logged, only the failure code
-      console.error("Document signature failed:", error.code || error.message);
+      // The PIN is never logged, only the failure and where it came from, so
+      // an unexpected error can be traced instead of showing as a generic one
+      console.error(
+        "Document signature failed:",
+        error.code || "SIGN_ERROR",
+        error.code ? error.cause?.message || "" : error.stack,
+      );
       return { ok: false, code: error.code || "SIGN_ERROR" };
     }
   });

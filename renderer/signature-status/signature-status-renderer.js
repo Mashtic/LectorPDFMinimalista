@@ -1,3 +1,5 @@
+import { formatSigningDate } from "../date-format/date-format.js";
+
 const SEAL_ICON = `
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
     stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
@@ -121,7 +123,7 @@ function buildLabel(signers, state) {
 }
 
 function formatDate(isoDate) {
-  return isoDate ? new Date(isoDate).toLocaleString() : "Unknown date";
+  return isoDate ? formatSigningDate(new Date(isoDate)) : "Unknown date";
 }
 
 function createElement(tag, className, text) {
