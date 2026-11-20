@@ -6,7 +6,7 @@ import {
   AnnotationLayer,
   AnnotationType,
 } from "../../node_modules/pdfjs-dist/build/pdf.mjs";
-import { SimpleLinkService } from "../../node_modules/pdfjs-dist/web/pdf_viewer.mjs";
+import { ViewerLinkService } from "../../services/link-service.js";
 import { createZoomState, setZoom, zoomIn, zoomOut } from "../zoom/zoom.js";
 import {
   getAnnotationText,
@@ -41,7 +41,7 @@ export class PdfViewer {
     this.onCurrentPageChanged = null;
 
     this.observers = [];
-    this.linkService = new SimpleLinkService();
+    this.linkService = new ViewerLinkService(this);
 
     // This is here if we want to perform and action when a PDF is modified
     // but not saved, like showing a message asking the user if they want to
@@ -576,8 +576,14 @@ export class PdfViewer {
         const [x2, y2] = viewport.convertToViewportPoint(rect[2], rect[3]);
         const left = Math.max(Math.floor(Math.min(x1, x2)), 0);
         const top = Math.max(Math.floor(Math.min(y1, y2)), 0);
-        const width = Math.min(Math.ceil(Math.abs(x2 - x1)) + 1, canvas.width - left);
-        const height = Math.min(Math.ceil(Math.abs(y2 - y1)) + 1, canvas.height - top);
+        const width = Math.min(
+          Math.ceil(Math.abs(x2 - x1)) + 1,
+          canvas.width - left,
+        );
+        const height = Math.min(
+          Math.ceil(Math.abs(y2 - y1)) + 1,
+          canvas.height - top,
+        );
 
         if (width <= 0 || height <= 0) continue;
 
@@ -670,7 +676,9 @@ export class PdfViewer {
     const annotations = (
       await page.getAnnotations({ intent: "display" })
     ).filter(
-      (annotation) => annotation.annotationType === AnnotationType.WIDGET,
+      (annotation) =>
+        annotation.annotationType === AnnotationType.WIDGET ||
+        annotation.annotationType === AnnotationType.LINK,
     );
 
     if (isStale()) return;
@@ -699,6 +707,19 @@ export class PdfViewer {
       const markModified = () => this.onDocumentModified?.();
       annotationLayer.addEventListener("input", markModified);
       annotationLayer.addEventListener("change", markModified);
+
+      annotationLayer.addEventListener("click", (event) => {
+        const link = event.target.closest?.("a[href]");
+        if (!link) return;
+
+        event.stopPropagation();
+
+        const href = link.href;
+        if (/^(https?|mailto|tel):/i.test(href)) {
+          event.preventDefault();
+          window.electronAPI.openExternal(href);
+        }
+      });
     }
 
     const annotationViewport = viewport.clone({ dontFlip: true });

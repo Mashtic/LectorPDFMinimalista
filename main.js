@@ -14,6 +14,7 @@ const {
   registerSignatureAppearanceIpc,
 } = require("./ipc/signature-appearance-ipc.js");
 const { registerUnsavedChangesIpc } = require("./ipc/unsaved-changes-ipc.js");
+const { registerExternalLinksIpc } = require("./ipc/links-ipc.js");
 const path = require("node:path");
 const { existsSync } = require("node:fs");
 const {
@@ -61,6 +62,7 @@ app.whenReady().then(async () => {
   registerSignatureInfoIpc();
   registerSignatureAppearanceIpc();
   registerUnsavedChangesIpc();
+  registerExternalLinksIpc();
 
   Menu.setApplicationMenu(null);
   await loadLaunchDocument();

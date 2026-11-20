@@ -410,8 +410,9 @@ pageInput.addEventListener("keydown", (event) => {
 });
 
 document.addEventListener("focusin", (event) => {
-  window.electronAPI.setTextInputFocus(isTypingTarget(event));
+  window.electronAPI.setTextInputFocus(isTextEntryTarget(event.target));
 });
+
 document.addEventListener("focusout", () => {
   window.electronAPI.setTextInputFocus(false);
 });
