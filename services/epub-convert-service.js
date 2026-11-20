@@ -99,6 +99,25 @@ async function embedImages(archive, chapter, chapterPath) {
   }
 }
 
+function rewriteLinks(chapter, chapterPath, chapterPaths) {
+  for (const link of Array.from(chapter.getElementsByTagNameNS("*", "a"))) {
+    const href = link.getAttribute("href");
+    if (!href || /^[a-z][a-z0-9+.-]*:/i.test(href)) {
+      continue;
+    }
+
+    const [file, fragment] = href.split("#");
+    const target = file ? resolvePath(chapterPath, file) : chapterPath;
+    const index = chapterPaths.indexOf(target);
+
+    if (index === -1) {
+      link.removeAttribute("href");
+    } else {
+      link.setAttribute("href", `#${fragment || `chapter-${index}`}`);
+    }
+  }
+}
+
 async function readStyles(archive, chapter, chapterPath, readPaths) {
   let styles = "";
 
@@ -127,7 +146,9 @@ async function createBookPage(archive) {
   const readPaths = new Set();
   let styles = BOOK_STYLE;
 
-  for (const chapterPath of await listChapterPaths(archive)) {
+  const chapterPaths = await listChapterPaths(archive);
+
+  for (const [index, chapterPath] of chapterPaths.entries()) {
     const chapter = parseXml(await readText(archive, chapterPath));
     const chapterBody = chapter.getElementsByTagNameNS("*", "body")[0];
     if (!chapterBody) {
@@ -141,6 +162,7 @@ async function createBookPage(archive) {
     }
 
     await embedImages(archive, chapter, chapterPath);
+    rewriteLinks(chapter, chapterPath, chapterPaths);
     styles += await readStyles(archive, chapter, chapterPath, readPaths);
 
     const section = book.createElementNS(
@@ -148,6 +170,7 @@ async function createBookPage(archive) {
       "section",
     );
     section.setAttribute("class", "chapter");
+    section.setAttribute("id", `chapter-${index}`);
     for (const node of Array.from(chapterBody.childNodes)) {
       section.appendChild(book.importNode(node, true));
     }
