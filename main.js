@@ -28,7 +28,7 @@ const { setGlobalVar } = require("./services/global-var-service.js");
 
 function findLaunchDocumentPath(argv) {
   return argv
-    .filter((argument) => /\.(pdf|dvi)$/i.test(argument))
+    .filter((argument) => /\.(pdf|dvi|epub)$/i.test(argument))
     .map((argument) => path.resolve(argument))
     .find((documentPath) => existsSync(documentPath));
 }
