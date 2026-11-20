@@ -26,6 +26,12 @@ function showContextMenu(window, selectionText = "") {
         window.webContents.send("comments:open", "");
       },
     });
+    template.push({
+      label: "Add Text Box",
+      click: () => {
+        window.webContents.send("text-box:start");
+      },
+    });
     template.push(
       {
         label: "Save As",
