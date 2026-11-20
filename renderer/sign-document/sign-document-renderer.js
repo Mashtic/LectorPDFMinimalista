@@ -15,6 +15,8 @@ const ERROR_MESSAGES = {
   NO_PRIVATE_KEY: "The signing key was not found on the card.",
   NO_APPEARANCE: "Configure the signature appearance before signing.",
   INVALID_PAGE: "The page is no longer available.",
+  INVALID_IMAGE:
+    "The signature image could not be used. Choose it again in Signature Appearance.",
   CARD_ERROR: "The card could not be read. Try reconnecting the reader.",
   CERTIFICATE_REVOKED:
     "The certificate of this card has been revoked, so it cannot sign.",

@@ -1,3 +1,5 @@
+import { formatSigningDate } from "../date-format/date-format.js";
+
 const ERROR_MESSAGES = {
   INVALID_IMAGE: "That file is not a valid PNG or JPG image.",
   UNREADABLE_FILE: "The image file could not be read.",
@@ -22,7 +24,7 @@ export function buildAppearancePreview(appearance, signerName) {
   }
 
   if (appearance.showDate) {
-    lines.push(new Date().toLocaleString());
+    lines.push(formatSigningDate(new Date()));
   }
 
   const textBlock = lines.length

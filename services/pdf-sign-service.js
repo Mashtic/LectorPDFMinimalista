@@ -127,6 +127,14 @@ async function signCurrentPdfWithCard(pin, options = {}) {
     let documentToSign = Buffer.from(currentPDF);
 
     /*
+     * One moment is taken for the whole signature, after the slow network
+     * lookups, so the date printed on the stamp and the one declared in the
+     * signature dictionary are the same and as close as possible to the
+     * timestamp the authority certifies afterwards.
+     */
+    const signingTime = new Date();
+
+    /*
      * The graphic expression is stamped first and signed afterwards, so the
      * signature covers it. Stamping after signing would break the signature.
      */
@@ -143,6 +151,7 @@ async function signCurrentPdfWithCard(pin, options = {}) {
         placement: options.placement,
         pageNumber: options.pageNumber,
         signerName,
+        signingTime,
       });
     }
 
@@ -154,6 +163,7 @@ async function signCurrentPdfWithCard(pin, options = {}) {
       reason: SIGN_REASON,
       name: signerName || "",
       subFilter: SUBFILTER_ETSI_CADES_DETACHED,
+      signingTime,
       // The space is reserved before signing, so it is sized for everything
       // the container will carry
       signatureLength: estimateContainerSize({ certificatesDer, revocation }),
@@ -168,7 +178,7 @@ async function signCurrentPdfWithCard(pin, options = {}) {
 
     const result = {
       signerName,
-      signedAt: new Date().toISOString(),
+      signedAt: signingTime.toISOString(),
       // Without these the signature is still valid, but a validator may warn
       // about the trust hierarchy or about the revocation status
       hasFullChain: chain.isComplete,

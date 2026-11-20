@@ -1,4 +1,5 @@
 const { PDFDocument, StandardFonts, rgb } = require("pdf-lib");
+const { formatSigningDate } = require("./date-format-service.js");
 
 /*
  * Draws the graphic expression of the signature on a page: the image on top
@@ -20,7 +21,7 @@ function createStampError(code) {
   return error;
 }
 
-function buildTextLines(appearance, signerName) {
+function buildTextLines(appearance, signerName, signingTime) {
   const lines = [];
 
   if (appearance.text) {
@@ -32,7 +33,7 @@ function buildTextLines(appearance, signerName) {
   }
 
   if (appearance.showDate) {
-    lines.push(new Date().toLocaleString());
+    lines.push(formatSigningDate(signingTime));
   }
 
   return lines;
@@ -53,12 +54,21 @@ function toPdfBox(placement, page) {
 }
 
 async function embedImage(pdf, appearance) {
+  /*
+   * Node often keeps small buffers inside a larger shared block of memory.
+   * pdf-lib reads JPEG data from the start of that block instead of from
+   * where the image begins, so it fails at random ("SOI not found") depending
+   * on where Node happened to place the image. A copy of its own always
+   * starts at the beginning.
+   */
+  const imageBytes = Uint8Array.from(appearance.imageBytes);
+
   if (appearance.mediaType === "image/png") {
     // embedPng keeps the alpha channel, so transparency is preserved
-    return pdf.embedPng(appearance.imageBytes);
+    return pdf.embedPng(imageBytes);
   }
 
-  return pdf.embedJpg(appearance.imageBytes);
+  return pdf.embedJpg(imageBytes);
 }
 
 function drawTextLines(page, font, lines, box, fontSize) {
@@ -85,6 +95,7 @@ async function stampAppearance({
   placement,
   pageNumber,
   signerName,
+  signingTime = new Date(),
 }) {
   const pdf = await PDFDocument.load(pdfBuffer, { ignoreEncryption: true });
   const page = pdf.getPages()[Number(pageNumber) - 1];
@@ -94,7 +105,7 @@ async function stampAppearance({
   }
 
   const box = toPdfBox(placement, page);
-  const lines = buildTextLines(appearance, signerName);
+  const lines = buildTextLines(appearance, signerName, signingTime);
 
   const textHeight = lines.length ? box.height * TEXT_BLOCK_RATIO : 0;
   const imageHeight = box.height - textHeight;

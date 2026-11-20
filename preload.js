@@ -86,4 +86,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on("check-unsaved-changes", (_e, requestId) => cb(requestId)),
   respondUnsavedChanges: (requestId, ok) =>
     ipcRenderer.send("unsaved-changes-response", requestId, ok),
+
+  openExternal: (url) => ipcRenderer.invoke("shell:openExternal", url),
 });
