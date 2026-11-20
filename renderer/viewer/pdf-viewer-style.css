@@ -15,8 +15,8 @@
 .text-box-draft {
   position: absolute;
   box-sizing: border-box;
-  border: 1px solid transparent;
-  background: transparent;
+  border: 1px solid rgb(128 128 128 / 90%);
+  background: rgb(128 128 128 / 16%);
   pointer-events: none;
 }
 
