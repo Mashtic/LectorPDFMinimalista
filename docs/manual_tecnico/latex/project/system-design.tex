@@ -9,6 +9,14 @@ El código del proyecto tiene un diseño modular basado en los módulos de javas
 
 Para comunicar el proceso principal con el proceso renderer Electron provee la biblioteca IPC (Inter-Process Comunication)\cite{electron_ipc}. En el proyecto la biblioteca se utiliza en el módulo "ipc" que trabaja como una capa de interfaz entre los servicios que provee el proceso principal y el proceso renderer. El proceso renderer se conecta con la interfaz del módulo ipc a través de un preload script que electron carga en el renderer cuando es invocado, este archivo se encuentra en la carpeta raíz del proyecto con el nombre preload.js.\cite{electron_ipc} 
 
+\subsection{Flujos incorporados en el Sprint 3}
+
+El servicio de apertura selecciona el conversor según la extensión del archivo. Para DVI, el proceso principal ejecuta \texttt{dvipdfmx} y carga en memoria el PDF resultante. Para EPUB, el proceso principal prepara el contenido HTML del libro y delega la impresión a \texttt{epub-render-window.js}. La ventana de Electron genera un PDF etiquetado con un índice basado en los encabezados. Ambos formatos reutilizan el visualizador de PDF. La ruta del PDF se establece al guardar el documento convertido mediante \emph{Guardar como}.
+
+El visualizador reutiliza la capa de anotaciones de PDF.js para los campos interactivos y los enlaces. Los valores de los formularios se conservan en \texttt{annotationStorage} hasta guardar el PDF. Los destinos internos se resuelven en el visualizador y los enlaces externos se envían al proceso principal mediante IPC.
+
+En la rama \texttt{feature/abrir\_markdown}, el renderer genera la vista previa y el índice lateral a partir de los encabezados. El proceso principal lee los archivos y escribe el PDF exportado. En la conversión de carpetas, el índice de la vista previa se construye en el renderer. La llamada de impresión usa saltos de página entre archivos, pero no solicita un índice para el PDF ni aísla los errores de lectura por archivo, dos criterios de aceptación de US-044.
+
 \subsection{Diagrama de dependencias}
 
 El diagrama de dependencias muestra las dependencias entre los módulos de la aplicación. Es una forma útil de visualizar como trabajan los módulos de la aplicación entre sí y de ver que forma se relacionan. Este diagrama es generado utilizando la herramienta madge, así que muestra el proyecto tal y como está programado. También, puede resultar útil para detectar dependencias circulares o un flujo extraño dentro del programa.
