@@ -1,3 +1,4 @@
+import { confirmLeaveMarkdown } from "../markdown/markdown.js";
 import { PdfViewer } from "./pdf-viewer.js";
 import { PdfSearchController } from "../search/pdf-search.js";
 import { initializeSearchBar } from "../search/search-bar.js";
@@ -505,7 +506,8 @@ document.addEventListener("focusout", () => {
 });
 
 async function confirmLeaveDocument() {
-  if (!viewer || !hasUnsavedChanges) return true;
+  if (!viewer) return confirmLeaveMarkdown(showUnsavedChangesDialog);
+  if (!hasUnsavedChanges) return true;
 
   const choice = await showUnsavedChangesDialog();
 
