@@ -3,6 +3,9 @@ const globalVars = {
   suggestedSavePath: null,
   currentPDF: null,
   currentPage: 1,
+  markdownPath: null,
+  currentMarkdown: null,
+  markdownFolderPreviewActive: false,
 };
 
 function getGlobalVar(key) {

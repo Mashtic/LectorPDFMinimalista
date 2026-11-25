@@ -1,4 +1,4 @@
-import { appendPdf, openFile, openPdfFromFile } from "./open-file/open-file.js";
+import { appendPdf, openFile, openDocument, openPdfFromFile } from "./open-file/open-file.js";
 import { saveCurrentPdf, saveFile } from "./save-file/save-file.js";
 import { startSigning } from "./sign-document/sign-document-renderer.js";
 import { openSignatureAppearanceModal } from "./signature-appearance/signature-appearance-renderer.js";
@@ -6,7 +6,10 @@ import "./window/window.js";
 import { isTextEntryTarget } from "./keyboard/keyboard-shortcuts.js";
 
 
-document.getElementById("OpenFileBtn").addEventListener("click", openFile);
+document.getElementById("OpenFileBtn").addEventListener("click", openDocument);
+window.electronAPI.onOpenMarkdownDialog(async () => {
+  if (await window.electronAPI.openMarkdown()) window.location.reload();
+});
 
 // KEYBOARD SHORTCUTS
 document.addEventListener("keydown", (event) => {

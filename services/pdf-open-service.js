@@ -13,14 +13,17 @@ const OPEN_ERROR_MESSAGES = {
   ENCRYPTED_EPUB: "This EPUB book is protected with DRM and cannot be opened.",
 };
 
-async function readPdfFile() {
+const MARKDOWN_EXTENSIONS = ["md", "markdown", "mdown"];
+
+async function readPdfFile(_event, includeMarkdown = false) {
   const { canceled, filePaths } = await dialog.showOpenDialog({
     properties: ["openFile"],
     filters: [
-      { name: "Documents", extensions: ["pdf", "dvi", "epub"] },
+      { name: "Documents", extensions: ["pdf", "dvi", "epub", ...(includeMarkdown ? MARKDOWN_EXTENSIONS : [])] },
       { name: "PDF Files", extensions: ["pdf"] },
       { name: "DVI Files", extensions: ["dvi"] },
       { name: "EPUB Books", extensions: ["epub"] },
+      ...(includeMarkdown ? [{ name: "Markdown", extensions: MARKDOWN_EXTENSIONS }] : []),
     ],
   });
 
@@ -44,6 +47,10 @@ async function readPdfFromPath(filePath) {
 
 //A converted DVI or EPUB has no PDF on disk yet, so its path stays empty
 async function readDocumentFromPath(filePath) {
+  if (MARKDOWN_EXTENSIONS.includes(path.extname(filePath).slice(1).toLowerCase())) {
+    return { path: filePath, type: "markdown", content: await readFile(filePath, "utf8") };
+  }
+
   if (!isDvi(filePath) && !isEpub(filePath)) {
     return { ...(await readPdfFromPath(filePath)), suggestedSavePath: null };
   }

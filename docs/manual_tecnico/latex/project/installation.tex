@@ -44,6 +44,9 @@ Para compilar el proyecto se ejecuta el comando `npm run build`. Este comando us
 \subsection{Dependencias}
 El proceso de compilación empaqueta todas las dependencias necesarias en el ejecutable, por lo tanto el entorno de producción solo necesita tener el binario.
 
+\subsubsection{Dependencia para abrir archivos DVI}
+La apertura de archivos DVI (US-041) requiere el conversor \texttt{dvipdfmx}, disponible en TeX Live o MiKTeX. Después de instalarlo, verifique que esté disponible en \texttt{PATH}. También puede indicar la ruta del ejecutable mediante la variable de entorno \texttt{DVIPDFMX\_PATH} antes de iniciar Folio.
+
 \subsection{Instrucciones de instalación}
 El ejecutable es portable, así que no requiere instalarse en el sistema. Para ejecutar la aplicación solo debe correr el ejecutable.
 

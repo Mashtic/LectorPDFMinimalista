@@ -14,6 +14,7 @@ const {
   registerSignatureAppearanceIpc,
 } = require("./ipc/signature-appearance-ipc.js");
 const { registerUnsavedChangesIpc } = require("./ipc/unsaved-changes-ipc.js");
+const { registerMarkdownIpc } = require("./ipc/markdown-ipc.js");
 const { registerExternalLinksIpc } = require("./ipc/links-ipc.js");
 const path = require("node:path");
 const { existsSync } = require("node:fs");
@@ -29,7 +30,7 @@ const { setGlobalVar } = require("./services/global-var-service.js");
 
 function findLaunchDocumentPath(argv) {
   return argv
-    .filter((argument) => /\.(pdf|dvi|epub)$/i.test(argument))
+    .filter((argument) => /\.(pdf|dvi|epub|md|markdown|mdown)$/i.test(argument))
     .map((argument) => path.resolve(argument))
     .find((documentPath) => existsSync(documentPath));
 }
@@ -42,6 +43,11 @@ async function loadLaunchDocument() {
 
   try {
     const file = await readDocumentFromPath(documentPath);
+    if (file.type === "markdown") {
+      setGlobalVar("markdownPath", file.path);
+      setGlobalVar("currentMarkdown", file.content);
+      return;
+    }
     setGlobalVar("pdfPath", file.path);
     setGlobalVar("suggestedSavePath", file.suggestedSavePath);
     setGlobalVar("currentPDF", file.content);
@@ -63,6 +69,7 @@ app.whenReady().then(async () => {
   registerSignatureAppearanceIpc();
   registerUnsavedChangesIpc();
   registerExternalLinksIpc();
+  registerMarkdownIpc();
 
   Menu.setApplicationMenu(null);
   await loadLaunchDocument();

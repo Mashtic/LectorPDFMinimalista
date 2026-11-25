@@ -147,3 +147,38 @@ Durante el desarrollo se realizan más tareas que utilizan otro tipo de codifica
 \hline
 
 \end{longtable}
+
+\subsubsection{Sprint 3: Apertura de formatos, exportación y formularios}
+
+La implementación descrita para US-040, US-041, US-043, US-045 y US-046 corresponde a la rama \texttt{develop}. Jira registra US-042 y US-044 como finalizadas y su código se encuentra en la rama \texttt{feature/abrir\_markdown}, pendiente de integrarse en \texttt{develop} al momento de la revisión. US-047 figura en curso en Jira.
+
+\begin{longtable}{|l||p{7cm}|p{4.5cm}|}
+
+\multicolumn{3}{c}{Lector PDF minimalista}\\
+\hline
+\textbf{Código} & \textbf{Descripción} & \textbf{Criterios de Calidad}\\
+\hline\hline
+\endfirsthead
+\hline
+\textbf{Código} & \textbf{Descripción} & \textbf{Criterios de Calidad}\\
+\hline\hline
+\endhead
+
+\textbf{US-040} & \textbf{Abrir un archivo EPUB:} El servicio \texttt{epub-convert-service.js} lee el paquete EPUB con JSZip, reúne los capítulos en el orden indicado por el libro y genera HTML para imprimirlo a PDF en una ventana de Electron. El resultado se abre en el visualizador de PDF. & Como usuario, quiero abrir un EPUB desde el selector de archivos y leerlo con su formato. El panel \emph{Outline} debe permitir saltar a cada capítulo y \texttt{Ctrl+F} debe buscar en el texto. Si el EPUB es inválido o está dañado, se debe mostrar un error y conservar el documento abierto.\\
+\hline
+\textbf{US-041} & \textbf{Abrir un archivo DVI:} El servicio \texttt{dvi-convert-service.js} ejecuta \texttt{dvipdfmx} para generar un PDF temporal, lee el resultado para abrirlo en el visualizador y elimina los archivos temporales. Si el conversor no está instalado, la aplicación muestra un aviso. & Como persona usuaria, quiero abrir un archivo DVI para leer su contenido dentro de Folio.\\
+\hline
+\textbf{US-042} & \textbf{Abrir un archivo Markdown:} El módulo \texttt{markdown-ipc.js} lee el archivo en UTF-8 y el módulo \texttt{markdown.js} renderiza su vista previa en la ventana principal. El índice lateral se construye a partir de los encabezados del documento. & Como persona usuaria, quiero abrir un archivo Markdown en Folio para leer su contenido con formato y navegar por sus secciones.\\
+\hline
+\textbf{US-043} & \textbf{Exportar un documento EPUB a PDF:} Al abrir un EPUB, el proceso principal conserva en memoria el PDF generado por la conversión. La opción Guardar como solicita una ruta de destino y escribe el documento como un archivo PDF independiente. & Como persona usuaria, quiero exportar el EPUB abierto como un archivo PDF para abrirlo y compartirlo en ese formato.\\
+\hline
+\textbf{US-044} & \textbf{Convertir una carpeta de archivos Markdown en un único PDF:} El módulo \texttt{markdown-ipc.js} recorre la carpeta y sus subcarpetas, ordenando las entradas por nombre con orden numérico. El renderer genera una vista previa con una sección por archivo. Al guardar, una ventana de Electron imprime el HTML a PDF con \texttt{printToPDF}. & Como usuario, quiero elegir una carpeta y consolidar sus archivos Markdown por nombre en un PDF. Cada archivo debe empezar en una página nueva y aparecer en el índice del PDF. Debe indicarse si se incluyen las subcarpetas. Si un archivo falla, se debe informar cuál y continuar con los demás.\\
+\hline
+\textbf{US-045} & \textbf{Editar formularios en un PDF:} \texttt{PdfViewer} habilita los campos interactivos de PDF.js en la capa de anotaciones. Los cambios en campos de texto, casillas, botones de opción y listas desplegables se registran en \texttt{annotationStorage}. Al guardar el PDF, PDF.js incorpora los valores al documento mediante \texttt{saveDocument}. & Como usuario, quiero rellenar formularios en Folio y ver los valores guardados desde otro lector de PDF. Se deben respetar los campos obligatorios y de solo lectura. Para documentos sin formulario, la interfaz conserva su comportamiento habitual.\\
+\hline
+\textbf{US-046} & \textbf{Links En PDF:} El visualizador resuelve los destinos internos mediante PDF.js y se desplaza hasta la página y la posición indicadas. Para enlaces externos, el renderer envía la dirección al proceso principal mediante IPC y Electron la abre con la aplicación predeterminada del sistema. & Como usuario, quiero hacer clic en los enlaces de un PDF para navegar a otra parte del documento o abrir el recurso externo correspondiente.\\
+\hline
+\textbf{US-047} & \textbf{Añadir cajas de texto:} Historia en curso. La funcionalidad prevista permite colocar una caja de texto libre en una página del PDF mediante la opción \emph{Add Text Box} del menú contextual. & Como usuario, quiero añadir cajas de texto para completar formularios o escribir notas. Durante la edición debo poder moverlas, redimensionarlas, editar el texto, cambiar el tamaño de fuente y eliminarlas con la papelera. El zoom y el desplazamiento de la caja deben conservar el tamaño de fuente. Fuera de edición, la caja se muestra sin borde ni fondo.\\
+\hline
+
+\end{longtable}
